@@ -1,3 +1,3 @@
-exports.up = pg => {}
+exports.up = async ({ db }) => {}
 
-exports.down = pg => {}
+exports.down = async ({ db }) => {}
