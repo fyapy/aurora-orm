@@ -4,7 +4,6 @@
 
 const util = require('node:util')
 const yargs = require('yargs')
-const ConnectionParameters = require('pg/lib/connection-parameters')
 const { createMigration, runner } = require('../dist/migrator')
 
 process.on('uncaughtException', (err) => {

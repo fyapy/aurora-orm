@@ -46,7 +46,7 @@ export function migration({ db, actions, filePath }: {
 
   function _getMarkAsRun(action: MigrationAction) {
     const schema = 'public'
-    const migrationsTable = 'migrations'
+    const migrationsTable = 'pgmigrations'
 
     switch (action) {
       case actions.down:

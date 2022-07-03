@@ -5,7 +5,7 @@ import { Migration, MigrationDirection, RunnerOptionConfig } from './types'
 import { loadMigrationFiles } from './utils'
 
 
-const fullTableName = 'migrations'
+const fullTableName = 'pgmigrations'
 const idColumn = 'id'
 const nameColumn = 'name'
 const runOnColumn = 'run_on'
