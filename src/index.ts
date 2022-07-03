@@ -1,1 +1,1 @@
-export const orm = 'aurora'
+export * from './orm'

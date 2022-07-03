@@ -10,7 +10,7 @@
     "sourceMap": false,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noUnusedLocals": true,
     "noImplicitOverride": true
   },
