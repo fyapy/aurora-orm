@@ -12,7 +12,7 @@ export async function createMigration({ name, directory }: {
 
   const time = new Date().valueOf()
 
-  const templateFileName = path.resolve(process.cwd(), 'templates/migration-template.js')
+  const templateFileName = path.resolve(__dirname, '../../templates/migration-template.js')
   // file name looks like migrations/1391877300255_migration-title.js
   const newFile = `${directory}/${time}_${name}.js`
 
