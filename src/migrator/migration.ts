@@ -71,6 +71,7 @@ export function migration({ db, actions, filePath }: {
       await db.query('COMMIT')
     } catch (err) {
       await db.query('ROLLBACK')
+      throw err
     }
   }
 

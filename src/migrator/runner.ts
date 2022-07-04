@@ -85,14 +85,14 @@ function getMigrationsToRun(options: RunnerOptionConfig, runNames: string[], mig
   return upMigrations.slice(0, Math.abs(count))
 }
 
-function runMigrations({ migrations, direction }: {
+async function runMigrations({ migrations, direction }: {
   migrations: Migration[]
   direction: MigrationDirection
 }) {
-  return migrations.reduce(
-    (promise: Promise<unknown>, migration) => promise.then(() => migration.apply(direction)),
-    Promise.resolve(),
-  )
+  for (const m of migrations) {
+    console.info(`> Run: ${m.name} (${direction})`)
+    await m.apply(direction)
+  }
 }
 
 
@@ -125,6 +125,8 @@ export async function runner(options: RunnerOptionConfig) {
       migrations: toRun,
       direction: options.direction,
     })
+  } catch (err) {
+    throw err
   } finally {
     if (db.connected()) {
       db.close()
