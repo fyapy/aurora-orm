@@ -67,14 +67,10 @@ async function getRunMigrations(db: ReturnType<typeof connectDB>) {
 function getMigrationsToRun(options: RunnerOptionConfig, runNames: string[], migrations: Migration[]): Migration[] {
   if (options.direction === 'down') {
     const downMigrations: Array<string | Migration> = runNames
-      // .filter((migrationName) => !options.file || options.file === migrationName)
       .map((migrationName) => migrations.find(({ name }) => name === migrationName) || migrationName)
-    // const { count = 1 } = options
-    const count = 1
 
-    const toRun = (
-      downMigrations.filter((migration) => typeof migration === 'object' && migration.timestamp >= count)
-    ).reverse()
+    const toRun = downMigrations.slice(-Math.abs(1)).reverse()
+
     const deletedMigrations = toRun.filter((migration): migration is string => typeof migration === 'string')
     if (deletedMigrations.length) {
       const deletedMigrationsStr = deletedMigrations.join(', ')
