@@ -14,5 +14,5 @@
     "noUnusedLocals": true,
     "noImplicitOverride": true
   },
-  "exclude": ["node_modules", "templates", "test", "dist", "bin", "migrations"]
+  "exclude": ["node_modules", "templates", "test", "dist", "bin", "migrations", "docs"]
 }
