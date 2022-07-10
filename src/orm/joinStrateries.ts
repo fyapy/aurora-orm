@@ -22,8 +22,9 @@ export function OneToOne({
         const values = makeUnique(data.map(d => d[foreignProp])).filter(d => d !== null)
 
         const dataToJoin = await joinRepo.findAll({
-          [referenceProp]: In(values),
-        }, {
+          where: {
+            [referenceProp]: In(values),
+          },
           select,
           join,
           tx,
@@ -33,7 +34,8 @@ export function OneToOne({
       } else {
         const where = joinStrategyWhere(joinRepo, data, foreignProp, referenceProp)
 
-        const _joinData = await joinRepo.findOne(where, {
+        const _joinData = await joinRepo.findOne({
+          where,
           select,
           join,
           tx,
@@ -67,8 +69,9 @@ export function OneToMany({
 
       if (Array.isArray(data)) {
         const dataToJoin = await joinRepo.findAll({
-          [foreignProp]: In(makeUnique(data.map(d => d[foreignProp]))),
-        }, {
+          where: {
+            [foreignProp]: In(makeUnique(data.map(d => d[foreignProp]))),
+          },
           select,
           join,
           tx,
@@ -77,7 +80,8 @@ export function OneToMany({
         mapper(data, prop, foreignProp, dataToJoin as any[], referenceProp)
       } else {
         const where = joinStrategyWhere(joinRepo, data, foreignProp, referenceProp)
-        const _joinData = await joinRepo.findAll(where, {
+        const _joinData = await joinRepo.findAll({
+          where,
           select,
           join,
           tx,
@@ -114,7 +118,7 @@ export function Exists({
           ? In(makeUnique(data.map(d => d[foreignProp])))
           : { [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))) }
 
-        const dataToJoin = await joinRepo.findAll(where, { tx })
+        const dataToJoin = await joinRepo.findAll({ where, tx })
 
         // cusmtom mapper
         const mapper = {}
