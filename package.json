@@ -6,7 +6,7 @@
   "bin": {
     "aurora-orm": "bin/aurora-orm.js"
   },
-  "author": "Amit Abdullin",
+  "author": "Amir Abdullin",
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
