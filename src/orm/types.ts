@@ -20,7 +20,7 @@ interface Writer<T, P, C> {
 type SubJoin = [string, Array<string | [string] | SubJoin>]
 export type Join = Array<string | SubJoin>
 
-export interface FindOptions<T, C> {
+export interface BaseFindOptions<T, C> {
   join?: Join
   select?: Array<keyof T>
   orderBy?: {
@@ -29,6 +29,13 @@ export interface FindOptions<T, C> {
   limit?: number
   skip?: number
   tx?: C
+}
+
+export interface FindAllOptions<T, C> extends BaseFindOptions<T, C> {
+  where: Where<T> | Where<T>[]
+}
+export interface FindOneOptions<T, C> extends BaseFindOptions<T, C> {
+  where: ID | Where<T> | Where<T>[]
 }
 
 export interface SQL {
@@ -44,8 +51,8 @@ export type Where<T extends AnyObject> = {
 export type WhereValues = Array<string | number | Array<string | number | null>>
 
 interface Reader<T, P, C> {
-  findAll(value: Where<P> | Where<P>[], options?: FindOptions<P, C>): Promise<T[]>
-  findOne(id: ID | Where<P> | Where<P>[], options?: FindOptions<P, C>): Promise<T>
+  findAll(value: Where<P> | Where<P>[] | FindAllOptions<P, C>): Promise<T[]>
+  findOne(id: ID | Where<P> | Where<P>[] | FindOneOptions<P, C>): Promise<T>
   exists(id: ID | Where<P> | Where<P>[], tx?: Tx): Promise<boolean>
   count(value: Where<P> | Where<P>[], tx?: Tx): Promise<number>
 }

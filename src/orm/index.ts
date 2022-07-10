@@ -27,5 +27,5 @@ export {
   NotEqual,
 } from './queryBuilder'
 export * as JoinStrategies from './joinStrateries'
-export type { ID, Tx } from './types'
+export type { ID, Tx, SQL } from './types'
 export { connect, config } from './connect'

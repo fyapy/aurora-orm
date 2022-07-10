@@ -1,6 +1,7 @@
 import type {
   BaseModel,
-  FindOptions,
+  FindAllOptions,
+  FindOneOptions,
   ID,
   ColumnData,
   Where,
@@ -8,6 +9,7 @@ import type {
   WhereValues,
   Join,
   Tx,
+  BaseFindOptions,
 } from './types'
 import { Pool } from 'pg'
 import { buildAliasMapper, insertValues, SQLParams } from './queryBuilder'
@@ -45,7 +47,9 @@ export function createModel<
   mapping: Record<keyof D, ColumnData | JoinStrategy>
 }) {
   type T = Omit<D, S>
-  type FindParams = FindOptions<T, Tx>
+  type BaseFindParams = BaseFindOptions<T, Tx>
+  type FindAllParams = FindAllOptions<T, Tx>
+  type FindOneParams = FindOneOptions<T, Tx>
 
   const allMapping = Object.entries<ColumnData | JoinStrategy>(mapping)
 
@@ -69,6 +73,7 @@ export function createModel<
 
   // constructor
   const aliasMapper = buildAliasMapper<T>(columnsMapping)
+  const hasWhereColumn = typeof columnsMapping['where'] !== 'undefined'
 
   const columnAlias = aliasMapper
   const cols = (...args: Array<keyof T>) => args.map(
@@ -184,7 +189,7 @@ export function createModel<
       values: _values,
     }
   }
-  function orderBy(values: Exclude<FindParams['orderBy'], undefined>) {
+  function orderBy(values: Exclude<BaseFindParams['orderBy'], undefined>) {
     let sql = ''
 
     for (const key of Object.keys(values)) {
@@ -198,7 +203,7 @@ export function createModel<
     return sql
   }
 
-  function runJoins(result: T | T[], options: FindOptions<T, Tx>) {
+  function runJoins(result: T | T[], options: BaseFindParams) {
     if (typeof options.join === 'undefined') {
       return
     }
@@ -303,7 +308,7 @@ export function createModel<
     const keys = Object.keys(newValue)
 
     if (keys.length === 0) {
-      return findOne(id, { tx })
+      return findOne({ where: id, tx })
     }
 
     const sqlSet = keys.reduce((acc, key) => {
@@ -349,108 +354,130 @@ export function createModel<
     return queryRow<boolean>(SQLParams(sql), values, tx)
   }
 
-  async function findAll(value: Where<T> | Where<T>[], options: FindParams = {}): Promise<D[]> {
-    const isNotEmptySelect = typeof options.select !== 'undefined'
+  function isWhere(params: any): params is Where<T> | Where<T>[] {
+    if (hasWhereColumn === true && typeof params.where !== 'undefined') {
+      return typeof params.where !== 'object'
+        ? true
+        : params.where.type === 'sql' // is SQL operator
+    }
 
-    // maybe need optimization
-    if (typeof options.join !== 'undefined') {
-      for (const join of options.join) {
+    return Array.isArray(params) || typeof params.where === 'undefined'
+  }
+
+  function prepareSelectColumns(params: FindOneParams) {
+    const isNotEmptySelect = typeof params.select !== 'undefined'
+
+    if (typeof params.join !== 'undefined') {
+      for (const join of params.join) {
         if (isNotEmptySelect) {
           const joinPropName = typeof join === 'string'
             ? join
             : join[0]
 
-          options.select!.push(joins[joinPropName].foreignProp as any)
+          params.select!.push(joins[joinPropName].foreignProp as any)
         }
       }
     }
 
-
     const sqlCols = isNotEmptySelect
-      ? cols(...options.select!)
+      ? cols(...params.select!)
       : allColumns
-    const whereProps = where(value)
+
+    return sqlCols
+  }
+
+  async function findAll(params: Where<T> | Where<T>[] | FindAllParams): Promise<D[]> {
+    if (isWhere(params)) {
+      // not without FindParams
+      const whereProps = where(params)
+      const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
+
+      const result = await query<D>(SQLParams(sql), whereProps.values)
+      return result
+    }
+
+    // FindParams
+    const sqlCols = prepareSelectColumns(params)
+    const whereProps = where(params.where)
 
     let sql = `SELECT ${sqlCols} FROM "${table}" ${whereProps.sql}`
 
-    if (typeof options.orderBy !== 'undefined') {
-      sql += ` ORDER BY ${orderBy(options.orderBy)}`
+    if (typeof params.orderBy !== 'undefined') {
+      sql += ` ORDER BY ${orderBy(params.orderBy)}`
     }
 
-    if (typeof options.skip === 'number') {
+    if (typeof params.skip === 'number') {
       sql += ' OFFSET ?'
-      whereProps.values.push(options.skip)
+      whereProps.values.push(params.skip)
     }
-    if (typeof options.limit === 'number') {
+    if (typeof params.limit === 'number') {
       sql += ' LIMIT ?'
-      whereProps.values.push(options.limit)
+      whereProps.values.push(params.limit)
     }
 
-    const result = await query<D>(SQLParams(sql), whereProps.values, options.tx)
+    const result = await query<D>(SQLParams(sql), whereProps.values, params.tx)
     if (result.length === 0) {
       return result
     }
 
-    await runJoins(result, options)
+    await runJoins(result, params)
 
     return result
   }
 
-  async function findOne(id: ID | Where<T> | Where<T>[], options: FindParams = {}): Promise<D> {
-    const isNotEmptySelect = typeof options.select !== 'undefined'
-
-    // maybe need optimization
-    if (typeof options.join !== 'undefined') {
-      for (const join of options.join) {
-        if (isNotEmptySelect) {
-          const joinPropName = typeof join === 'string'
-            ? join
-            : join[0]
-
-          options.select!.push(joins[joinPropName].foreignProp as any)
-        }
-      }
-    }
-
-    const sqlCols = isNotEmptySelect
-      ? cols(...options.select!)
-      : allColumns
-    const isPrimitive = typeof id !== 'object'
-
+  async function findOneByParams(params: FindOneParams): Promise<D> {
+    const sqlCols = prepareSelectColumns(params)
     let sql = `SELECT ${sqlCols} FROM "${table}"`
 
-    if (isPrimitive) {
+
+    if (typeof params.where !== 'object') {
       sql += ` WHERE "${primaryKey}" = ?`
 
-      if (typeof options.orderBy !== 'undefined') {
-        sql += ` ORDER BY ${orderBy(options.orderBy)}`
+      if (typeof params.orderBy !== 'undefined') {
+        sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      const result = await queryRow<D>(SQLParams(sql), [id], options.tx)
-      if (typeof result === 'undefined') {
-        return result
-      }
-
-      await runJoins(result, options)
-
-      return result
+      return await queryRow<D>(SQLParams(sql), [params.where], params.tx)
     } else {
-      const whereProps = where(id)
+      const whereProps = where(params.where)
       sql += ` ${whereProps.sql}`
 
-      if (typeof options.orderBy !== 'undefined') {
-        sql += ` ORDER BY ${orderBy(options.orderBy)}`
+      if (typeof params.orderBy !== 'undefined') {
+        sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      const result = await queryRow<D>(SQLParams(sql), whereProps.values, options.tx)
-      if (typeof result === 'undefined') {
-        return result
-      }
+      return await queryRow<D>(SQLParams(sql), whereProps.values, params.tx)
+    }
+  }
 
-      await runJoins(result, options)
+  async function findOne(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<D> {
+    if (typeof params !== 'object') {
+      // isPrimitive
+      return await queryRow<D>(
+        SQLParams(`SELECT ${allColumns} FROM "${table}" WHERE "${primaryKey}" = ?`),
+        [params],
+      )
+    }
 
+    if (isWhere(params)) {
+      // not without FindParams
+      const whereProps = where(params)
+
+      return await queryRow<D>(
+        SQLParams(`SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`),
+        whereProps.values,
+      )
+    }
+
+    // FindParams
+    const result = await findOneByParams(params)
+    if (typeof result === 'undefined') {
       return result
     }
+
+    await runJoins(result, params)
+
+    return result
   }
 
   async function exist(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean> {
