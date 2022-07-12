@@ -1,4 +1,6 @@
 import { Pool } from 'pg'
+import { loadConnectionConfig } from '../connection'
+import { loadEnv } from '../utils/env'
 
 export interface Config {
   pool: Pool | null
@@ -10,20 +12,25 @@ export const config: Config = {
 }
 
 interface ConnectConfig {
-  type: 'postgresql'
-  url: string
   debug?: boolean
+  envPath?: string
+  connectNotify?: boolean
 }
 
-export const connect = async ({ url, debug }: ConnectConfig) => {
+export async function connect({ debug, envPath, connectNotify = true }: ConnectConfig = {}) {
   if (debug) {
     config.debug = debug
   }
-  const pool = new Pool({
-    connectionString: url,
-  })
+
+  loadEnv(envPath)
+
+  const pool = new Pool(loadConnectionConfig())
 
   await pool.connect()
+
+  if (connectNotify) {
+    console.log('Aurora ORM succesfully connected');
+  }
 
   config.pool = pool
   return pool

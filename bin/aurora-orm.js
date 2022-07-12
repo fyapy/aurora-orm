@@ -5,58 +5,27 @@
 const util = require('node:util')
 const yargs = require('yargs')
 const { createMigration, runner } = require('../dist/migrator')
+const { loadConnectionConfig } = require('../dist/connection')
+const { loadEnv, getEnvVariable } = require('../dist/utils/env')
 
 process.on('uncaughtException', (err) => {
   console.error(err)
   process.exit(1)
 })
 
-function tryRequire(moduleName) {
-  try {
-    return require(moduleName)
-  } catch (err) {
-    if (err.code !== 'MODULE_NOT_FOUND') {
-      throw err
-    }
-    return null
-  }
-}
-
 const envPathArg = 'envPath'
-const databaseUrlVarArg = 'database-url-var'
 
 const { argv } = yargs.usage('Usage: $0 [up|down|create] [migrationName]')
-  .option('d', {
-    alias: databaseUrlVarArg,
-    default: 'DATABASE_URL',
-    describe: 'Name of env variable where is set the databaseUrl',
-    type: 'string',
-  })
   .option(envPathArg, {
     describe: 'Path to the .env file that should be used for configuration',
     type: 'string',
   })
 
 
-const dotenv = tryRequire('dotenv')
-if (dotenv) {
-  const envPath = argv[envPathArg]
+const envPath = argv[envPathArg]
+// Load config from ".env" file
+loadEnv(envPath)
 
-  // Create default dotenv config
-  const dotenvConfig = {
-    silent: true,
-    ...(envPath ? { path: envPath } : undefined)
-  }
-
-  // Load config from ".env" file
-  const myEnv = dotenv.config(dotenvConfig)
-  const dotenvExpand = tryRequire('dotenv-expand')
-  if (dotenvExpand && dotenvExpand.expand) {
-    dotenvExpand.expand(myEnv)
-  }
-}
-
-let DB_CONNECTION = process.env[argv[databaseUrlVarArg]]
 
 const action = argv._.shift()
 
@@ -89,15 +58,9 @@ if (action === 'create') {
       process.exit(1)
     })
 } else if (action === 'up' || action === 'down') {
-  if (!DB_CONNECTION) {
-    throw new Error(`The ${argv[databaseUrlVarArg]} environment variable is not set.`)
-  }
-
   const options = direction => ({
     direction,
-    databaseUrl: {
-      connectionString: DB_CONNECTION,
-    },
+    databaseUrl: loadConnectionConfig(),
   })
 
   runner(options(action))
