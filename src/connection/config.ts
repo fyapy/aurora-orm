@@ -15,6 +15,7 @@ function formatConifg(json: ConnectionConfig) {
   const config = Object.keys(json).reduce((acc, key) => {
     const val = json[key]
 
+    // need handle nested object case
     if (typeof val === 'string' && val.startsWith('env:')) {
       const envName = val.replace('env:', '')
       const envVal = getEnvVariable(envName)
@@ -24,6 +25,8 @@ function formatConifg(json: ConnectionConfig) {
       }
 
       acc[key] = envVal
+    } else {
+      acc[key] = val
     }
 
     return acc
