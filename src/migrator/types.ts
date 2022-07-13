@@ -29,6 +29,7 @@ export type MigrationAction = (options: {
 }) => Promise<void> | void
 
 export interface MigrationBuilderActions {
+  version: 'v1'
   up?: MigrationAction | false
   down?: MigrationAction | false
 }

@@ -74,7 +74,7 @@ if (action === 'create') {
     })
 } else {
   console.log(argv._)
-  console.error('Invalid Action: Must be [up|down|create|redo].')
+  console.error('Invalid Action: Must be [up|down|create].')
   yargs.showHelp()
   process.exit(1)
 }
