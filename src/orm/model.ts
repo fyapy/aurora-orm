@@ -124,13 +124,14 @@ export function createModel<
     if (typeof value === 'object') {
       const operator = value as SQL
 
-      if (operator.type === 'sql') {
+      if (operator !== null && operator.type === 'sql') {
         condition = operator.fn({
           values: _values,
           alias,
         })
       } else {
-        throw new Error('Repository: Unknown operator type')
+        condition = `${alias} = ?`
+        _values.push(value as any)
       }
     } else {
       condition = `${alias} = ?`
