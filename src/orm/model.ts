@@ -344,7 +344,7 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ? RETURNING ${allColumns}`
 
-      return queryRow<T>(SQLParams(sql), [id], tx)
+      return queryRow<T>(SQLParams(sql), [...getWhereValues(newValue), id], tx)
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql} RETURNING ${allColumns}`

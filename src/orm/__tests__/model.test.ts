@@ -21,7 +21,7 @@ describe('orm/model', () => {
 
   afterEach(clearSqlRows)
 
-  test('should be currect sql update query', async () => {
+  test('should be currect sql update query with sql operator', async () => {
     await userModel.update({
       id: In([1, 2, 3]),
     }, {
@@ -32,5 +32,16 @@ describe('orm/model', () => {
 
     expect(sql).toEqual('UPDATE "users" SET "age" = $1 WHERE "id" = ANY($2) RETURNING "id", "name", "age"')
     expect(values).toEqual([3, [1, 2, 3]])
+  })
+
+  test('should be currect sql update query by id', async () => {
+    await userModel.update(1, {
+      age: 3,
+    })
+
+    const [sql, values] = getSqlRow(0)
+
+    expect(sql).toEqual('UPDATE "users" SET "age" = $1 WHERE "id" = $2 RETURNING "id", "name", "age"')
+    expect(values).toEqual([3, 1])
   })
 })
