@@ -135,6 +135,21 @@ export function createModel<
 
     return condition
   }
+  // TODO: maybe combine with where()
+  function getWhereValues(values: Where<T>) {
+    const keys = Object.keys(values)
+    const _values: WhereValues = []
+
+    for (const key of keys) {
+      _whereSQL({
+        key,
+        _values,
+        values,
+      })
+    }
+
+    return _values
+  }
   const where = (values: Where<T> | Where<T>[]) => {
     const keys = Object.keys(values)
     const _values: WhereValues = []
@@ -325,11 +340,14 @@ export function createModel<
     let sql = `UPDATE "${table}" SET ${sqlSet}`
 
     if (isPrimitive) {
-      values.push(id)
-      sql += ` WHERE "${primaryKey}" = ?`
+      sql += ` WHERE "${primaryKey}" = ? RETURNING ${allColumns}`
+
+      return queryRow<T>(SQLParams(sql), [id], tx)
     } else {
-      values.push(...Object.values(id))
-      sql += ` ${where(id).sql}`
+      const whereProps = where(id)
+      sql += ` ${whereProps.sql} RETURNING ${allColumns}`
+
+      return queryRow<T>(SQLParams(sql), [...getWhereValues(newValue), ...whereProps.values], tx)
     }
 
     sql += ` RETURNING ${allColumns}`
