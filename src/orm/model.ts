@@ -13,7 +13,7 @@ import type {
 } from './types'
 import { Pool } from 'pg'
 import { buildAliasMapper, insertValues, SQLParams } from './queryBuilder'
-import { query, queryRow } from './utils'
+import { query as _query, queryRow as _queryRow } from './utils'
 
 type Repos = Record<string, ReturnType<typeof createModel>>
 const _repos: Repos = {}
@@ -40,11 +40,15 @@ export function createModel<
   table,
   mapping,
   primaryKey = 'id',
+  query = _query,
+  queryRow = _queryRow,
 }: {
   table: string
   pool?: Pool
   primaryKey?: string
   mapping: Record<keyof D, ColumnData | JoinStrategy>
+  query?: <T = any>(sql: string, values?: any[] | null, tx?: Tx) => Promise<T[]>
+  queryRow?: <T = any>(sql: string, values: any[] | null, tx?: any | undefined) => Promise<T>
 }) {
   type T = Omit<D, S>
   type BaseFindParams = BaseFindOptions<T, Tx>
@@ -335,8 +339,6 @@ export function createModel<
     }, '')
 
     const isPrimitive = typeof id !== 'object'
-    // TODO: use always where() call for values
-    const values = [] as any[]
     let sql = `UPDATE "${table}" SET ${sqlSet}`
 
     if (isPrimitive) {
@@ -349,10 +351,6 @@ export function createModel<
 
       return queryRow<T>(SQLParams(sql), [...getWhereValues(newValue), ...whereProps.values], tx)
     }
-
-    sql += ` RETURNING ${allColumns}`
-
-    return queryRow<T>(SQLParams(sql), [...Object.values(newValue), ...values], tx)
   }
 
   function del(id: ID | Where<T>, tx?: Tx): Promise<boolean> {
