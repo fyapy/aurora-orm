@@ -58,12 +58,10 @@ if (action === 'create') {
       process.exit(1)
     })
 } else if (action === 'up' || action === 'down') {
-  const options = direction => ({
+  runner({
     direction,
     databaseUrl: loadConnectionConfig(),
   })
-
-  runner(options(action))
     .then(() => {
       console.log('Migrations complete!')
       process.exit(0)
