@@ -13,8 +13,14 @@ npm install aurora-orm
 
 ## Contributors
 
-Before make pull request test library.
+Before make pull request test library using [symlink](https://docs.npmjs.com/cli/v8/commands/npm-link).
 
 ```bash
 yarn build && (yarn unlink || true) && yarn link
+```
+
+And run Jest tests.
+
+```bash
+yarn test
 ```
