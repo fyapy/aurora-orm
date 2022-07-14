@@ -6,7 +6,7 @@ const util = require('node:util')
 const yargs = require('yargs')
 const { createMigration, runner } = require('../dist/migrator')
 const { loadConnectionConfig } = require('../dist/connection')
-const { loadEnv, getEnvVariable } = require('../dist/utils/env')
+const { loadEnv } = require('../dist/utils/env')
 
 process.on('uncaughtException', (err) => {
   console.error(err)
