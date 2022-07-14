@@ -28,7 +28,7 @@ describe('orm/model', () => {
       age: 3,
     })
 
-    const [sql, values] = getSqlRow(0)
+    const [sql, values] = getSqlRow()
 
     expect(sql).toEqual('UPDATE "users" SET "age" = $1 WHERE "id" = ANY($2) RETURNING "id", "name", "age"')
     expect(values).toEqual([3, [1, 2, 3]])
@@ -39,7 +39,7 @@ describe('orm/model', () => {
       age: 3,
     })
 
-    const [sql, values] = getSqlRow(0)
+    const [sql, values] = getSqlRow()
 
     expect(sql).toEqual('UPDATE "users" SET "age" = $1 WHERE "id" = $2 RETURNING "id", "name", "age"')
     expect(values).toEqual([3, 1])

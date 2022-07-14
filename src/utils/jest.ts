@@ -1,7 +1,7 @@
 
 let sqlRows = [] as [string, any[] | null][]
 
-export const getSqlRow = (index: number) => sqlRows[index] || ['', null]
+export const getSqlRow = (index: number = 0) => sqlRows[index] ?? ['', null]
 
 export const clearSqlRows = () => sqlRows = []
 

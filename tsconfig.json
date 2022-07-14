@@ -14,5 +14,14 @@
     "noUnusedLocals": true,
     "noImplicitOverride": true
   },
-  "exclude": ["node_modules", "templates", "test", "dist", "bin", "migrations", "docs"]
+  "exclude": [
+    "node_modules",
+    "templates",
+    "dist",
+    "bin",
+    "migrations",
+    "docs",
+    "**/*.test.ts",
+    "**/*.mock.ts",
+  ]
 }
