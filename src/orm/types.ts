@@ -13,7 +13,12 @@ export type ID = string | number
 interface Writer<T, P, C> {
   create(value: Partial<P>, tx?: C): Promise<T>
   createMany(values: Partial<P>[], tx?: C): Promise<T[]>
-  update(id: ID | Where<P>, newValue: Partial<P>, tx?: C): Promise<T>
+  update(options: {
+    where: ID | Where<P>
+    set: Partial<P>
+    returning?: boolean | Array<keyof T>
+    tx?: C
+  }): Promise<T>
   delete(id: ID | Where<P>, tx?: C): Promise<boolean>
 }
 

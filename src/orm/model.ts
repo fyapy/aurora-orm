@@ -324,8 +324,18 @@ export function createModel<
     return rows
   }
 
-  function update(id: ID | Where<T>, newValue: Partial<T>, tx?: Tx): Promise<T> {
-    const keys = Object.keys(newValue)
+  function update({
+    returning = false,
+    where: id,
+    set,
+    tx,
+  }: {
+    where: ID | Where<T>
+    set: Partial<T>
+    tx?: Tx
+    returning?: boolean | Array<keyof T>
+  }): Promise<T> {
+    const keys = Object.keys(set)
 
     if (keys.length === 0) {
       return findOne({ where: id, tx })
@@ -341,16 +351,21 @@ export function createModel<
 
     const isPrimitive = typeof id !== 'object'
     let sql = `UPDATE "${table}" SET ${sqlSet}`
+    const returningSQL = returning === false
+      ? ''
+      : (returning === true
+        ? ` RETURNING ${allColumns}`
+        : ` RETURNING ${cols(...returning)}`)
 
     if (isPrimitive) {
-      sql += ` WHERE "${primaryKey}" = ? RETURNING ${allColumns}`
+      sql += ` WHERE "${primaryKey}" = ?${returningSQL}`
 
-      return queryRow<T>(SQLParams(sql), [...getWhereValues(newValue), id], tx)
+      return queryRow<T>(SQLParams(sql), [...getWhereValues(set), id], tx)
     } else {
       const whereProps = where(id)
-      sql += ` ${whereProps.sql} RETURNING ${allColumns}`
+      sql += ` ${whereProps.sql}${returningSQL}`
 
-      return queryRow<T>(SQLParams(sql), [...getWhereValues(newValue), ...whereProps.values], tx)
+      return queryRow<T>(SQLParams(sql), [...getWhereValues(set), ...whereProps.values], tx)
     }
   }
 
