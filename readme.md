@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://aurora-orm.netlify.app/" target="_blank" rel="noopener noreferrer">
-    <img width="180" src="/docs/static/img/aurora-orm.png" alt="Aurora ORM logo">
+    <img width="180" src="/docs/.vuepress/public/aurora-orm.png" alt="Aurora ORM logo">
   </a>
 </p>
 <br/>
