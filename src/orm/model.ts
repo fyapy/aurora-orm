@@ -418,7 +418,7 @@ export function createModel<
     return sqlCols
   }
 
-  async function findAll(params: Where<T> | Where<T>[] | FindAllParams): Promise<D[]> {
+  async function findAll(params: Where<T> | Where<T>[] | FindAllParams = {}): Promise<D[]> {
     if (isWhere(params)) {
       // not without FindParams
       const whereProps = where(params)

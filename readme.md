@@ -80,16 +80,14 @@ const user = await UserModel.create({
   addictions: [4],
 })
 
-const allUsers = await UserModel.findAll({})
-const firstUser = await UserModel.findOne({
-  id: 1,
-}) // find by id
+const allUsers = await UserModel.findAll()
+const firstUser = await UserModel.findOne(1) // find by id
 const john = await UserModel.findOne({
-  age: 26,
   name: 'John',
-}) // find by age and name
+  age: 26,
+}) // find by name and age
 
-await UserModel.del(john)
+await UserModel.delete(john)
 ```
 
 ## Installation

@@ -1,21 +1,21 @@
 ---
 home: true
 heroImage: /aurora-orm.png
-tagline: The JavaScript ORM that you will enjoy using
+tagline: Decorator-less and type safe ORM, for Node.js
 actionText: Get Started
 actionLink: /guide/
 features:
-- title: 💡 Intuitive
-  details: Stores are as familiar as components. API designed to let you write well organized stores.
+- title: 💡 Developer friendly
+  details: Aurora ORM is built to be very expressive and to help developers in their daily use, without sacrificing performance and security.
 - title: 🔑 Type Safe
-  details: Types are inferred, which means stores provide you with autocompletion even in JavaScript!
-- title: ⚙️ Devtools support
-  details: Pinia hooks into Vue devtools to give you an enhanced development experience in both Vue 2 and Vue 3.
+  details: The data model ensures that columns and types are properly mapped when defining and using the model.
+- title: ⚙️ Support SQL/CQL
+  details: The main goal of Aurora ORM is to have a single interface for working with PostgreSQL and Cassandra.
 - title: 🔌 Extensible
-  details: React to store changes to extend Pinia with transactions, local storage synchronization, etc.
-- title: 🏗 Modular by design
-  details: Build multiple stores and let your bundler code split them automatically.
-- title: 📦 Extremely light
-  details: Pinia weighs around 1kb, you will forget it's even there!
+  details:  Aurora ORM is fully extensible via custom join strategies, and custom operators.
+- title: 🏗 Transpiler agnostic
+  details: There is no binding on unstable decorators or reflect-metadata, which allows using any transpiler Esbuild, SWC, etc.
+- title: 📦 Completely native
+  details: Runs in a regular Node JS environment without transpilation, due to implementation based on functional style.
 footer: MIT Licensed | Copyright © 2022-present Amir Abdullin
 ---

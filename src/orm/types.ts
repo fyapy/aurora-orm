@@ -56,7 +56,7 @@ export type Where<T extends AnyObject> = {
 export type WhereValues = Array<string | number | Array<string | number | null>>
 
 interface Reader<T, P, C> {
-  findAll(value: Where<P> | Where<P>[] | FindAllOptions<P, C>): Promise<T[]>
+  findAll(value?: Where<P> | Where<P>[] | FindAllOptions<P, C>): Promise<T[]>
   findOne(id: ID | Where<P> | Where<P>[] | FindOneOptions<P, C>): Promise<T>
   exists(id: ID | Where<P> | Where<P>[], tx?: Tx): Promise<boolean>
   count(value: Where<P> | Where<P>[], tx?: Tx): Promise<number>
