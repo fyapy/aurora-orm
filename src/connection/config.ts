@@ -39,12 +39,12 @@ function formatConifg(json: ConnectionConfig) {
 export function loadConnectionConfig() {
   try {
     const config = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), 'aurora-config.json')) as unknown as string,
+      fs.readFileSync(path.join(process.cwd(), 'aurora-orm.json')) as unknown as string,
     ) as ConnectionConfig
 
     return formatConifg(config)
   } catch (e) {
     console.error(e)
-    throw new Error('"aurora-config.json" cannot be readed')
+    throw new Error('"aurora-orm.json" cannot be readed')
   }
 }
