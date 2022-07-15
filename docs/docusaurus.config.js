@@ -60,7 +60,7 @@ const config = {
         title: 'Aurora ORM',
         logo: {
           alt: 'Aurora ORM Logo',
-          src: 'img/logo.svg',
+          src: 'img/aurora-orm.png',
         },
         items: [
           {

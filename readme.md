@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://aurora-orm.netlify.app/" target="_blank" rel="noopener noreferrer">
+    <img width="180" src="/docs/static/img/aurora-orm.png" alt="Aurora ORM logo">
+  </a>
+</p>
+
 # Aurora-ORM
 
 > Decorator-less ORM for TypeScript and JavaScript.
