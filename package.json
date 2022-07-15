@@ -39,6 +39,7 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.7.4"
   },
+  "homepage": "https://aurora-orm.vercel.app",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fyapy/aurora-orm.git"
