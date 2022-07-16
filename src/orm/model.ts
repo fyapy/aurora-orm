@@ -119,38 +119,30 @@ export function createModel<
   }): string => {
     const alias = aliasMapper(key as keyof T)
     const value = values[key as keyof T]
-    let condition: string
 
     if (typeof value === 'object') {
       const operator = value as SQL
 
       if (operator !== null && operator.type === 'sql') {
-        condition = operator.fn({
+        return operator.fn({
           values: _values,
           alias,
         })
       } else {
-        condition = `${alias} = ?`
         _values.push(value as any)
+        return `${alias} = ?`
       }
-    } else {
-      condition = `${alias} = ?`
-      _values.push(value as any)
     }
 
-    return condition
+    _values.push(value as any)
+    return `${alias} = ?`
   }
-  // TODO: maybe combine with where()
-  function getWhereValues(values: Where<T>) {
+  function getSetValues(values: Where<T>) {
     const keys = Object.keys(values)
     const _values: WhereValues = []
 
     for (const key of keys) {
-      _whereSQL({
-        key,
-        _values,
-        values,
-      })
+      _whereSQL({ key, _values, values })
     }
 
     return _values
@@ -191,11 +183,7 @@ export function createModel<
     } else {
       // Without OR operator
       for (const key of keys) {
-        const condition = _whereSQL({
-          key,
-          _values,
-          values,
-        })
+        const condition = _whereSQL({ key, _values, values })
 
         sql += sql === ''
           ? condition
@@ -360,12 +348,12 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ?${returningSQL}`
 
-      return queryRow<T>(SQLParams(sql), [...getWhereValues(set), id], tx)
+      return queryRow<T>(SQLParams(sql), [...getSetValues(set), id], tx)
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql}${returningSQL}`
 
-      return queryRow<T>(SQLParams(sql), [...getWhereValues(set), ...whereProps.values], tx)
+      return queryRow<T>(SQLParams(sql), [...getSetValues(set), ...whereProps.values], tx)
     }
   }
 
