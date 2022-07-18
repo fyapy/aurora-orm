@@ -35,7 +35,7 @@ describe('orm/model', () => {
 
     const [sql, values] = getSqlRow()
 
-    expect(sql).toEqual('UPDATE "users" SET "age" = $1 WHERE "id" = ANY($2)')
+    expect(sql).toEqual('UPDATE "users" SET "age" = ? WHERE "id" = ANY(?)')
     expect(values).toEqual([3, [1, 2, 3]])
   })
 
@@ -49,7 +49,7 @@ describe('orm/model', () => {
 
     const [sql, values] = getSqlRow()
 
-    expect(sql).toEqual('UPDATE "users" SET "age" = $1 WHERE "id" = $2')
+    expect(sql).toEqual('UPDATE "users" SET "age" = ? WHERE "id" = ?')
     expect(values).toEqual([3, 1])
   })
 
@@ -64,7 +64,7 @@ describe('orm/model', () => {
 
     const [sql, values] = getSqlRow()
 
-    expect(sql).toEqual('UPDATE "users" SET "addictions" = $1, "age" = $2 WHERE "id" = $3')
+    expect(sql).toEqual('UPDATE "users" SET "addictions" = ?, "age" = ? WHERE "id" = ?')
     expect(values).toEqual([[1], null, 2])
   })
 
@@ -80,7 +80,7 @@ describe('orm/model', () => {
     const [sql, values] = getSqlRow()
 
     expect(sql).toEqual([
-      'UPDATE "users" SET "age" = $1 WHERE "id" = $2',
+      'UPDATE "users" SET "age" = ? WHERE "id" = ?',
       'RETURNING "id", "name", "age", "addictions"',
     ].join(' '))
     expect(values).toEqual([3, 4])
@@ -98,7 +98,7 @@ describe('orm/model', () => {
     const [sql, values] = getSqlRow()
 
     expect(sql).toEqual([
-      'UPDATE "users" SET "age" = $1 WHERE "id" = $2',
+      'UPDATE "users" SET "age" = ? WHERE "id" = ?',
       'RETURNING "id", "name"',
     ].join(' '))
     expect(values).toEqual([3, 4])

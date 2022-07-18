@@ -66,27 +66,35 @@ export function createModel<
   let dbQuery = getDbQuery()
   let dbQueryRow = getDbQueryRow()
 
-  function retryConnect() {
-    if (typeof connection === 'undefined') {
-      connection = ormConfig.connections[connectionName]!
-    }
-    if (typeof dbQuery === 'undefined') {
-      dbQuery = getDbQuery()
-    }
-    if (typeof dbQueryRow === 'undefined') {
-      dbQueryRow = getDbQueryRow()
-    }
-  }
-
   // try to reasign, after reconnect
-  setTimeout(retryConnect, 0)
-  setTimeout(retryConnect, 500)
-  setTimeout(() => {
-    retryConnect()
-    if (typeof connection === 'undefined') {
-      throw new Error('Aurora-orm cannot get connection during 2500 ms, check database connection!')
+  if (process.env.NODE_ENV !== 'test') {
+    function retryConnect() {
+      if (typeof connection === 'undefined') {
+        connection = ormConfig.connections[connectionName]!
+
+        output.connection = connection
+        output.getConnect = connection?.getConnect
+        output.startTrx = connection?.startTrx
+        output.commit = connection?.commit
+        output.rollback = connection?.rollback
+      }
+      if (typeof dbQuery === 'undefined') {
+        dbQuery = getDbQuery()
+      }
+      if (typeof dbQueryRow === 'undefined') {
+        dbQueryRow = getDbQueryRow()
+      }
     }
-  }, 2500)
+
+    setTimeout(retryConnect, 0)
+    setTimeout(retryConnect, 500)
+    setTimeout(() => {
+      retryConnect()
+      if (typeof connection === 'undefined') {
+        throw new Error('Aurora-orm cannot get connection during 2500 ms, check database connection!')
+      }
+    }, 2500)
+  }
 
 
   // columns
@@ -579,10 +587,10 @@ export function createModel<
       count,
     } as BaseModel<D, T, Tx>),
     connection,
-    getConnect: connection.getConnect,
-    startTrx: connection.startTrx,
-    commit: connection.commit,
-    rollback: connection.rollback,
+    getConnect: connection?.getConnect,
+    startTrx: connection?.startTrx,
+    commit: connection?.commit,
+    rollback: connection?.rollback,
   }
 
   // @ts-ignore
