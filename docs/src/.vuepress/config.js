@@ -25,7 +25,7 @@ module.exports = {
    * ref：https://v1.vuepress.vuejs.org/theme/default-theme-config.html
    */
   themeConfig: {
-    logo: '/aurora-orm.png',
+    logo: '/aurora-orm.svg',
     repo: '',
     editLinks: false,
     docsDir: '',

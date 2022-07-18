@@ -1,10 +1,4 @@
 export {
-  query,
-  queryRow,
-  commit,
-  rollback,
-  startTrx,
-  getConnect,
   isUniqueErr,
   mapper,
   makeUnique,
@@ -27,5 +21,5 @@ export {
   NotEqual,
 } from './queryBuilder'
 export * as JoinStrategies from './joinStrateries'
-export type { ID, Tx, SQL } from './types'
-export { connect, config } from './connect'
+export type { ID, Tx, Operator } from './types'
+export { connect, ormConfig } from './connect'

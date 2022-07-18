@@ -1,3 +1,4 @@
+import type { Pool } from 'pg'
 import type {
   BaseModel,
   FindAllOptions,
@@ -5,15 +6,14 @@ import type {
   ID,
   ColumnData,
   Where,
-  SQL,
+  Operator,
   WhereValues,
   Join,
   Tx,
   BaseFindOptions,
 } from './types'
-import { Pool } from 'pg'
-import { buildAliasMapper, insertValues, SQLParams } from './queryBuilder'
-import { query as _query, queryRow as _queryRow } from './utils'
+import { buildAliasMapper, insertValues } from './queryBuilder'
+import { ormConfig, DefaultConnection } from './connect'
 
 type Repos = Record<string, ReturnType<typeof createModel>>
 const _repos: Repos = {}
@@ -40,21 +40,56 @@ export function createModel<
   table,
   mapping,
   primaryKey = 'id',
-  query = _query,
-  queryRow = _queryRow,
+  query,
+  queryRow,
+  connectionName = DefaultConnection,
 }: {
   table: string
   pool?: Pool
   primaryKey?: string
   mapping: Record<keyof D, ColumnData | JoinStrategy>
-  query?: <T = any>(sql: string, values?: any[] | null, tx?: Tx) => Promise<T[]>
-  queryRow?: <T = any>(sql: string, values: any[] | null, tx?: any | undefined) => Promise<T>
+  query?: (connectionName: string) => <T = any>(sql: string, values?: any[] | null, tx?: Tx) => Promise<T[]>
+  queryRow?: (connectionName: string) => <T = any>(sql: string, values: any[] | null, tx?: any | undefined) => Promise<T>
+  connectionName?: string,
 }) {
   type T = Omit<D, S>
   type BaseFindParams = BaseFindOptions<T, Tx>
   type FindAllParams = FindAllOptions<T, Tx>
   type FindOneParams = FindOneOptions<T, Tx>
 
+  // database runtime
+  let connection = ormConfig.connections[connectionName]!
+
+  const getDbQuery = () => query ? query(connectionName) : connection?.query
+  const getDbQueryRow = () => queryRow ? queryRow(connectionName) : connection?.queryRow
+
+  let dbQuery = getDbQuery()
+  let dbQueryRow = getDbQueryRow()
+
+  function retryConnect() {
+    if (typeof connection === 'undefined') {
+      connection = ormConfig.connections[connectionName]!
+    }
+    if (typeof dbQuery === 'undefined') {
+      dbQuery = getDbQuery()
+    }
+    if (typeof dbQueryRow === 'undefined') {
+      dbQueryRow = getDbQueryRow()
+    }
+  }
+
+  // try to reasign, after reconnect
+  setTimeout(retryConnect, 0)
+  setTimeout(retryConnect, 500)
+  setTimeout(() => {
+    retryConnect()
+    if (typeof connection === 'undefined') {
+      throw new Error('Aurora-orm cannot get connection during 2500 ms, check database connection!')
+    }
+  }, 2500)
+
+
+  // columns
   const allMapping = Object.entries<ColumnData | JoinStrategy>(mapping)
 
   type Joins = Record<keyof T, JoinStrategy>
@@ -121,9 +156,9 @@ export function createModel<
     const value = values[key as keyof T]
 
     if (typeof value === 'object') {
-      const operator = value as SQL
+      const operator = value as Operator
 
-      if (operator !== null && operator.type === 'sql') {
+      if (operator !== null && operator.type === 'operator') {
         return operator.fn({
           values: _values,
           alias,
@@ -264,7 +299,7 @@ export function createModel<
     const cols = _cols.join(', ')
     const values = insertValues(_values)
 
-    const row = await queryRow<T>(
+    const row = await dbQueryRow<T>(
       `INSERT INTO "${table}" (${cols}) VALUES (${values}) RETURNING ${allColumns}`,
       _values,
       tx,
@@ -303,7 +338,7 @@ export function createModel<
       })})`)
       .join(', ')
 
-    const rows = await query<T>(
+    const rows = await dbQuery<T>(
       `INSERT INTO "${table}" (${cols}) VALUES ${inlinedValues} RETURNING ${allColumns}`,
       _values,
       tx,
@@ -348,12 +383,12 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ?${returningSQL}`
 
-      return queryRow<T>(SQLParams(sql), [...getSetValues(set), id], tx)
+      return dbQueryRow<T>(sql, [...getSetValues(set), id], tx)
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql}${returningSQL}`
 
-      return queryRow<T>(SQLParams(sql), [...getSetValues(set), ...whereProps.values], tx)
+      return dbQueryRow<T>(sql, [...getSetValues(set), ...whereProps.values], tx)
     }
   }
 
@@ -371,14 +406,14 @@ export function createModel<
       sql += ` ${where(id).sql}`
     }
 
-    return queryRow<boolean>(SQLParams(sql), values, tx)
+    return dbQueryRow<boolean>(sql, values, tx)
   }
 
   function isWhere(params: any): params is Where<T> | Where<T>[] {
     if (hasWhereColumn === true && typeof params.where !== 'undefined') {
       return typeof params.where !== 'object'
         ? true
-        : params.where.type === 'sql' // is SQL operator
+        : params.where.type === 'operator' // is operator
     }
 
     return Array.isArray(params) || typeof params.where === 'undefined'
@@ -412,7 +447,7 @@ export function createModel<
       const whereProps = where(params)
       const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-      const result = await query<D>(SQLParams(sql), whereProps.values)
+      const result = await dbQuery<D>(sql, whereProps.values)
       return result
     }
 
@@ -435,7 +470,7 @@ export function createModel<
       whereProps.values.push(params.limit)
     }
 
-    const result = await query<D>(SQLParams(sql), whereProps.values, params.tx)
+    const result = await dbQuery<D>(sql, whereProps.values, params.tx)
     if (result.length === 0) {
       return result
     }
@@ -457,7 +492,7 @@ export function createModel<
         sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      return await queryRow<D>(SQLParams(sql), [params.where], params.tx)
+      return await dbQueryRow<D>(sql, [params.where], params.tx)
     } else {
       const whereProps = where(params.where)
       sql += ` ${whereProps.sql}`
@@ -466,27 +501,24 @@ export function createModel<
         sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      return await queryRow<D>(SQLParams(sql), whereProps.values, params.tx)
+      return await dbQueryRow<D>(sql, whereProps.values, params.tx)
     }
   }
 
   async function findOne(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<D> {
     if (typeof params !== 'object') {
       // isPrimitive
-      return await queryRow<D>(
-        SQLParams(`SELECT ${allColumns} FROM "${table}" WHERE "${primaryKey}" = ?`),
-        [params],
-      )
+      const sql = `SELECT ${allColumns} FROM "${table}" WHERE "${primaryKey}" = ?`
+
+      return await dbQueryRow<D>(sql, [params])
     }
 
     if (isWhere(params)) {
-      // not without FindParams
+      // just Where
       const whereProps = where(params)
+      const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-      return await queryRow<D>(
-        SQLParams(`SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`),
-        whereProps.values,
-      )
+      return await dbQueryRow<D>(sql, whereProps.values)
     }
 
     // FindParams
@@ -507,13 +539,13 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ? LIMIT 1`
 
-      const res = await queryRow<{ count: number }>(SQLParams(sql), [id], tx)
+      const res = await dbQueryRow<{ count: number }>(sql, [id], tx)
       return res.count !== 0
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql}`
 
-      const res = await queryRow<{ count: number }>(SQLParams(sql), whereProps.values, tx)
+      const res = await dbQueryRow<{ count: number }>(sql, whereProps.values, tx)
       return res.count !== 0
     }
   }
@@ -522,11 +554,7 @@ export function createModel<
     const whereProps = where(value)
     const sql = `SELECT COUNT(*)::integer as count FROM "${table}" ${whereProps.sql}`
 
-    const res = await queryRow<{ count: number }>(
-      SQLParams(sql),
-      whereProps.values,
-      tx,
-    )
+    const res = await dbQueryRow<{ count: number }>(sql, whereProps.values, tx)
 
     return res.count
   }
@@ -550,6 +578,11 @@ export function createModel<
       exists: exist,
       count,
     } as BaseModel<D, T, Tx>),
+    connection,
+    getConnect: connection.getConnect,
+    startTrx: connection.startTrx,
+    commit: connection.commit,
+    rollback: connection.rollback,
   }
 
   // @ts-ignore

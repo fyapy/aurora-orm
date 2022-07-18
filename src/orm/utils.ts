@@ -1,6 +1,4 @@
-import type { Tx } from './types'
-import { config } from './connect'
-import { createModel } from './model'
+import type { createModel } from './model'
 
 export const isUniqueErr = (error: any, table?: string) => {
   if (table) {
@@ -8,91 +6,6 @@ export const isUniqueErr = (error: any, table?: string) => {
   }
 
   return error.code === '23505' && error.severity === 'ERROR'
-}
-
-export const getConnect = (tx?: Tx): Promise<Tx> => {
-  if (tx) {
-    return tx as unknown as Promise<Tx>
-  }
-  return config.pool!.connect()
-}
-
-export const queryRow = async <T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T> => {
-  const client = await getConnect(tx)
-  if (config.debug === true) {
-    console.log(sql, values)
-  }
-
-  if (Array.isArray(values)) {
-    try {
-      const res = await client.query(sql, values)
-
-      return (res.command === 'DELETE'
-        ? res.rowCount !== 0
-        : res.rows[0]) as T
-    } catch (e) {
-      console.error(e)
-      throw e
-    } finally {
-      if (!tx) client.release()
-    }
-  }
-
-  try {
-    const res = await client.query(sql)
-
-    return res.rows[0] as T
-  } catch (e) {
-    throw e
-  } finally {
-    if (!tx) client.release()
-  }
-}
-export const query = async <T = any>(sql: string, values?: any[] | null, tx?: Tx) => {
-  const client = await getConnect(tx)
-  if (config.debug === true) {
-    console.log(sql, values)
-  }
-
-  if (Array.isArray(values)) {
-    try {
-      const res = await client.query(sql, values)
-
-      return res.rows as T[]
-    } catch (e) {
-      throw e
-    } finally {
-      if (!tx) client.release()
-    }
-  }
-
-  try {
-    const res = await client.query(sql)
-
-    return res.rows as T[]
-  } catch (e) {
-    throw e
-  } finally {
-    if (!tx) client.release()
-  }
-}
-
-export const startTrx = async (tx?: Tx) => {
-  const _tx = tx ?? await getConnect()
-  await _tx.query('BEGIN')
-  return _tx
-}
-export const commit = async (tx: Tx, closeConnection = true) => {
-  await tx.query('COMMIT')
-  if (closeConnection === true) {
-    tx.release()
-  }
-}
-export const rollback = async (tx: Tx, closeConnection = true) => {
-  await tx.query('ROLLBACK')
-  if (closeConnection === true) {
-    tx.release()
-  }
 }
 
 export const mapper = (

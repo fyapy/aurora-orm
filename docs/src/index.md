@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /aurora-orm.png
+heroImage: /aurora-orm.svg
 tagline: Decorator-less and type safe ORM, for Node.js
 actionText: Get Started
 actionLink: /guide/

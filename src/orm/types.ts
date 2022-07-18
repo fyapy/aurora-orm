@@ -1,6 +1,13 @@
-import type { PoolClient } from 'pg'
-
-export type Tx = PoolClient
+export interface QueryConfig {
+  name?: string
+  text: string
+  values?: any[]
+}
+export interface Tx {
+  release(): void
+  query<T = any>(text: string, values?: any[]): Promise<T>
+  query<T = any>(config: QueryConfig): Promise<T>
+}
 
 export type AnyObject = Record<string, any>
 export type ColumnData = string | {
@@ -18,6 +25,7 @@ interface Writer<T, P, C> {
     set: Partial<P>
     returning?: boolean | Array<keyof T>
     tx?: C
+    prepared?: boolean
   }): Promise<T>
   delete(id: ID | Where<P>, tx?: C): Promise<boolean>
 }
@@ -34,6 +42,7 @@ export interface BaseFindOptions<T, C> {
   limit?: number
   skip?: number
   tx?: C
+  prepared?: boolean
 }
 
 export interface FindAllOptions<T, C> extends BaseFindOptions<T, C> {
@@ -43,15 +52,16 @@ export interface FindOneOptions<T, C> extends BaseFindOptions<T, C> {
   where: ID | Where<T> | Where<T>[]
 }
 
-export interface SQL {
-  type: 'sql'
+export interface Operator {
+  type: 'operator'
+  name: string
   fn: (options: {
     values: WhereValues
     alias: string
   }) => string
 }
 export type Where<T extends AnyObject> = {
-  [K in keyof T]?: SQL | T[K]
+  [K in keyof T]?: Operator | T[K]
 }
 export type WhereValues = Array<string | number | Array<string | number | null>>
 

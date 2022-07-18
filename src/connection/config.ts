@@ -24,16 +24,18 @@ const configExtractEnv = (json: ConnectionConfig) => Object.keys(json).reduce((a
   return acc
 }, {} as ConnectionConfig)
 
-function formatConifg(json: ConnectionConfig) {
-  if (Array.isArray(json)) {
-    throw new Error('Array config in current moment not supported')
+function formatConifg(config: ConnectionConfig | ConnectionConfig[]) {
+  if (Array.isArray(config)) {
+    return config.map(json => {
+      if (!json.name) {
+        throw new Error(`Array connections in 'aurora-orm.json' must have a 'name' property`)
+      }
+
+      return configExtractEnv(json)
+    })
   }
 
-  if (json.type) {
-    delete json.type
-  }
-
-  return configExtractEnv(json)
+  return configExtractEnv(config)
 }
 
 export function loadConnectionConfig() {
