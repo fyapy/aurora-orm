@@ -10,7 +10,7 @@ import { SQLParams } from '../queryBuilder'
 
 export async function postgreSQL({ config, ormLog }: {
   config: RemoveIdnetifiers<PostgresqlConnectionStringConfig | Postgresql>
-  ormLog: (sql: string, values?: any[] | null) => void
+  ormLog(sql: string, values?: any[] | null): void
 }): Promise<Driver> {
     const { Pool } = await import('pg')
 
@@ -27,7 +27,7 @@ export async function postgreSQL({ config, ormLog }: {
           const res = await client.query(SQLParams(sql), values)
 
           return ((res as any).command === 'DELETE'
-            ? (res as any).rowCount !== 0
+            ? res
             : res.rows[0]) as T
         }
 
@@ -104,6 +104,7 @@ export async function postgreSQL({ config, ormLog }: {
         tx.release()
       }
     }
+    const _end = pool.end
 
     return {
       getConnect,
@@ -112,6 +113,7 @@ export async function postgreSQL({ config, ormLog }: {
       rollback,
       queryRow,
       query,
+      _end,
       _: pool,
     }
 }

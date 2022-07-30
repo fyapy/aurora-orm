@@ -22,7 +22,7 @@ export type JoinStrategy<T = Record<string, any>> = {
   table: string
   foreignProp: string
   referenceProp: string
-  fn: (options: {
+  fn(options: {
     repos: Repos
     data: T | T[]
     prop: string
@@ -30,7 +30,7 @@ export type JoinStrategy<T = Record<string, any>> = {
     select?: never[]
     join?: Join
     tx?: Tx
-  }) => Promise<void>
+  }): Promise<void>
 }
 
 export function createModel<
@@ -400,7 +400,7 @@ export function createModel<
     }
   }
 
-  function del(id: ID | Where<T>, tx?: Tx): Promise<boolean> {
+  async function del(id: ID | Where<T>, tx?: Tx): Promise<boolean> {
     const isPrimitive = typeof id !== 'object'
     const values = isPrimitive
       ? [id]
@@ -414,7 +414,9 @@ export function createModel<
       sql += ` ${where(id).sql}`
     }
 
-    return dbQueryRow<boolean>(sql, values, tx)
+    const res = await dbQueryRow(sql, values, tx)
+
+    return (res as any).rowCount !== 0
   }
 
   function isWhere(params: any): params is Where<T> | Where<T>[] {

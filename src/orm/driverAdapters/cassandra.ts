@@ -4,7 +4,7 @@ import type { Driver } from './types'
 
 export async function cassandra({ config, ormLog }: {
   config: RemoveIdnetifiers<CassandraConfig>
-  ormLog: (sql: string, values?: any[] | null) => void
+  ormLog(sql: string, values?: any[] | null): void
 }): Promise<Driver> {
   const { Client, auth } = await import('cassandra-driver')
 
@@ -77,6 +77,7 @@ export async function cassandra({ config, ormLog }: {
   const rollback = async (tx: Tx, closeConnection = true) => {
     console.log('Cassandra: ROLLBACK')
   }
+  const _end = (() => {}) as () => Promise<void>
 
   return {
     getConnect,
@@ -85,6 +86,7 @@ export async function cassandra({ config, ormLog }: {
     startTrx,
     commit,
     rollback,
+    _end,
     _: pool,
   }
 }

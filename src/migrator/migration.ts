@@ -1,6 +1,6 @@
 import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDirection } from './types'
+import type { DBConnection } from './db'
 import path from 'node:path'
-import { connectDB } from './db'
 
 function getTimestamp(filename: string): number {
   const prefix = filename.split('_')[0]
@@ -25,9 +25,10 @@ function getTimestamp(filename: string): number {
   return Number(prefix) || 0
 }
 
-export function migration({ db, actions, filePath }: {
-  db: ReturnType<typeof connectDB>
-  filePath: string,
+export function migration({ db, databases, actions, filePath }: {
+  db: DBConnection
+  databases: Record<string, DBConnection>
+  filePath: string
   actions: MigrationBuilderActions,
 }): Migration {
   const name = path.basename(filePath, path.extname(filePath))
@@ -65,7 +66,7 @@ export function migration({ db, actions, filePath }: {
 
     await db.query('BEGIN')
     try {
-      await action({ db })
+      await action({ sql: db, databases })
 
       await db.query(_getMarkAsRun(action))
       await db.query('COMMIT')

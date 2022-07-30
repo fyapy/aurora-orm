@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { connectDB } from './db'
+import { connectDB, DBConnection } from './db'
 import { migration } from './migration'
 import { Migration, MigrationDirection, RunnerOptionConfig } from './types'
 import { loadMigrationFiles } from './utils'
@@ -12,7 +12,7 @@ const runOnColumn = 'run_on'
 
 const schema = 'public'
 
-async function loadMigrations(db: ReturnType<typeof connectDB>) {
+async function loadMigrations(db: DBConnection, databases: Record<string, DBConnection>) {
   try {
     const dir = '/migrations'
 
@@ -27,6 +27,7 @@ async function loadMigrations(db: ReturnType<typeof connectDB>) {
 
         return migration({
           db,
+          databases,
           filePath,
           actions,
         })
@@ -41,11 +42,12 @@ async function loadMigrations(db: ReturnType<typeof connectDB>) {
   }
 }
 
-async function ensureMigrationsTable(db: ReturnType<typeof connectDB>) {
+// TODO: move code to driverAdapters
+async function ensureMigrationsTable(db: DBConnection) {
   try {
     const migrationsTable = fullTableName
 
-    const migrationTables = await db.select(
+    const migrationTables = await db.query(
       `SELECT table_name FROM information_schema.tables WHERE table_schema = '${schema}' AND table_name = '${migrationsTable}'`,
     )
 
@@ -59,8 +61,10 @@ async function ensureMigrationsTable(db: ReturnType<typeof connectDB>) {
   }
 }
 
-async function getRunMigrations(db: ReturnType<typeof connectDB>) {
-  return db.column(nameColumn, `SELECT ${nameColumn} FROM ${fullTableName} ORDER BY ${runOnColumn}, ${idColumn}`)
+async function getRunMigrations(db: DBConnection) {
+  const list = await db.query(`SELECT ${nameColumn} FROM ${fullTableName} ORDER BY ${runOnColumn}, ${idColumn}`)
+
+  return list.map(item => item[nameColumn])
 }
 
 
@@ -95,9 +99,48 @@ async function runMigrations({ migrations, direction }: {
   }
 }
 
+async function connectionsForMigrations(options: RunnerOptionConfig): Promise<{
+  db: DBConnection
+  databases: Record<string, DBConnection>
+}> {
+  if (Array.isArray(options.config)) {
+    const migrationsConfig = options.migrationsConfig!
+
+    const db = await connectDB(migrationsConfig)
+    const connections = await Promise.all(options.config.map(config => {
+      if (config.name === migrationsConfig.name) {
+        return Promise.resolve(null)
+      }
+
+      return connectDB(config)
+    }))
+
+    const databases = options.config.reduce((acc, config, index) => {
+      acc[config.name!] = config.name === migrationsConfig.name
+        ? db
+        : connections[index]
+
+      return acc
+    }, {})
+
+    return {
+      db,
+      databases,
+    }
+  }
+
+  const db = await connectDB(options.config)
+
+  return {
+    db,
+    databases: {
+      [options.config.name ?? 'default']: db,
+    },
+  }
+}
 
 export async function runner(options: RunnerOptionConfig) {
-  const db = connectDB(options.databaseUrl)
+  const { db, databases } = await connectionsForMigrations(options)
 
   try {
     await db.createConnection()
@@ -105,7 +148,7 @@ export async function runner(options: RunnerOptionConfig) {
     await ensureMigrationsTable(db)
 
     const [migrations, runNames] = await Promise.all([
-      loadMigrations(db),
+      loadMigrations(db, databases),
       getRunMigrations(db),
     ])
 

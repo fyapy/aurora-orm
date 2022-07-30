@@ -1,5 +1,5 @@
-import { ClientConfig, QueryArrayConfig, QueryArrayResult, QueryConfig, QueryResult } from 'pg'
-import { connectDB } from './db'
+import type { ConnectionConfig } from '../connection'
+import type { DBConnection } from './db'
 
 export interface RunMigration {
   readonly path: string
@@ -11,25 +11,18 @@ export type MigrationDirection = 'up' | 'down'
 export interface RunnerOptionConfig {
   direction: MigrationDirection
 
-  databaseUrl: ClientConfig
-}
-
-export interface DB {
-  query(queryConfig: QueryArrayConfig, values?: any[]): Promise<QueryArrayResult>
-  query(queryConfig: QueryConfig): Promise<QueryResult>
-  query(queryTextOrConfig: string | QueryConfig, values?: any[]): Promise<QueryResult>
-
-  select(queryConfig: QueryArrayConfig, values?: any[]): Promise<any[]>
-  select(queryConfig: QueryConfig): Promise<any[]>
-  select(queryTextOrConfig: string | QueryConfig, values?: any[]): Promise<any[]>
+  config: ConnectionConfig | ConnectionConfig[]
+  migrationsConfig?: ConnectionConfig
 }
 
 export type MigrationAction = (options: {
-  db: ReturnType<typeof connectDB>
+  sql: DBConnection
+  databases: Record<string, DBConnection>
 }) => Promise<void> | void
 
 export interface MigrationBuilderActions {
   version: 'v1'
+  connectionNames?: string[]
   up?: MigrationAction | false
   down?: MigrationAction | false
 }
@@ -38,8 +31,8 @@ export interface Migration {
   name: string
   path: string
   timestamp: number
-  db: ReturnType<typeof connectDB>
+  db: DBConnection
   up: MigrationBuilderActions['up']
   down: MigrationBuilderActions['down']
-  apply: (direction: MigrationDirection) => Promise<void>
+  apply(direction: MigrationDirection): Promise<void>
 }

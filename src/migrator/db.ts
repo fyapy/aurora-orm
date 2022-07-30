@@ -1,16 +1,12 @@
+import type { ConnectionConfig } from '../connection'
 import { inspect } from 'node:util'
-import { Client, ClientBase, ClientConfig, QueryArrayConfig, QueryArrayResult, QueryConfig, QueryResult } from 'pg'
-import { DB } from './types'
+import { connectToDatabase } from '../orm/connect'
 
-export interface DBConnection extends DB {
+export interface DBConnection {
   createConnection(): Promise<void>
+  query(sql: string, values?: any[]): Promise<any[]>
 
-  column(columnName: string, queryConfig: QueryArrayConfig, values?: any[]): Promise<any[]>
-  column(columnName: string, queryConfig: QueryConfig): Promise<any[]>
-  column(columnName: string, queryTextOrConfig: string | QueryConfig, values?: any[]): Promise<any[]>
-
-  connected: () => boolean
-  // addBeforeCloseListener: (listener: any) => number
+  connected(): boolean
   close(): Promise<void>
 }
 
@@ -20,93 +16,45 @@ enum ConnectionStatus {
   ERROR = 'ERROR',
 }
 
-export function connectDB(connection: ClientBase | string | ClientConfig): DBConnection {
-  const isExternalClient =
-    typeof connection === 'object' && 'query' in connection && typeof connection.query === 'function'
+export async function connectDB(config: ConnectionConfig): Promise<DBConnection> {
   let connectionStatus = ConnectionStatus.DISCONNECTED
 
-  const client: Client = isExternalClient
-    ? (connection as Client)
-    : new Client(connection as string | ClientConfig)
+  const driver = await connectToDatabase(config)
 
-  const createConnection = () => new Promise<void>((resolve, reject) => {
-    if (isExternalClient || connectionStatus === ConnectionStatus.CONNECTED) {
-      resolve()
-    } else if (connectionStatus === ConnectionStatus.ERROR) {
-      reject(new Error('Connection already failed, do not try to connect again'))
-    } else {
-      client.connect((err) => {
-        if (err) {
-          connectionStatus = ConnectionStatus.ERROR
-          console.error(`could not connect to postgres: ${inspect(err)}`)
-          return reject(err)
-        }
-        connectionStatus = ConnectionStatus.CONNECTED
-        return resolve()
-      })
+  async function createConnection(): Promise<void> {
+    if (connectionStatus === ConnectionStatus.CONNECTED) return
+    if (connectionStatus === ConnectionStatus.ERROR) {
+      throw new Error('Connection already failed, do not try to connect again')
     }
-  })
 
-  const query: DBConnection['query'] = async (
-    queryTextOrConfig: string | QueryConfig | QueryArrayConfig,
-    values?: any[],
-  ): Promise<QueryArrayResult | QueryResult> => {
-    await createConnection()
     try {
-      return await client.query(queryTextOrConfig, values)
-    } catch (err: any) {
-      const { message, position }: { message: string; position: number } = err
-      const string: string = typeof queryTextOrConfig === 'string' ? queryTextOrConfig : queryTextOrConfig.text
-      if (message && position >= 1) {
-        const endLineWrapIndexOf = string.indexOf('\n', position)
-        const endLineWrapPos = endLineWrapIndexOf >= 0 ? endLineWrapIndexOf : string.length
-        const stringStart = string.substring(0, endLineWrapPos)
-        const stringEnd = string.substr(endLineWrapPos)
-        const startLineWrapPos = stringStart.lastIndexOf('\n') + 1
-        const padding = ' '.repeat(position - startLineWrapPos - 1)
-        console.error(`Error executing:
-${stringStart}
-${padding}^^^^${stringEnd}
-${message}
-`)
-      } else {
-        console.error(`Error executing:
-${string}
-${err}
-`)
-      }
+      await driver.getConnect()
+      connectionStatus = ConnectionStatus.CONNECTED
+    } catch (err) {
+      connectionStatus = ConnectionStatus.ERROR
+      console.error(`Could not connect to database: ${inspect(err)}`)
       throw err
     }
   }
 
-  const select: DBConnection['select'] = async (
-    queryTextOrConfig: string | QueryConfig | QueryArrayConfig,
-    values?: any[],
-  ) => {
-    const { rows } = await query(queryTextOrConfig, values)
-    return rows
-  }
-  const column: DBConnection['column'] = async (
-    columnName: string,
-    queryTextOrConfig: string | QueryConfig | QueryArrayConfig,
-    values?: any[],
-  ) => {
-    const rows = await select(queryTextOrConfig, values)
-    return rows.map((r: { [key: string]: any }) => r[columnName])
+  async function query(sql: string, values?: any[]): Promise<any[]> {
+    await createConnection()
+    try {
+      return await driver.query(sql, values ?? null)
+    } catch (err: any) {
+      console.error(`Error executing:\n${err}\n`)
+      throw err
+    }
   }
 
   return {
     createConnection,
     query,
-    select,
-    column,
 
     connected: () => connectionStatus === ConnectionStatus.CONNECTED,
-    close: async () => {
-      if (!isExternalClient) {
-        connectionStatus = ConnectionStatus.DISCONNECTED
-        client.end()
-      }
+    close() {
+      connectionStatus = ConnectionStatus.DISCONNECTED
+      return driver._end()
     },
   }
 }

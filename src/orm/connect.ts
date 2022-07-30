@@ -26,7 +26,7 @@ interface ConnectConfig {
   connectNotify?: boolean
 }
 
-function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
+export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   function deleteType() {
     if (config.type) delete config.type
     if (config.name) delete config.name
