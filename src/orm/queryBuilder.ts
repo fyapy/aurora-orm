@@ -106,3 +106,15 @@ export const NotEqual = (val: any): types.Operator => ({
     return `${options.alias} != ?`
   },
 })
+export const Increment = (value: number): types.SetOperator => ({
+  type: 'set-operator',
+  name: 'increment',
+  value,
+  fn: alias => `${alias} = ${alias} + ?`,
+})
+export const Decrement = (value: number): types.SetOperator => ({
+  type: 'set-operator',
+  name: 'decrement',
+  value,
+  fn: alias => `${alias} = ${alias} - ?`,
+})

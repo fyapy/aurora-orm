@@ -1,6 +1,7 @@
 import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDirection } from './types'
 import type { DBConnection } from './db'
 import path from 'node:path'
+import { migrationsTable, schema } from './constants'
 
 function getTimestamp(filename: string): number {
   const prefix = filename.split('_')[0]
@@ -46,9 +47,6 @@ export function migration({ db, databases, actions, filePath }: {
   }
 
   function _getMarkAsRun(action: MigrationAction) {
-    const schema = 'public'
-    const migrationsTable = 'pgmigrations'
-
     switch (action) {
       case actions.down:
         console.info(`### MIGRATION ${name} (DOWN) ###`)

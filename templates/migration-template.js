@@ -1,10 +1,10 @@
 const { createMigration } = require('aurora-orm/dist/migrator/templates/v1')
 
 module.exports = createMigration({
-  async up({ db }) {
+  async up({ sql }) {
 
   },
-  async down({ db }) {
+  async down({ sql }) {
 
   },
 })

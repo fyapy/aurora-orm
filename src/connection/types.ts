@@ -1,18 +1,19 @@
-export interface CassandraConfig {
-  name?: string
-  type: 'cassandra'
-  keyspace: string
-  contactPoints: string[]
-  localDataCenter: string
-  auth?: {
-    username: string
-    password: string
-  }
-}
+// export interface CassandraConfig {
+//   name?: string
+//   type: 'cassandra'
+//   keyspace: string
+//   contactPoints: string[]
+//   localDataCenter: string
+//   auth?: {
+//     username: string
+//     password: string
+//   }
+// }
 export interface PostgresqlConnectionStringConfig {
   name?: string
   type?: 'postgresql'
   connectionString: string
+  debug?: boolean
 }
 export interface Postgresql {
   name?: string
@@ -22,11 +23,12 @@ export interface Postgresql {
   username: string
   password: string
   database: string
+  debug?: boolean
 }
 
 export type ConnectionConfig =
   | Postgresql
   | PostgresqlConnectionStringConfig
-  | CassandraConfig
+  // | CassandraConfig
 
-export type RemoveIdnetifiers<T extends Record<string, any>> = Omit<T, 'name' | 'type'>
+export type RemoveIdnetifiers<T extends Record<string, any>> = Omit<T, 'name' | 'type' | 'debug'>

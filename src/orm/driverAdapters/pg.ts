@@ -104,7 +104,9 @@ export async function postgreSQL({ config, ormLog }: {
         tx.release()
       }
     }
-    const _end = pool.end
+    async function _end() {
+      await pool.end()
+    }
 
     return {
       getConnect,
@@ -115,5 +117,31 @@ export async function postgreSQL({ config, ormLog }: {
       query,
       _end,
       _: pool,
+
+      migrator({
+        schema,
+        idColumn,
+        nameColumn,
+        runOnColumn,
+        migrationsTable,
+      }) {
+        const tables = () => query(
+          `SELECT table_name FROM information_schema.tables WHERE table_schema = '${schema}' AND table_name = '${migrationsTable}'`,
+        )
+        const selectAll = () => query(
+          `SELECT ${nameColumn} FROM ${migrationsTable} ORDER BY ${runOnColumn}, ${idColumn}`,
+        )
+        const createTable = async () => {
+          await query(
+            `CREATE TABLE ${migrationsTable} (${idColumn} SERIAL PRIMARY KEY, ${nameColumn} varchar(255) NOT NULL, ${runOnColumn} timestamp NOT NULL)`,
+          )
+        }
+
+        return {
+          tables,
+          selectAll,
+          createTable,
+        }
+      }
     }
 }

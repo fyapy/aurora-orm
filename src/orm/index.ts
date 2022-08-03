@@ -19,6 +19,8 @@ export {
   NotIn,
   ILikeStart,
   NotEqual,
+  Decrement,
+  Increment,
 } from './queryBuilder'
 export * as JoinStrategies from './joinStrateries'
 export type { ID, Tx, Operator } from './types'

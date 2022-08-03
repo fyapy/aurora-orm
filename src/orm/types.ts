@@ -22,7 +22,7 @@ interface Writer<T, P, C> {
   createMany(values: Partial<P>[], tx?: C): Promise<T[]>
   update(options: {
     where: ID | Where<P>
-    set: Partial<P>
+    set: Set<P>
     returning?: boolean | Array<keyof T>
     tx?: C
     prepared?: boolean
@@ -60,8 +60,17 @@ export interface Operator {
     alias: string
   }) => string
 }
+export interface SetOperator {
+  type: 'set-operator'
+  name: string
+  value: number
+  fn: (alias: string) => string
+}
 export type Where<T extends AnyObject> = {
   [K in keyof T]?: Operator | T[K]
+}
+export type Set<T extends AnyObject> = {
+  [K in keyof T]?: SetOperator | T[K]
 }
 export type WhereValues = Array<string | number | Array<string | number | null>>
 

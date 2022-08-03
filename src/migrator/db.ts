@@ -1,8 +1,10 @@
 import type { ConnectionConfig } from '../connection'
+import type { Driver } from '../orm/driverAdapters'
 import { inspect } from 'node:util'
 import { connectToDatabase } from '../orm/connect'
 
 export interface DBConnection {
+  driver: Driver
   createConnection(): Promise<void>
   query(sql: string, values?: any[]): Promise<any[]>
 
@@ -48,6 +50,7 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
   }
 
   return {
+    driver,
     createConnection,
     query,
 

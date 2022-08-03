@@ -1,16 +1,9 @@
 import path from 'node:path'
+import { idColumn, migrationsTable, nameColumn, runOnColumn, schema } from './constants'
 import { connectDB, DBConnection } from './db'
 import { migration } from './migration'
 import { Migration, MigrationDirection, RunnerOptionConfig } from './types'
 import { loadMigrationFiles } from './utils'
-
-
-const fullTableName = 'pgmigrations'
-const idColumn = 'id'
-const nameColumn = 'name'
-const runOnColumn = 'run_on'
-
-const schema = 'public'
 
 async function loadMigrations(db: DBConnection, databases: Record<string, DBConnection>) {
   try {
@@ -42,27 +35,20 @@ async function loadMigrations(db: DBConnection, databases: Record<string, DBConn
   }
 }
 
-// TODO: move code to driverAdapters
-async function ensureMigrationsTable(db: DBConnection) {
+async function ensureMigrationsTable(migrator: ReturnType<DBConnection['driver']['migrator']>) {
   try {
-    const migrationsTable = fullTableName
-
-    const migrationTables = await db.query(
-      `SELECT table_name FROM information_schema.tables WHERE table_schema = '${schema}' AND table_name = '${migrationsTable}'`,
-    )
+    const migrationTables = await migrator.tables()
 
     if (migrationTables.length === 0) {
-      await db.query(
-        `CREATE TABLE ${fullTableName} (${idColumn} SERIAL PRIMARY KEY, ${nameColumn} varchar(255) NOT NULL, ${runOnColumn} timestamp NOT NULL)`
-      )
+      await migrator.createTable()
     }
   } catch (err: any) {
     throw new Error(`Unable to ensure migrations table: ${err.stack}`)
   }
 }
 
-async function getRunMigrations(db: DBConnection) {
-  const list = await db.query(`SELECT ${nameColumn} FROM ${fullTableName} ORDER BY ${runOnColumn}, ${idColumn}`)
+async function getRunMigrations(migrator: ReturnType<DBConnection['driver']['migrator']>): Promise<string[]> {
+  const list = await migrator.selectAll()
 
   return list.map(item => item[nameColumn])
 }
@@ -145,11 +131,19 @@ export async function runner(options: RunnerOptionConfig) {
   try {
     await db.createConnection()
 
-    await ensureMigrationsTable(db)
+    const migrator = db.driver.migrator({
+      schema,
+      idColumn,
+      nameColumn,
+      runOnColumn,
+      migrationsTable,
+    })
+
+    await ensureMigrationsTable(migrator)
 
     const [migrations, runNames] = await Promise.all([
       loadMigrations(db, databases),
-      getRunMigrations(db),
+      getRunMigrations(migrator),
     ])
 
     const toRun: Migration[] = getMigrationsToRun(options, runNames, migrations)

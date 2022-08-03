@@ -1,6 +1,6 @@
 import { clearSqlRows, getSqlRow, mockQueryRow } from '../../utils/jest'
 import { createModel } from '../model'
-import { In } from '../queryBuilder'
+import { In, Increment } from '../queryBuilder'
 
 interface User {
   id: number
@@ -102,5 +102,23 @@ describe('orm/model', () => {
       'RETURNING "id", "name"',
     ].join(' '))
     expect(values).toEqual([3, 4])
+  })
+
+  test('should be currect sql update query with set-operator', async () => {
+    await userModel.update({
+      where: 4,
+      set: {
+        age: Increment(2),
+      },
+      returning: ['id', 'name'],
+    })
+
+    const [sql, values] = getSqlRow()
+
+    expect(sql).toEqual([
+      'UPDATE "users" SET "age" = "age" + ? WHERE "id" = ?',
+      'RETURNING "id", "name"',
+    ].join(' '))
+    expect(values).toEqual([2, 4])
   })
 })

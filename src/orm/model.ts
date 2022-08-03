@@ -11,6 +11,8 @@ import type {
   Join,
   Tx,
   BaseFindOptions,
+  SetOperator,
+  Set,
 } from './types'
 import { buildAliasMapper, insertValues } from './queryBuilder'
 import { ormConfig, DefaultConnection } from './connect'
@@ -180,12 +182,12 @@ export function createModel<
     _values.push(value as any)
     return `${alias} = ?`
   }
-  function getSetValues(values: Where<T>) {
+  function getSetValues(values: Set<T>) {
     const keys = Object.keys(values)
     const _values: WhereValues = []
 
     for (const key of keys) {
-      _whereSQL({ key, _values, values })
+      _whereSQL({ key, _values, values } as any)
     }
 
     return _values
@@ -362,7 +364,7 @@ export function createModel<
     tx,
   }: {
     where: ID | Where<T>
-    set: Partial<T>
+    set: Set<T>
     tx?: Tx
     returning?: boolean | Array<keyof T>
   }): Promise<T> {
@@ -372,7 +374,21 @@ export function createModel<
       return findOne({ where: id, tx })
     }
 
-    const sqlSet = keys.reduce((acc, key) => {
+    const setValues = getSetValues(set)
+    const sqlSet = keys.reduce((acc, key, index) => {
+      const setValue = set[key] as SetOperator | number | string | boolean | null
+
+      // SetOperator
+      if (typeof setValue === 'object' && setValue !== null && setValue.type === 'set-operator') {
+        setValues[index] = setValue.value
+        const sql = setValue.fn(columnAlias(key as keyof T))
+
+        return acc !== ''
+          ? `${acc}, ${sql}`
+          : sql
+      }
+
+      // Primitive
       const sql = `${columnAlias(key as keyof T)} = ?`
 
       return acc !== ''
@@ -391,12 +407,12 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ?${returningSQL}`
 
-      return dbQueryRow<T>(sql, [...getSetValues(set), id], tx)
+      return dbQueryRow<T>(sql, [...setValues, id], tx)
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql}${returningSQL}`
 
-      return dbQueryRow<T>(sql, [...getSetValues(set), ...whereProps.values], tx)
+      return dbQueryRow<T>(sql, [...setValues, ...whereProps.values], tx)
     }
   }
 

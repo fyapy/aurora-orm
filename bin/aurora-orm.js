@@ -37,23 +37,6 @@ const action = argv._.shift()
 
 const MIGRATIONS_DIR = `${process.cwd()}/migrations`
 
-function _migrationsConfig() {
-  const config = loadConnectionConfig()
-
-  if (Array.isArray(config)) {
-    if (!migratinsDbConnectionName) {
-      throw new Error(`Please specify arg '${migratinsDbConnectionNameArg}', it is needed to specify database where aurora-orm will be store data about migrations`)
-    }
-
-    const singleConfig = config.find(c => c.name === migratinsDbConnectionName)
-    if (!singleConfig) {
-      throw new Error(`Connection name '${migratinsDbConnectionName}' from arg '${migratinsDbConnectionNameArg}' not found!`)
-    }
-  }
-
-  return config
-}
-
 if (action === 'create') {
   // replaces spaces with dashes - should help fix some errors
   // forces use of dashes in names - keep thing clean
@@ -80,9 +63,22 @@ if (action === 'create') {
       process.exit(1)
     })
 } else if (action === 'up' || action === 'down') {
+  const config = loadConnectionConfig()
+
+  if (Array.isArray(config)) {
+    if (!migratinsDbConnectionName) {
+      throw new Error(`Please specify arg '${migratinsDbConnectionNameArg}', it is needed to specify database where aurora-orm will be store data about migrations`)
+    }
+
+    const singleConfig = config.find(c => c.name === migratinsDbConnectionName)
+    if (!singleConfig) {
+      throw new Error(`Connection name '${migratinsDbConnectionName}' from arg '${migratinsDbConnectionNameArg}' not found!`)
+    }
+  }
+
   runner({
-    direction,
-    config: _migrationsConfig(),
+    direction: action,
+    config,
   })
     .then(() => {
       console.log('Migrations complete!')

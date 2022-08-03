@@ -13,7 +13,7 @@
 
 > Decorator-less, type safe, fast and low overhead ORM for Node.js and TypeScript.
 
-Aurora ORM works both for PostgreSQL and ~~Cassandra~~ (not yet).
+Aurora ORM works both for PostgreSQL and YugabyteDB.
 
 Aurora ORM is an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
 that can run in NodeJS and can be used with TypeScript and JavaScript environment.
@@ -36,7 +36,7 @@ And don't use unstable features like decorators and reflect-metadata that give y
 -   Elegant-syntax.
 -   Logging.
 -   Connection configuration in json format.
--   Supports Postgres / ~~Cassandra~~.
+-   Supports Postgres / YugabyteDB.
 -   TypeScript and JavaScript support.
 -   Support modern transpilers like [SWC](https://swc.rs/) or [ESbuild](https://esbuild.github.io/).
 -   Produced code is performant, flexible, clean and maintainable.

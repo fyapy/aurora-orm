@@ -9,5 +9,17 @@ export interface Driver {
   query<T = any>(sql: string, values: any[] | null, tx?: any | undefined): Promise<T[]>
 
   _end(): Promise<void>
-  _: import('pg').Pool | import('cassandra-driver').Client
+  _: import('pg').Pool // | import('cassandra-driver').Client
+
+  migrator(options: {
+    schema: string
+    migrationsTable: string
+    idColumn: string
+    runOnColumn: string
+    nameColumn: string
+  }): {
+    tables(): Promise<any[]>,
+    selectAll(): Promise<any[]>,
+    createTable(): Promise<void>,
+  }
 }
