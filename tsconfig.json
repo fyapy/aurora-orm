@@ -21,6 +21,7 @@
     "bin",
     "migrations",
     "docs",
+    "benchmarks",
     "**/*.test.ts",
     "**/*.mock.ts",
   ]

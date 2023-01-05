@@ -1,6 +1,6 @@
 import type { JoinStrategy } from './model'
 import { In } from './queryBuilder'
-import { makeUnique, mapper, joinStrategyWhere } from './utils'
+import { makeUnique, mapper, manyMapper, joinStrategyWhere } from './utils'
 
 export function OneToOne({
   table,
@@ -70,14 +70,14 @@ export function OneToMany({
       if (Array.isArray(data)) {
         const dataToJoin = await joinRepo.findAll({
           where: {
-            [foreignProp]: In(makeUnique(data.map(d => d[foreignProp]))),
+            [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))),
           },
           select,
           join,
           tx,
         })
 
-        mapper(data, prop, foreignProp, dataToJoin as any[], referenceProp)
+        manyMapper(data, prop, foreignProp, dataToJoin as any[], referenceProp)
       } else {
         const where = joinStrategyWhere(joinRepo, data, foreignProp, referenceProp)
         const _joinData = await joinRepo.findAll({

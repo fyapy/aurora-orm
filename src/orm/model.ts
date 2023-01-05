@@ -62,11 +62,15 @@ export function createModel<
   // database runtime
   let connection = ormConfig.connections[connectionName]!
 
-  const getDbQuery = () => query ? query(connectionName) : connection?.query
-  const getDbQueryRow = () => queryRow ? queryRow(connectionName) : connection?.queryRow
-
-  let dbQuery = getDbQuery()
-  let dbQueryRow = getDbQueryRow()
+  const db = {
+    // TODO: подумать можно ли тут убрать геттеры
+    get dbQuery() {
+      return query ? query(connectionName) : connection?.query
+    },
+    get dbQueryRow() {
+      return queryRow ? queryRow(connectionName) : connection?.queryRow
+    },
+  }
 
   // try to reasign, after reconnect
   if (process.env.NODE_ENV !== 'test') {
@@ -80,12 +84,6 @@ export function createModel<
         output.commit = connection?.commit
         output.rollback = connection?.rollback
       }
-      if (typeof dbQuery === 'undefined') {
-        dbQuery = getDbQuery()
-      }
-      if (typeof dbQueryRow === 'undefined') {
-        dbQueryRow = getDbQueryRow()
-      }
     }
 
     setTimeout(retryConnect, 0)
@@ -93,7 +91,7 @@ export function createModel<
     setTimeout(() => {
       retryConnect()
       if (typeof connection === 'undefined') {
-        throw new Error('Aurora-orm cannot get connection during 2500 ms, check database connection!')
+        throw new Error('aurora-orm cannot get connection during 2500 ms, check database connection!')
       }
     }, 2500)
   }
@@ -309,7 +307,7 @@ export function createModel<
     const cols = _cols.join(', ')
     const values = insertValues(_values)
 
-    const row = await dbQueryRow<T>(
+    const row = await db.dbQueryRow<T>(
       `INSERT INTO "${table}" (${cols}) VALUES (${values}) RETURNING ${allColumns}`,
       _values,
       tx,
@@ -348,7 +346,7 @@ export function createModel<
       })})`)
       .join(', ')
 
-    const rows = await dbQuery<T>(
+    const rows = await db.dbQuery<T>(
       `INSERT INTO "${table}" (${cols}) VALUES ${inlinedValues} RETURNING ${allColumns}`,
       _values,
       tx,
@@ -407,12 +405,12 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ?${returningSQL}`
 
-      return dbQueryRow<T>(sql, [...setValues, id], tx)
+      return db.dbQueryRow<T>(sql, [...setValues, id], tx)
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql}${returningSQL}`
 
-      return dbQueryRow<T>(sql, [...setValues, ...whereProps.values], tx)
+      return db.dbQueryRow<T>(sql, [...setValues, ...whereProps.values], tx)
     }
   }
 
@@ -430,7 +428,7 @@ export function createModel<
       sql += ` ${where(id).sql}`
     }
 
-    const res = await dbQueryRow(sql, values, tx)
+    const res = await db.dbQueryRow(sql, values, tx)
 
     return (res as any).rowCount !== 0
   }
@@ -473,7 +471,7 @@ export function createModel<
       const whereProps = where(params)
       const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-      const result = await dbQuery<D>(sql, whereProps.values)
+      const result = await db.dbQuery<D>(sql, whereProps.values)
       return result
     }
 
@@ -496,7 +494,7 @@ export function createModel<
       whereProps.values.push(params.limit)
     }
 
-    const result = await dbQuery<D>(sql, whereProps.values, params.tx)
+    const result = await db.dbQuery<D>(sql, whereProps.values, params.tx)
     if (result.length === 0) {
       return result
     }
@@ -518,7 +516,7 @@ export function createModel<
         sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      return await dbQueryRow<D>(sql, [params.where], params.tx)
+      return await db.dbQueryRow<D>(sql, [params.where], params.tx)
     } else {
       const whereProps = where(params.where)
       sql += ` ${whereProps.sql}`
@@ -527,7 +525,7 @@ export function createModel<
         sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      return await dbQueryRow<D>(sql, whereProps.values, params.tx)
+      return await db.dbQueryRow<D>(sql, whereProps.values, params.tx)
     }
   }
 
@@ -536,7 +534,7 @@ export function createModel<
       // isPrimitive
       const sql = `SELECT ${allColumns} FROM "${table}" WHERE "${primaryKey}" = ?`
 
-      return await dbQueryRow<D>(sql, [params])
+      return await db.dbQueryRow<D>(sql, [params])
     }
 
     if (isWhere(params)) {
@@ -544,7 +542,7 @@ export function createModel<
       const whereProps = where(params)
       const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-      return await dbQueryRow<D>(sql, whereProps.values)
+      return await db.dbQueryRow<D>(sql, whereProps.values)
     }
 
     // FindParams
@@ -565,13 +563,13 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ? LIMIT 1`
 
-      const res = await dbQueryRow<{ count: number }>(sql, [id], tx)
+      const res = await db.dbQueryRow<{ count: number }>(sql, [id], tx)
       return res.count !== 0
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql}`
 
-      const res = await dbQueryRow<{ count: number }>(sql, whereProps.values, tx)
+      const res = await db.dbQueryRow<{ count: number }>(sql, whereProps.values, tx)
       return res.count !== 0
     }
   }
@@ -580,7 +578,7 @@ export function createModel<
     const whereProps = where(value)
     const sql = `SELECT COUNT(*)::integer as count FROM "${table}" ${whereProps.sql}`
 
-    const res = await dbQueryRow<{ count: number }>(sql, whereProps.values, tx)
+    const res = await db.dbQueryRow<{ count: number }>(sql, whereProps.values, tx)
 
     return res.count
   }
@@ -605,10 +603,19 @@ export function createModel<
       count,
     } as BaseModel<D, T, Tx>),
     connection,
-    getConnect: connection?.getConnect,
-    startTrx: connection?.startTrx,
-    commit: connection?.commit,
-    rollback: connection?.rollback,
+    // TODO: подумать можно ли тут убрать геттеры
+    get getConnect() {
+      return connection?.getConnect
+    },
+    get startTrx() {
+      return connection?.startTrx
+    },
+    get commit() {
+      return connection?.commit
+    },
+    get rollback() {
+      return connection?.rollback
+    },
   }
 
   // @ts-ignore

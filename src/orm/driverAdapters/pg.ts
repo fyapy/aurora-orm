@@ -44,7 +44,6 @@ export async function postgreSQL({ config, ormLog }: {
 
         return res.rows[0] as T
       } catch (e) {
-        console.error(e)
         throw e
       } finally {
         if (!tx) client.release()
@@ -75,7 +74,6 @@ export async function postgreSQL({ config, ormLog }: {
 
         return res.rows as T[]
       } catch (e) {
-        console.error(e)
         throw e
       } finally {
         if (!tx) client.release()

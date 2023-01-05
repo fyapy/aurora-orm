@@ -41,12 +41,7 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
 
   async function query(sql: string, values?: any[]): Promise<any[]> {
     await createConnection()
-    try {
-      return await driver.query(sql, values ?? null)
-    } catch (err: any) {
-      console.error(`Error executing:\n${err}\n`)
-      throw err
-    }
+    return await driver.query(sql, values ?? null)
   }
 
   return {

@@ -26,6 +26,10 @@ interface ConnectConfig {
   connectNotify?: boolean
 }
 
+enum DatabaseTypes {
+  PostgreSQL = 'postgresql'
+}
+
 export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   function deleteType() {
     if (config.type) delete config.type
@@ -37,14 +41,17 @@ export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   }
 
   switch (config.type) {
-    case 'postgresql':
+    case DatabaseTypes.PostgreSQL:
       deleteType()
       return drivers.postgreSQL({ config, ormLog })
     // case 'cassandra':
     //   deleteType()
     //   return drivers.cassandra({ config, ormLog })
     default:
-      throw new Error(`Aurora-orm.json connection have unknown type '${config.type}'`)
+      const endOfError = `, сhoose one of these types: ${Object.values(DatabaseTypes)}`
+      throw new Error(config.type
+        ? `aurora-orm.json connection have unknown type '${config.type}'${endOfError}`
+        : `aurora-orm.json don't have "type" property${endOfError}`)
   }
 }
 

@@ -17,7 +17,7 @@ export type ColumnData = string | {
 
 export type ID = string | number
 
-interface Writer<T, P, C> {
+interface Writer<T, P extends AnyObject, C> {
   create(value: Partial<P>, tx?: C): Promise<T>
   createMany(values: Partial<P>[], tx?: C): Promise<T[]>
   update(options: {
@@ -45,10 +45,10 @@ export interface BaseFindOptions<T, C> {
   prepared?: boolean
 }
 
-export interface FindAllOptions<T, C> extends BaseFindOptions<T, C> {
+export interface FindAllOptions<T extends AnyObject, C> extends BaseFindOptions<T, C> {
   where: Where<T> | Where<T>[]
 }
-export interface FindOneOptions<T, C> extends BaseFindOptions<T, C> {
+export interface FindOneOptions<T extends AnyObject, C> extends BaseFindOptions<T, C> {
   where: ID | Where<T> | Where<T>[]
 }
 
@@ -74,11 +74,11 @@ export type Set<T extends AnyObject> = {
 }
 export type WhereValues = Array<string | number | Array<string | number | null>>
 
-interface Reader<T, P, C> {
+interface Reader<T, P extends AnyObject, C> {
   findAll(value?: Where<P> | Where<P>[] | FindAllOptions<P, C>): Promise<T[]>
   findOne(id: ID | Where<P> | Where<P>[] | FindOneOptions<P, C>): Promise<T>
   exists(id: ID | Where<P> | Where<P>[], tx?: Tx): Promise<boolean>
   count(value: Where<P> | Where<P>[], tx?: Tx): Promise<number>
 }
 
-export type BaseModel<T, P, C> = Writer<T, P, C> & Reader<T, P, C>
+export type BaseModel<T, P extends AnyObject, C> = Writer<T, P, C> & Reader<T, P, C>
