@@ -7,9 +7,22 @@ export interface Config {
   connections: Record<string, Driver>
   debug: boolean
 }
+
 export const ormConfig: Config = {
   connections: {},
   debug: false,
+}
+
+type Subscribtion = (connectionName: string, driver: Driver) => boolean
+let subscribers: Subscribtion[] = []
+
+function setConnection(connectionName: string, driver: Driver) {
+  ormConfig.connections[connectionName] = driver
+  subscribers = subscribers.filter(cb => cb(connectionName, driver) === false)
+}
+
+export const subsctibeToConnection = (subscription: Subscribtion) => {
+  subscribers.push(subscription)
 }
 
 function ormLog(sql: string, values?: any[] | null) {
@@ -68,10 +81,10 @@ export async function connect({ debug, envPath, connectNotify = true }: ConnectC
     for (const connectConfig of auroraConfig) {
       const ConnectionName = connectConfig.name!
 
-      ormConfig.connections[ConnectionName] = await connectToDatabase(connectConfig)
+      setConnection(ConnectionName, await connectToDatabase(connectConfig))
     }
   } else {
-    ormConfig.connections[DefaultConnection] = await connectToDatabase(auroraConfig)
+    setConnection(DefaultConnection, await connectToDatabase(auroraConfig))
   }
 
   if (connectNotify) {

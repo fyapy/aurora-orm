@@ -74,12 +74,15 @@ export const joinStrategyWhere = (
 export const makeUnique = (list: string[]) => [...new Set(list)]
 
 export const addMethods = <
-  T,
+  T extends ReturnType<typeof createModel>,
   M extends Record<string, (...args: any) => any>
 >(
   base: T,
   methods: (base: T) => M,
-): T & M => ({
-  ...base,
-  ...methods(base),
-})
+): T & M => {
+  for (const [key, method] of Object.entries(methods(base))) {
+    base[key] = method
+  }
+
+  return base as T & M
+}
