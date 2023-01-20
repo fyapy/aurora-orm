@@ -12,7 +12,8 @@
     "prebuild": "rimraf dist",
     "build": "tsc --removeComments && tsc --declaration --emitDeclarationOnly",
     "test": "jest",
-    "bench": "node ./benchmarks/aurora_sync/index.js"
+    "bench": "node ./benchmarks/aurora_sync/index.js",
+    "prepublish": "pnpm run build"
   },
   "files": [
     "templates",
