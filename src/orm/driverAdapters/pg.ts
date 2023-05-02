@@ -131,7 +131,7 @@ export async function postgreSQL({ config, ormLog }: {
         )
         const createTable = async () => {
           await query(
-            `CREATE TABLE ${migrationsTable} (${idColumn} SERIAL PRIMARY KEY, ${nameColumn} varchar(255) NOT NULL, ${runOnColumn} timestamp NOT NULL)`,
+            `CREATE TABLE ${migrationsTable} (${idColumn} SERIAL PRIMARY KEY, ${nameColumn} varchar(255) NOT NULL, ${runOnColumn} timestamptz NOT NULL)`,
           )
         }
 
