@@ -15,7 +15,12 @@ export const mapper = (
   map: Record<string, any>[],
   mapByProp: string,
 ) => {
-  if (map.length === 0) return
+  if (map.length === 0) {
+    for (const item of list) {
+      item[mapToProp] = []
+    }
+    return;
+  }
 
   const mapper = {}
   map.forEach(c => mapper[c[mapByProp]] = c)
