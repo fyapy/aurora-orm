@@ -1,6 +1,7 @@
 export {
   isUniqueErr,
   mapper,
+  manyMapper,
   makeUnique,
   joinStrategyWhere,
   addMethods,
