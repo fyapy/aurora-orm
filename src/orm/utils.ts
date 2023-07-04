@@ -17,7 +17,7 @@ export const mapper = (
 ) => {
   if (map.length === 0) {
     for (const item of list) {
-      item[mapToProp] = []
+      item[mapToProp] = null
     }
     return;
   }
@@ -43,7 +43,12 @@ export const manyMapper = (
   map: Record<string, any>[],
   mapByProp: string,
 ) => {
-  if (map.length === 0) return
+  if (map.length === 0) {
+    for (const item of list) {
+      item[mapToProp] = []
+    }
+    return;
+  }
 
   const mapper: Record<string, any[]> = {}
   map.forEach(c => {
