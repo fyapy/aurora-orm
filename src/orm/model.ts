@@ -19,6 +19,7 @@ import { ormConfig, DefaultConnection, subsctibeToConnection } from './connect'
 
 type Repos = Record<string, ReturnType<typeof createModel>>
 const _repos: Repos = {}
+const TRUE = true
 
 export type JoinStrategy<T = Record<string, any>> = {
   table: string
@@ -45,6 +46,12 @@ export function createModel<
   query,
   queryRow,
   connectionName = DefaultConnection,
+  beforeCreate,
+  afterCreate,
+  beforeUpdate,
+  afterUpdate,
+  beforeDelete,
+  afterDelete,
 }: {
   table: string
   pool?: Pool
@@ -53,6 +60,12 @@ export function createModel<
   query?: (connectionName: string) => <T = any>(sql: string, values?: any[] | null, tx?: Tx) => Promise<T[]>
   queryRow?: (connectionName: string) => <T = any>(sql: string, values: any[] | null, tx?: any | undefined) => Promise<T>
   connectionName?: string,
+  beforeCreate?: (setData?: Partial<Omit<D, S>>) => Promise<void>,
+  afterCreate?: (data: Omit<D, S>) => Promise<void>,
+  beforeUpdate?: (set: Set<Omit<D, S>>) => Promise<void>,
+  afterUpdate?: (data: Omit<D, S>) => Promise<void>,
+  beforeDelete?: (data: ID | Where<Omit<D, S>>) => Promise<void>,
+  afterDelete?: (data: ID | Where<Omit<D, S>>, deleted: boolean) => Promise<void>,
 }) {
   type T = Omit<D, S>
   type BaseFindParams = BaseFindOptions<T, Tx>
@@ -60,6 +73,13 @@ export function createModel<
   type FindOneParams = FindOneOptions<T, Tx>
 
   // database runtime
+  const beforeCreateExists = typeof beforeCreate !== 'undefined'
+  const afterCreateExists = typeof afterCreate !== 'undefined'
+  const beforeUpdateExists = typeof beforeUpdate !== 'undefined'
+  const afterUpdateExists = typeof afterUpdate !== 'undefined'
+  const beforeDeleteExists = typeof beforeDelete !== 'undefined'
+  const afterDeleteExists = typeof afterDelete !== 'undefined'
+
   let connection = ormConfig.connections[connectionName]!
   let dbQuery = query ? query(connectionName) : connection?.query
   let dbQueryRow = queryRow ? queryRow(connectionName) : connection?.queryRow
@@ -301,12 +321,19 @@ export function createModel<
     const cols = _cols.join(', ')
     const values = insertValues(_values)
 
+    if (beforeCreateExists === TRUE) {
+      await beforeCreate!(value)
+    }
+
     const row = await dbQueryRow<T>(
       `INSERT INTO "${table}" (${cols}) VALUES (${values}) RETURNING ${allColumns}`,
       _values,
       tx,
     )
 
+    if (afterCreateExists === TRUE) {
+      await afterCreate!(row)
+    }
 
     return row
   }
@@ -340,16 +367,24 @@ export function createModel<
       })})`)
       .join(', ')
 
+    if (beforeCreateExists === TRUE) {
+      await Promise.all(values.map(value => beforeCreate!(value)))
+    }
+
     const rows = await dbQuery<T>(
       `INSERT INTO "${table}" (${cols}) VALUES ${inlinedValues} RETURNING ${allColumns}`,
       _values,
       tx,
     )
 
+    if (afterCreateExists === TRUE) {
+      await Promise.all(rows.map(row => afterCreate!(row)))
+    }
+
     return rows
   }
 
-  function update({
+  async function update({
     returning = false,
     where: id,
     set,
@@ -399,12 +434,32 @@ export function createModel<
     if (isPrimitive) {
       sql += ` WHERE "${primaryKey}" = ?${returningSQL}`
 
-      return dbQueryRow<T>(sql, [...setValues, id], tx)
+      if (beforeUpdateExists === TRUE) {
+        await beforeUpdate!(set)
+      }
+
+      const row = await dbQueryRow<T>(sql, [...setValues, id], tx)
+
+      if (afterUpdateExists === TRUE) {
+        await afterUpdate!(row)
+      }
+
+      return row
     } else {
       const whereProps = where(id)
       sql += ` ${whereProps.sql}${returningSQL}`
 
-      return dbQueryRow<T>(sql, [...setValues, ...whereProps.values], tx)
+      if (beforeUpdateExists === TRUE) {
+        await beforeUpdate!(set)
+      }
+
+      const row = await dbQueryRow<T>(sql, [...setValues, ...whereProps.values], tx)
+
+      if (afterUpdateExists === TRUE) {
+        await afterUpdate!(row)
+      }
+
+      return row
     }
   }
 
@@ -422,9 +477,18 @@ export function createModel<
       sql += ` ${where(id).sql}`
     }
 
-    const res = await dbQueryRow(sql, values, tx)
+    if (beforeDeleteExists === TRUE) {
+      await beforeDelete!(id)
+    }
 
-    return (res as any).rowCount !== 0
+    const res = await dbQueryRow(sql, values, tx)
+    const deleted = (res as any).rowCount !== 0
+
+    if (afterDeleteExists === TRUE) {
+      await afterDelete!(id, deleted)
+    }
+
+    return deleted
   }
 
   function isWhere(params: any): params is Where<T> | Where<T>[] {
