@@ -9,6 +9,8 @@ export interface Driver {
   queryRow<T = any>(sql: string, values: any[] | null, tx?: any | undefined): Promise<T>
   query<T = any>(sql: string, values: any[] | null, tx?: any | undefined): Promise<T[]>
 
+  prepareDatabase?(): Promise<void>
+
   parseCreateTable(ast: CreateTable): string
   parseAlterTable(ast: AlterTable): string
   parseDropTable(ast: DropTable): string

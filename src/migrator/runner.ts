@@ -146,6 +146,10 @@ export async function runner(options: RunnerOptionConfig) {
       getRunMigrations(migrator),
     ])
 
+    if (runNames.length === 0 && typeof db.driver.prepareDatabase !== 'undefined') {
+      await db.driver.prepareDatabase()
+    }
+
     const toRun: Migration[] = getMigrationsToRun(options, runNames, migrations)
 
     if (toRun.length === 0) {

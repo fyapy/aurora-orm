@@ -25,6 +25,18 @@ export async function postgreSQL({ config, ormLog }: {
 
     await pool.connect()
 
+    async function prepareDatabase() {
+      const client = await pool.connect()
+
+      try {
+        await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+      } catch (e) {
+        throw e
+      } finally {
+        client.release()
+      }
+    }
+
     async function queryRow<T = any>(sql: string, values: any[] | null, tx?: PoolClient, prepare: boolean = false): Promise<T> {
       ormLog(sql, values)
       const client = tx ?? await pool.connect()
@@ -197,6 +209,7 @@ export async function postgreSQL({ config, ormLog }: {
       rollback,
       queryRow,
       query,
+      prepareDatabase,
       parseCreateTable,
       parseAlterTable,
       parseDropTable,
