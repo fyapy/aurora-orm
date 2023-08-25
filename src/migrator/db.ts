@@ -2,11 +2,16 @@ import type { ConnectionConfig } from '../connection'
 import type { Driver } from '../orm/driverAdapters'
 import { inspect } from 'node:util'
 import { connectToDatabase } from '../orm/connect'
+import * as queryBuilder from './queryBuilder'
 
 export interface DBConnection {
   driver: Driver
   createConnection(): Promise<void>
   query(sql: string, values?: any[]): Promise<any[]>
+
+  createTable(table: string, columns: Record<string, queryBuilder.Column>): Promise<void>
+  dropTable(table: string): Promise<void>
+  alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>): Promise<void>
 
   connected(): boolean
   close(): Promise<void>
@@ -44,10 +49,38 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     return await driver.query(sql, values ?? null)
   }
 
+  async function createTable(table: string, columns: Record<string, queryBuilder.Column>) {
+    const ast = queryBuilder.createTable(table, columns)
+    const sql = driver.parseCreateTable(ast)
+
+    await createConnection()
+    await driver.query(sql, null)
+  }
+
+  async function dropTable(table: string) {
+    const ast = queryBuilder.dropTable(table)
+    const sql = driver.parseDropTable(ast)
+
+    await createConnection()
+    await driver.query(sql, null)
+  }
+
+  async function alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>) {
+    const ast = queryBuilder.alterTable(table, columns)
+    const sql = driver.parseAlterTable(ast)
+
+    await createConnection()
+    await driver.query(sql, null)
+  }
+
   return {
     driver,
     createConnection,
     query,
+
+    createTable,
+    dropTable,
+    alterTable,
 
     connected: () => connectionStatus === ConnectionStatus.CONNECTED,
     close() {

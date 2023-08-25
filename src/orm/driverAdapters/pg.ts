@@ -6,6 +6,13 @@ import type {
 } from '../../connection'
 import type { Tx, QueryConfig } from '../types'
 import type { Driver } from './types'
+import {
+  type DefaultColumn,
+  type CreateTable,
+  type AlterTable,
+  type DropTable,
+  ColumnOperator,
+} from '../../migrator/queryBuilder'
 import { SQLParams } from '../queryBuilder'
 
 export async function postgreSQL({ config, ormLog }: {
@@ -106,6 +113,83 @@ export async function postgreSQL({ config, ormLog }: {
       await pool.end()
     }
 
+    function columnDefault(def: string | number | DefaultColumn) {
+      switch (typeof def) {
+        case 'number':
+          return ` DEFAULT ${def}`
+        case 'object':
+          return ` DEFAULT ${def.sql}`
+        case 'string':
+          return ` DEFAULT '${def}'`
+      }
+    }
+    function parseCreateTable(ast: CreateTable) {
+      let sql = `CREATE TABLE "${ast.table}" (`
+
+      const columns = Object.entries(ast.columns)
+      for (const [name, opts] of columns) {
+        let column = `"${name}" ${opts.type}`
+
+        if (opts.primary === true) {
+          column += ' PRIMARY KEY'
+        }
+        if (opts.unique === true) {
+          column += ' UNIQUE'
+        }
+        if (opts.notNull === true) {
+          column += ' NOT NULL'
+        }
+
+        if (typeof opts.default !== 'undefined') {
+          column += columnDefault(opts.default)
+        }
+
+        sql += column
+      }
+
+      sql += ');'
+
+      return sql
+    }
+    function parseDropTable(ast: DropTable) {
+      return `DROP TABLE "${ast.table}";`
+    }
+
+    function parseAlterTable(ast: AlterTable) {
+      let sql = `ALTER TABLE "${ast.table}"`
+
+      sql += Object.entries(ast.columns)
+        .map(([name, opts]) => {
+          if (opts.operator === ColumnOperator.AddColumn) {
+            let sql = `ADD COLUMN "${name}" ${ast.type}`
+
+            if (opts.notNull === true) {
+              sql += ' NOT NULL'
+            }
+            if (typeof opts.default !== 'undefined') {
+              sql += columnDefault(opts.default)
+            }
+
+            return sql
+          }
+          if (opts.operator === ColumnOperator.DropColumn) {
+            return `DROP COLUMN "${name}"`
+          }
+          if (opts.operator === ColumnOperator.SetDefault) {
+            return `ALTER COLUMN "${name}" SET${columnDefault(opts.value)}`
+          }
+          if (opts.operator === ColumnOperator.SetType) {
+            return `ALTER COLUMN "${name}" TYPE ${opts.type}`
+          }
+
+          throw new Error('AlterTable ast parse error')
+        })
+        .join(', ')
+
+      sql += ';'
+      return sql
+    }
+
     return {
       getConnect,
       startTrx,
@@ -113,6 +197,9 @@ export async function postgreSQL({ config, ormLog }: {
       rollback,
       queryRow,
       query,
+      parseCreateTable,
+      parseAlterTable,
+      parseDropTable,
       _end,
       _: pool,
 

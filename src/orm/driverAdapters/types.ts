@@ -1,3 +1,4 @@
+import type { AlterTable, CreateTable, DropTable } from '../../migrator/queryBuilder'
 import type { Tx } from '../types'
 
 export interface Driver {
@@ -7,6 +8,10 @@ export interface Driver {
   rollback(tx: Tx, closeConnection?: boolean): Promise<void>
   queryRow<T = any>(sql: string, values: any[] | null, tx?: any | undefined): Promise<T>
   query<T = any>(sql: string, values: any[] | null, tx?: any | undefined): Promise<T[]>
+
+  parseCreateTable(ast: CreateTable): string
+  parseAlterTable(ast: AlterTable): string
+  parseDropTable(ast: DropTable): string
 
   _end(): Promise<void>
   _: import('pg').Pool // | import('cassandra-driver').Client
