@@ -1,6 +1,7 @@
 import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDirection } from './types'
 import type { DBConnection } from './db'
 import path from 'node:path'
+import { column, now, uuidGenerateV4 } from './queryBuilder'
 import { migrationsTable, schema } from './constants'
 
 function getTimestamp(filename: string): number {
@@ -64,7 +65,15 @@ export function migration({ db, databases, actions, filePath }: {
 
     await db.query('BEGIN')
     try {
-      await action({ sql: db, databases })
+      await action({
+        sql: db,
+        databases,
+        column,
+        defs: {
+          now,
+          uuidGenerateV4,
+        },
+      })
 
       await db.query(_getMarkAsRun(action))
       await db.query('COMMIT')

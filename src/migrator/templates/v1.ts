@@ -1,6 +1,9 @@
+import type { DefaultColumn, column } from '../queryBuilder'
 import type { DBConnection } from '../db'
 
 interface MigrationOptions {
+  column: typeof column
+  defs: Record<'uuidGenerateV4' | 'now', DefaultColumn>
   sql: DBConnection
   getSQLConnection(connectionName: string): DBConnection
 }

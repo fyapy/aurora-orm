@@ -138,26 +138,27 @@ export async function postgreSQL({ config, ormLog }: {
     function parseCreateTable(ast: CreateTable) {
       let sql = `CREATE TABLE "${ast.table}" (`
 
-      const columns = Object.entries(ast.columns)
-      for (const [name, opts] of columns) {
-        let column = `"${name}" ${opts.type}`
+      sql += Object.entries(ast.columns)
+        .map(([name, opts]) => {
+          let column = `"${name}" ${opts.type}`
 
-        if (opts.primary === true) {
-          column += ' PRIMARY KEY'
-        }
-        if (opts.unique === true) {
-          column += ' UNIQUE'
-        }
-        if (opts.notNull === true) {
-          column += ' NOT NULL'
-        }
+          if (opts.primary === true) {
+            column += ' PRIMARY KEY'
+          }
+          if (opts.unique === true) {
+            column += ' UNIQUE'
+          }
+          if (opts.notNull === true) {
+            column += ' NOT NULL'
+          }
 
-        if (typeof opts.default !== 'undefined') {
-          column += columnDefault(opts.default)
-        }
+          if (typeof opts.default !== 'undefined') {
+            column += columnDefault(opts.default)
+          }
 
-        sql += column
-      }
+          return column
+        })
+        .join(', ')
 
       sql += ');'
 

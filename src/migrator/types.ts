@@ -1,4 +1,5 @@
 import type { ConnectionConfig } from '../connection'
+import type { DefaultColumn, column } from './queryBuilder'
 import type { DBConnection } from './db'
 
 export interface RunMigration {
@@ -16,6 +17,8 @@ export interface RunnerOptionConfig {
 }
 
 export type MigrationAction = (options: {
+  column: typeof column
+  defs: Record<'uuidGenerateV4' | 'now', DefaultColumn>
   sql: DBConnection
   databases: Record<string, DBConnection>
 }) => Promise<void> | void
