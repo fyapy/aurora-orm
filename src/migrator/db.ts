@@ -85,7 +85,7 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     connected: () => connectionStatus === ConnectionStatus.CONNECTED,
     close() {
       connectionStatus = ConnectionStatus.DISCONNECTED
-      return driver._end()
+      return driver.end()
     },
   }
 }

@@ -1,6 +1,14 @@
 import type { AlterTable, CreateTable, DropTable } from '../../migrator/queryBuilder'
 import type { Tx } from '../types'
 
+export type Migrator = {
+  delete(name: string): Promise<void>
+  insert(name: string): Promise<void>
+  tables(): Promise<any[]>
+  selectAll(): Promise<any[]>
+  createTable(): Promise<void>
+}
+
 export interface Driver {
   getConnect(): Promise<Tx>
   startTrx(tx?: Tx): Promise<Tx>
@@ -15,18 +23,12 @@ export interface Driver {
   parseAlterTable(ast: AlterTable): string
   parseDropTable(ast: DropTable): string
 
-  _end(): Promise<void>
-  _: import('pg').Pool // | import('cassandra-driver').Client
+  end(): Promise<void>
 
-  migrator(options: {
-    schema: string
+  migrator: (options: {
     migrationsTable: string
     idColumn: string
     runOnColumn: string
     nameColumn: string
-  }): {
-    tables(): Promise<any[]>,
-    selectAll(): Promise<any[]>,
-    createTable(): Promise<void>,
-  }
+  }) => Migrator
 }

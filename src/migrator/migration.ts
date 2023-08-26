@@ -2,7 +2,12 @@ import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDire
 import type { DBConnection } from './db'
 import path from 'node:path'
 import { column, now, uuidGenerateV4 } from './queryBuilder'
-import { migrationsTable, schema } from './constants'
+import { Migrator } from '../orm/driverAdapters/types'
+
+const defs = {
+  now,
+  uuidGenerateV4,
+}
 
 function getTimestamp(filename: string): number {
   const prefix = filename.split('_')[0]
@@ -27,15 +32,16 @@ function getTimestamp(filename: string): number {
   return Number(prefix) || 0
 }
 
-export function migration({ db, databases, actions, filePath }: {
+export function migration({db, databases, actions, filePath, migrator}: {
   db: DBConnection
   databases: Record<string, DBConnection>
   filePath: string
-  actions: MigrationBuilderActions,
+  actions: MigrationBuilderActions
+  migrator: Migrator
 }): Migration {
   const name = path.basename(filePath, path.extname(filePath))
 
-  function _getAction(direction: MigrationDirection) {
+  function getAction(direction: MigrationDirection) {
     const action = actions[direction]
 
     if (typeof action !== 'function') {
@@ -47,21 +53,21 @@ export function migration({ db, databases, actions, filePath }: {
     return action
   }
 
-  function _getMarkAsRun(action: MigrationAction) {
-    switch (action) {
-      case actions.down:
-        console.info(`### MIGRATION ${name} (DOWN) ###`)
-        return `DELETE FROM "${schema}"."${migrationsTable}" WHERE name='${name}';`
-      case actions.up:
-        console.info(`### MIGRATION ${name} (UP) ###`)
-        return `INSERT INTO "${schema}"."${migrationsTable}" (name, run_on) VALUES ('${name}', NOW());`
-      default:
-        throw new Error('Unknown direction')
+  async function markAsRun(action: MigrationAction) {
+    if (action === actions.down) {
+      console.info(`### MIGRATION ${name} (DOWN) ###`)
+      return await migrator.delete(name)
     }
+    if (action === actions.up) {
+      console.info(`### MIGRATION ${name} (UP) ###`)
+      return await migrator.insert(name)
+    }
+
+    throw new Error('Unknown direction')
   }
 
   async function apply(direction: MigrationDirection) {
-    const action = _getAction(direction)
+    const action = getAction(direction)
 
     await db.query('BEGIN')
     try {
@@ -69,13 +75,10 @@ export function migration({ db, databases, actions, filePath }: {
         sql: db,
         databases,
         column,
-        defs: {
-          now,
-          uuidGenerateV4,
-        },
+        defs,
       })
 
-      await db.query(_getMarkAsRun(action))
+      await markAsRun(action)
       await db.query('COMMIT')
     } catch (err) {
       await db.query('ROLLBACK')

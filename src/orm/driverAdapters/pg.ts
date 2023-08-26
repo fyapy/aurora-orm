@@ -37,6 +37,10 @@ export async function postgreSQL({ config, ormLog }: {
       }
     }
 
+    async function end() {
+      await pool.end()
+    }
+
     async function queryRow<T = any>(sql: string, values: any[] | null, tx?: PoolClient, prepare: boolean = false): Promise<T> {
       ormLog(sql, values)
       const client = tx ?? await pool.connect()
@@ -120,9 +124,6 @@ export async function postgreSQL({ config, ormLog }: {
       if (closeConnection === true) {
         tx.release()
       }
-    }
-    async function _end() {
-      await pool.end()
     }
 
     function columnDefault(def: string | number | DefaultColumn) {
@@ -214,29 +215,33 @@ export async function postgreSQL({ config, ormLog }: {
       parseCreateTable,
       parseAlterTable,
       parseDropTable,
-      _end,
-      _: pool,
+      end,
 
       migrator({
-        schema,
         idColumn,
         nameColumn,
         runOnColumn,
         migrationsTable,
       }) {
         const tables = () => query(
-          `SELECT table_name FROM information_schema.tables WHERE table_schema = '${schema}' AND table_name = '${migrationsTable}'`,
+          `SELECT table_name FROM information_schema.tables WHERE table_name = '${migrationsTable}'`,
         )
         const selectAll = () => query(
           `SELECT ${nameColumn} FROM ${migrationsTable} ORDER BY ${runOnColumn}, ${idColumn}`,
         )
-        const createTable = async () => {
+        async function createTable() {
           await query(
             `CREATE TABLE ${migrationsTable} (${idColumn} SERIAL PRIMARY KEY, ${nameColumn} varchar(255) NOT NULL, ${runOnColumn} timestamptz NOT NULL)`,
           )
         }
 
         return {
+          async delete(name) {
+            await query(`DELETE FROM "${migrationsTable}" WHERE ${nameColumn} = '${name}'`)
+          },
+          async insert(name) {
+            await query(`INSERT INTO "${migrationsTable}" (${nameColumn}, ${runOnColumn}) VALUES ('${name}', NOW())`)
+          },
           tables,
           selectAll,
           createTable,

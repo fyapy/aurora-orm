@@ -1,11 +1,16 @@
 import path from 'node:path'
-import { idColumn, migrationsTable, nameColumn, runOnColumn, schema } from './constants'
+import { idColumn, migrationsTable, nameColumn, runOnColumn } from './constants'
 import { connectDB, DBConnection } from './db'
 import { migration } from './migration'
 import { Migration, MigrationDirection, RunnerOptionConfig } from './types'
 import { loadMigrationFiles } from './utils'
+import { Migrator } from '../orm/driverAdapters/types'
 
-async function loadMigrations(db: DBConnection, databases: Record<string, DBConnection>) {
+async function loadMigrations({db, databases, migrator}: {
+  db: DBConnection
+  migrator: Migrator
+  databases: Record<string, DBConnection>
+}) {
   try {
     const dir = '/migrations'
 
@@ -20,6 +25,7 @@ async function loadMigrations(db: DBConnection, databases: Record<string, DBConn
 
         return migration({
           db,
+          migrator,
           databases,
           filePath,
           actions,
@@ -35,7 +41,7 @@ async function loadMigrations(db: DBConnection, databases: Record<string, DBConn
   }
 }
 
-async function ensureMigrationsTable(migrator: ReturnType<DBConnection['driver']['migrator']>) {
+async function ensureMigrationsTable(migrator: Migrator) {
   try {
     const migrationTables = await migrator.tables()
 
@@ -47,7 +53,7 @@ async function ensureMigrationsTable(migrator: ReturnType<DBConnection['driver']
   }
 }
 
-async function getRunMigrations(migrator: ReturnType<DBConnection['driver']['migrator']>): Promise<string[]> {
+async function getRunMigrations(migrator: Migrator): Promise<string[]> {
   const list = await migrator.selectAll()
 
   return list.map(item => item[nameColumn])
@@ -132,7 +138,6 @@ export async function runner(options: RunnerOptionConfig) {
     await db.createConnection()
 
     const migrator = db.driver.migrator({
-      schema,
       idColumn,
       nameColumn,
       runOnColumn,
@@ -142,7 +147,7 @@ export async function runner(options: RunnerOptionConfig) {
     await ensureMigrationsTable(migrator)
 
     const [migrations, runNames] = await Promise.all([
-      loadMigrations(db, databases),
+      loadMigrations({db, databases, migrator}),
       getRunMigrations(migrator),
     ])
 
