@@ -1,15 +1,4 @@
-<p align="center">
-  <a href="https://aurora-orm.netlify.app/" target="_blank" rel="noopener noreferrer">
-    <img width="180" src="/docs/src/.vuepress/public/aurora-orm.svg" alt="Aurora ORM logo">
-  </a>
-</p>
-<br/>
-<p align="center">
-  <a href="https://npmjs.com/package/aurora-orm"><img src="https://badgen.net/npm/v/aurora-orm" alt="npm package"></a>
-</p>
-<br/>
-
-# Aurora-ORM
+# Aurora-ORM <a href="https://npmjs.com/package/aurora-orm"><img src="https://badgen.net/npm/v/aurora-orm" alt="npm package"></a>
 
 > Decorator-less, type safe, fast and low overhead ORM for Node.js and TypeScript.
 
