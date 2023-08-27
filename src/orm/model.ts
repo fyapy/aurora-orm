@@ -13,11 +13,12 @@ import type {
   BaseFindOptions,
   SetOperator,
   Set,
+  AnyObject,
 } from './types'
 import { buildAliasMapper, insertValues } from './queryBuilder'
 import { ormConfig, subsctibeToConnection } from './connect'
 
-type Repos = Record<string, ReturnType<typeof createModel>>
+type Repos = Record<string, BaseModel>
 const _repos: Repos = {}
 const TRUE = true
 
@@ -36,10 +37,7 @@ export type JoinStrategy<T = Record<string, any>> = {
   }): Promise<void>
 }
 
-export function createModel<
-  D,
-  S extends string = '',
->({
+export function createModel<T extends AnyObject>({
   table,
   mapping,
   primaryKey = 'id',
@@ -55,17 +53,16 @@ export function createModel<
   table: string
   pool?: Pool
   primaryKey?: string
-  mapping: Record<keyof D, ColumnData | JoinStrategy>
+  mapping: Record<keyof T, ColumnData | JoinStrategy>
   query?: <T = any>(sql: string, values?: any[] | null, tx?: Tx) => Promise<T[]>
   queryRow?: <T = any>(sql: string, values: any[] | null, tx?: Tx) => Promise<T>
-  beforeCreate?: (setData?: Partial<Omit<D, S>>) => Promise<void>,
-  afterCreate?: (data: Omit<D, S>) => Promise<void>,
-  beforeUpdate?: (set: Set<Omit<D, S>>) => Promise<void>,
-  afterUpdate?: (data: Omit<D, S>) => Promise<void>,
-  beforeDelete?: (data: ID | Where<Omit<D, S>>) => Promise<void>,
-  afterDelete?: (data: ID | Where<Omit<D, S>>, deleted: boolean) => Promise<void>,
-}) {
-  type T = Omit<D, S>
+  beforeCreate?: (setData?: Partial<T>) => Promise<void>,
+  afterCreate?: (data: T) => Promise<void>,
+  beforeUpdate?: (set: Set<T>) => Promise<void>,
+  afterUpdate?: (data: T) => Promise<void>,
+  beforeDelete?: (data: ID | Where<T>) => Promise<void>,
+  afterDelete?: (data: ID | Where<T>, deleted: boolean) => Promise<void>,
+}): BaseModel<T> {
   type BaseFindParams = BaseFindOptions<T>
   type FindAllParams = FindAllOptions<T>
   type FindOneParams = FindOneOptions<T>
@@ -111,7 +108,7 @@ export function createModel<
   const allMapping = Object.entries<ColumnData | JoinStrategy>(mapping)
 
   type Joins = Record<keyof T, JoinStrategy>
-  const joins = allMapping.reduce<Joins>((acc, [key, value]) => {
+  const joins = (allMapping as Array<[keyof T, JoinStrategy]>).reduce<Joins>((acc, [key, value]) => {
     if (value['foreignProp'] && value['referenceProp']) {
       acc[key] = value
     }
@@ -120,7 +117,7 @@ export function createModel<
   }, {} as Joins)
 
   type Mapping = Record<keyof T, ColumnData>
-  const columnsMapping = allMapping.reduce<Mapping>((acc, [key, value]) => {
+  const columnsMapping = (allMapping as Array<[keyof T, ColumnData]>).reduce<Mapping>((acc, [key, value]) => {
     if (value['name'] || typeof value === 'string') {
       acc[key] = value
     }
@@ -519,13 +516,13 @@ export function createModel<
     return sqlCols
   }
 
-  async function findAll(params: Where<T> | Where<T>[] | FindAllParams = {}): Promise<D[]> {
+  async function findAll(params: Where<T> | Where<T>[] | FindAllParams = {}): Promise<T[]> {
     if (isWhere(params)) {
       // not without FindParams
       const whereProps = where(params)
       const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-      const result = await dbQuery<D>(sql, whereProps.values)
+      const result = await dbQuery<T>(sql, whereProps.values)
       return result
     }
 
@@ -548,7 +545,7 @@ export function createModel<
       whereProps.values.push(params.limit)
     }
 
-    const result = await dbQuery<D>(sql, whereProps.values, params.tx)
+    const result = await dbQuery<T>(sql, whereProps.values, params.tx)
     if (result.length === 0) {
       return result
     }
@@ -558,7 +555,7 @@ export function createModel<
     return result
   }
 
-  async function findOneByParams(params: FindOneParams): Promise<D> {
+  async function findOneByParams(params: FindOneParams): Promise<T> {
     const sqlCols = prepareSelectColumns(params)
     let sql = `SELECT ${sqlCols} FROM "${table}"`
 
@@ -570,7 +567,7 @@ export function createModel<
         sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      return await dbQueryRow<D>(sql, [params.where], params.tx)
+      return await dbQueryRow<T>(sql, [params.where], params.tx)
     } else {
       const whereProps = where(params.where)
       sql += ` ${whereProps.sql}`
@@ -579,16 +576,16 @@ export function createModel<
         sql += ` ORDER BY ${orderBy(params.orderBy)}`
       }
 
-      return await dbQueryRow<D>(sql, whereProps.values, params.tx)
+      return await dbQueryRow<T>(sql, whereProps.values, params.tx)
     }
   }
 
-  async function findOne(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<D> {
+  async function findOne(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<T> {
     if (typeof params !== 'object') {
       // isPrimitive
       const sql = `SELECT ${allColumns} FROM "${table}" WHERE "${primaryKey}" = ?`
 
-      return await dbQueryRow<D>(sql, [params])
+      return await dbQueryRow<T>(sql, [params])
     }
 
     if (isWhere(params)) {
@@ -596,7 +593,7 @@ export function createModel<
       const whereProps = where(params)
       const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-      return await dbQueryRow<D>(sql, whereProps.values)
+      return await dbQueryRow<T>(sql, whereProps.values)
     }
 
     // FindParams
@@ -652,7 +649,7 @@ export function createModel<
     startTrx: driver?.startTrx,
     commit: driver?.commit,
     rollback: driver?.rollback,
-  } as BaseModel<D, T>
+  } as BaseModel<T>
 
   // @ts-ignore
   _repos[table] = output

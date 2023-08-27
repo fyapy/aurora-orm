@@ -72,6 +72,7 @@ export async function postgreSQL({ config, ormLog }: {
 
       return res.rows[0] as T
     }
+    // TODO prepare ???
     async function query<T = any>(sql: string, values?: any[] | null, tx?: Tx, prepare: boolean = false) {
       ormLog(sql, values)
       const client = typeof tx === 'string' ? transactions[tx] : pool
@@ -203,7 +204,9 @@ export async function postgreSQL({ config, ormLog }: {
       rollback,
       queryRow,
       query,
+
       prepareDatabase,
+
       parseCreateTable,
       parseAlterTable,
       parseDropTable,
@@ -230,11 +233,11 @@ export async function postgreSQL({ config, ormLog }: {
         }
 
         return {
-          async delete(name) {
-            await query(`DELETE FROM "${migrationsTable}" WHERE ${nameColumn} = '${name}'`)
+          async delete(name, tx) {
+            await query(`DELETE FROM "${migrationsTable}" WHERE ${nameColumn} = '${name}'`, null, tx)
           },
-          async insert(name) {
-            await query(`INSERT INTO "${migrationsTable}" (${nameColumn}, ${runOnColumn}) VALUES ('${name}', NOW())`)
+          async insert(name, tx) {
+            await query(`INSERT INTO "${migrationsTable}" (${nameColumn}, ${runOnColumn}) VALUES ('${name}', NOW())`, null, tx)
           },
           tables,
           selectAll,

@@ -2,8 +2,8 @@ import type { AlterTable, CreateTable, DropTable } from '../../migrator/queryBui
 import type { Tx } from '../types'
 
 export type Migrator = {
-  delete(name: string): Promise<void>
-  insert(name: string): Promise<void>
+  delete(name: string, tx: Tx): Promise<void>
+  insert(name: string, tx: Tx): Promise<void>
   tables(): Promise<any[]>
   selectAll(): Promise<any[]>
   createTable(): Promise<void>

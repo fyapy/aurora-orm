@@ -1,5 +1,6 @@
 import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDirection } from './types'
 import type { DBConnection } from './db'
+import type { Tx } from '../orm/types'
 import path from 'node:path'
 import { column, now, uuidGenerateV4 } from './queryBuilder'
 import { Migrator } from '../orm/driverAdapters/types'
@@ -27,14 +28,14 @@ export function migration({db, actions, filePath, migrator}: {
     return action
   }
 
-  async function markAsRun(action: MigrationAction) {
+  async function markAsRun(action: MigrationAction, tx: Tx) {
     if (action === actions.down) {
       console.info(`### MIGRATION ${name} (DOWN) ###`)
-      return await migrator.delete(name)
+      return await migrator.delete(name, tx)
     }
     if (action === actions.up) {
       console.info(`### MIGRATION ${name} (UP) ###`)
-      return await migrator.insert(name)
+      return await migrator.insert(name, tx)
     }
 
     throw new Error('Unknown direction')
@@ -49,12 +50,15 @@ export function migration({db, actions, filePath, migrator}: {
         sql: {
           ...db,
           query: (sql, values) => db.query(sql, values, tx),
+          createTable: (table, columns) => db.createTable(table, columns, tx),
+          dropTable: table => db.dropTable(table, tx),
+          alterTable: (table, columns) => db.alterTable(table, columns, tx),
         },
         column,
         defs,
       })
 
-      await markAsRun(action)
+      await markAsRun(action, tx)
       await db.driver.commit(tx)
     } catch (err) {
       await db.driver.rollback(tx)

@@ -10,9 +10,9 @@ export interface DBConnection {
   createConnection(): Promise<void>
   query(sql: string, values?: any[], tx?: Tx): Promise<any[]>
 
-  createTable(table: string, columns: Record<string, queryBuilder.Column>): Promise<void>
-  dropTable(table: string): Promise<void>
-  alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>): Promise<void>
+  createTable(table: string, columns: Record<string, queryBuilder.Column>, tx?: Tx): Promise<void>
+  dropTable(table: string, tx?: Tx): Promise<void>
+  alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>, tx?: Tx): Promise<void>
 
   connected(): boolean
   close(): Promise<void>
@@ -50,28 +50,28 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     return await driver.query(sql, values ?? null, tx)
   }
 
-  async function createTable(table: string, columns: Record<string, queryBuilder.Column>) {
+  async function createTable(table: string, columns: Record<string, queryBuilder.Column>, tx?: Tx) {
     const ast = queryBuilder.createTable(table, columns)
     const sql = driver.parseCreateTable(ast)
 
     await createConnection()
-    await driver.query(sql, null)
+    await driver.query(sql, null, tx)
   }
 
-  async function dropTable(table: string) {
+  async function dropTable(table: string, tx?: Tx) {
     const ast = queryBuilder.dropTable(table)
     const sql = driver.parseDropTable(ast)
 
     await createConnection()
-    await driver.query(sql, null)
+    await driver.query(sql, null, tx)
   }
 
-  async function alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>) {
+  async function alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>, tx?: Tx) {
     const ast = queryBuilder.alterTable(table, columns)
     const sql = driver.parseAlterTable(ast)
 
     await createConnection()
-    await driver.query(sql, null)
+    await driver.query(sql, null, tx)
   }
 
   return {

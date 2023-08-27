@@ -15,17 +15,17 @@ export type ColumnData = string | {
 
 export type ID = string | number
 
-interface Writer<T, P extends AnyObject> {
-  create(value: Partial<P>, tx?: Tx): Promise<T>
-  createMany(values: Partial<P>[], tx?: Tx): Promise<T[]>
+interface Writer<T extends AnyObject> {
+  create(value: Partial<T>, tx?: Tx): Promise<T>
+  createMany(values: Partial<T>[], tx?: Tx): Promise<T[]>
   update(options: {
-    where: ID | Where<P>
-    set: Set<P>
+    where: ID | Where<T>
+    set: Set<T>
     returning?: boolean | Array<keyof T>
     tx?: Tx
     prepared?: boolean
   }): Promise<T>
-  delete(id: ID | Where<P>, tx?: Tx): Promise<boolean>
+  delete(id: ID | Where<T>, tx?: Tx): Promise<boolean>
 }
 
 type SubJoin = [string, Array<string | [string] | SubJoin>]
@@ -72,14 +72,14 @@ export type Set<T extends AnyObject> = {
 }
 export type WhereValues = Array<string | number | Array<string | number | null>>
 
-interface Reader<T, P extends AnyObject> {
-  findAll(value?: Where<P> | Where<P>[] | FindAllOptions<P>): Promise<T[]>
-  findOne(id: ID | Where<P> | Where<P>[] | FindOneOptions<P>): Promise<T>
-  exists(id: ID | Where<P> | Where<P>[], tx?: Tx): Promise<boolean>
-  count(value: Where<P> | Where<P>[], tx?: Tx): Promise<number>
+interface Reader<T extends AnyObject> {
+  findAll(value?: Where<T> | Where<T>[] | FindAllOptions<T>): Promise<T[]>
+  findOne(id: ID | Where<T> | Where<T>[] | FindOneOptions<T>): Promise<T>
+  exists(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean>
+  count(value: Where<T> | Where<T>[], tx?: Tx): Promise<number>
 }
 
-export interface BaseModel<T, P extends AnyObject> extends Writer<T, P>, Reader<T, P> {
+export interface BaseModel<T extends AnyObject = {}> extends Writer<T>, Reader<T> {
   primaryKey: string
 
   startTrx: Driver['startTrx']
