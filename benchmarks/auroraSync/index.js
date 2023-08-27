@@ -33,7 +33,7 @@ const UserModel = createModel({
     age: 'age',
     addictions: 'addictions',
   },
-  queryRow: () => {},
+  // queryRow: () => {},
 })
 
 bench(() => UserModel.update({

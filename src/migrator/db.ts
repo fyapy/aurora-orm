@@ -1,14 +1,13 @@
 import type { ConnectionConfig } from '../connection'
 import type { Driver } from '../orm/driverAdapters'
+import type { Tx } from '../orm'
 import { inspect } from 'node:util'
 import { connectToDatabase } from '../orm/connect'
 import * as queryBuilder from './queryBuilder'
-import { Tx } from '../orm'
 
 export interface DBConnection {
   driver: Driver
   createConnection(): Promise<void>
-  query(sql: string, values?: any[], tx?: Tx): Promise<any[]>
 
   createTable(table: string, columns: Record<string, queryBuilder.Column>, tx?: Tx): Promise<void>
   dropTable(table: string, tx?: Tx): Promise<void>
@@ -45,11 +44,6 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     }
   }
 
-  async function query(sql: string, values?: any[], tx?: Tx): Promise<any[]> {
-    await createConnection()
-    return await driver.query(sql, values ?? null, tx)
-  }
-
   async function createTable(table: string, columns: Record<string, queryBuilder.Column>, tx?: Tx) {
     const ast = queryBuilder.createTable(table, columns)
     const sql = driver.parseCreateTable(ast)
@@ -77,7 +71,6 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
   return {
     driver,
     createConnection,
-    query,
 
     createTable,
     dropTable,

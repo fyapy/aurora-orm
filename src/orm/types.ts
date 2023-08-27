@@ -79,10 +79,38 @@ interface Reader<T extends AnyObject> {
   count(value: Where<T> | Where<T>[], tx?: Tx): Promise<number>
 }
 
-export interface BaseModel<T extends AnyObject = {}> extends Writer<T>, Reader<T> {
+export interface BaseModel<T extends AnyObject = AnyObject> extends Writer<T>, Reader<T> {
   primaryKey: string
 
   startTrx: Driver['startTrx']
   commit: Driver['commit']
   rollback: Driver['rollback']
+}
+
+export type Repos = Record<string, BaseModel>
+export type JoinStrategy<T = Record<string, any>> = {
+  table: string
+  foreignProp: string
+  referenceProp: string
+  fn(options: {
+    repos: Repos
+    data: T | T[]
+    prop: string
+    primaryKey: string
+    select?: never[]
+    join?: Join
+    tx?: Tx
+  }): Promise<void>
+}
+
+export interface ModelOptions<T extends AnyObject> {
+  table: string
+  primaryKey?: string
+  mapping: Record<keyof T, ColumnData | JoinStrategy>
+  beforeCreate?: (setData?: Partial<T>) => Promise<void>,
+  afterCreate?: (data: T) => Promise<void>,
+  beforeUpdate?: (set: Set<T>) => Promise<void>,
+  afterUpdate?: (data: T) => Promise<void>,
+  beforeDelete?: (data: ID | Where<T>) => Promise<void>,
+  afterDelete?: (data: ID | Where<T>, deleted: boolean) => Promise<void>,
 }

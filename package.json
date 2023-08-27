@@ -1,6 +1,6 @@
 {
   "name": "aurora-orm",
-  "version": "0.0.89",
+  "version": "0.2.0",
   "description": "Data-Mapper ORM and migration management tool for TypeScript and Node.js. Support PostgreSQL.",
   "main": "dist/index.js",
   "bin": {
@@ -24,12 +24,12 @@
     "pg": ">=4.3.0 <9.0.0"
   },
   "dependencies": {
-    "@types/pg": "8.6.5",
     "dotenv": "16.0.3",
     "mkdirp": "1.0.4",
     "yargs": "17.6.2"
   },
   "devDependencies": {
+    "@types/pg": "8.6.5",
     "@swc/core": "1.3.24",
     "@swc/jest": "0.2.24",
     "@types/jest": "28.1.5",
@@ -40,7 +40,6 @@
     "rimraf": "3.0.2",
     "typescript": "4.9.4"
   },
-  "homepage": "https://aurora-orm.vercel.app",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fyapy/aurora-orm.git"

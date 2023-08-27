@@ -49,7 +49,6 @@ export function migration({db, actions, filePath, migrator}: {
       await action({
         sql: {
           ...db,
-          query: (sql, values) => db.query(sql, values, tx),
           createTable: (table, columns) => db.createTable(table, columns, tx),
           dropTable: table => db.dropTable(table, tx),
           alterTable: (table, columns) => db.alterTable(table, columns, tx),

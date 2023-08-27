@@ -1,7 +1,8 @@
 import type { Driver } from './driverAdapters'
 import { ConnectionConfig, loadConnectionConfig } from '../connection'
-import { loadEnv } from '../utils/env'
+import { Drivers } from '../connection/types'
 import * as drivers from './driverAdapters'
+import { loadEnv } from '../utils/env'
 
 export interface Config {
   driver: Driver | null
@@ -41,47 +42,48 @@ interface ConnectConfig {
   connectNotify?: boolean
 }
 
-enum DatabaseTypes {
-  PostgreSQL = 'postgresql'
-}
-
 export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
-  function deleteType() {
-    if (config.type) delete config.type
+  function deleteDriverType() {
+    if (config.driver) delete config.driver
 
     if (typeof config.debug === 'boolean') {
       ormConfig.debug = config.debug
     }
   }
 
-  switch (config.type) {
-    case DatabaseTypes.PostgreSQL:
-      deleteType()
-      return drivers.postgreSQL({ config, ormLog })
-    // case 'cassandra':
-    //   deleteType()
-    //   return drivers.cassandra({ config, ormLog })
+  switch (config.driver) {
+    case Drivers.PG:
+      deleteDriverType()
+      return drivers.pg({ config, ormLog })
     default:
-      const endOfError = `, сhoose one of these types: ${Object.values(DatabaseTypes)}`
-      throw new Error(config.type
-        ? `aurora-orm.json connection have unknown type '${config.type}'${endOfError}`
-        : `aurora-orm.json don't have "type" property${endOfError}`)
+      const endOfError = `, сhoose one of these types: ${Object.values(Drivers)}`
+      throw new Error(config.driver
+        ? `aurora-orm.json connection have unknown driver '${config.driver}'${endOfError}`
+        : `aurora-orm.json don't have "driver" property${endOfError}`)
   }
 }
 
 export async function connect({ debug, envPath, connectNotify = true }: ConnectConfig = {}) {
-  if (debug) {
+  if (typeof debug !== 'undefined') {
     ormConfig.debug = debug
   }
 
   loadEnv(envPath)
 
   const auroraConfig = loadConnectionConfig()
+  const timeout = 5000
+
+  setTimeout(() => {
+    if (ormConfig.driver === null) {
+      throw new Error(`aurora-orm cannot get connection during ${timeout} ms, check database connection!`)
+    }
+  }, timeout)
+
   const driver = await connectToDatabase(auroraConfig)
 
   setConnection(driver)
 
-  if (connectNotify) {
+  if (connectNotify === true) {
     console.log('Aurora ORM succesfully connected');
   }
 

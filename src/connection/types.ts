@@ -1,21 +1,14 @@
-// export interface CassandraConfig {
-//   name?: string
-//   type: 'cassandra'
-//   keyspace: string
-//   contactPoints: string[]
-//   localDataCenter: string
-//   auth?: {
-//     username: string
-//     password: string
-//   }
-// }
+export enum Drivers {
+  PG = 'pg'
+}
+
 export interface PostgresqlConnectionStringConfig {
-  type?: 'postgresql'
+  driver?: Drivers.PG
   connectionString: string
   debug?: boolean
 }
 export interface Postgresql {
-  type?: 'postgresql'
+  driver?: Drivers.PG
   host: string
   port: number
   username: string
@@ -27,6 +20,5 @@ export interface Postgresql {
 export type ConnectionConfig =
   | Postgresql
   | PostgresqlConnectionStringConfig
-  // | CassandraConfig
 
-export type RemoveIdnetifiers<T extends Record<string, any>> = Omit<T, 'name' | 'type' | 'debug'>
+export type RemoveIdnetifiers<T extends Record<string, any>> = Omit<T, 'driver' | 'debug'>

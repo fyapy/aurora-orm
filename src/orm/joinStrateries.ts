@@ -1,4 +1,4 @@
-import type { JoinStrategy } from './model'
+import type { JoinStrategy } from './types'
 import { In } from './queryBuilder'
 import { makeUnique, mapper, manyMapper, joinStrategyWhere } from './utils'
 
@@ -120,7 +120,7 @@ export function Exists({
 
         const dataToJoin = await joinRepo.findAll({ where, tx })
 
-        // cusmtom mapper
+        // custom mapper
         const mapper = {}
         dataToJoin.forEach((c: any) => mapper[c[referenceProp]] = true)
 

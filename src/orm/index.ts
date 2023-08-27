@@ -7,7 +7,6 @@ export {
   addMethods,
 } from './utils'
 export { createModel } from './model'
-export type { JoinStrategy } from './model'
 export {
   buildAliasMapper,
   MoreThan,
@@ -24,5 +23,5 @@ export {
   Increment,
 } from './queryBuilder'
 export * as JoinStrategies from './joinStrateries'
-export type { ID, Tx, Operator } from './types'
+export type { ID, Tx, Operator, JoinStrategy } from './types'
 export { connect, ormConfig } from './connect'
