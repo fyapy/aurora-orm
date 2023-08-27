@@ -12,7 +12,7 @@ export type MigrationDirection = 'up' | 'down'
 export interface RunnerOptionConfig {
   direction: MigrationDirection
 
-  config: ConnectionConfig | ConnectionConfig[]
+  config: ConnectionConfig
   migrationsConfig?: ConnectionConfig
 }
 
@@ -20,7 +20,6 @@ export type MigrationAction = (options: {
   column: typeof column
   defs: Record<'uuidGenerateV4' | 'now', DefaultColumn>
   sql: DBConnection
-  databases: Record<string, DBConnection>
 }) => Promise<void> | void
 
 export interface MigrationBuilderActions {

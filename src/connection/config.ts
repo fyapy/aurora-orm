@@ -24,26 +24,12 @@ const configExtractEnv = (json: ConnectionConfig) => Object.keys(json).reduce((a
   return acc
 }, {} as ConnectionConfig)
 
-function formatConifg(config: ConnectionConfig | ConnectionConfig[]) {
-  if (Array.isArray(config)) {
-    return config.map(json => {
-      if (!json.name) {
-        throw new Error(`Array connections in 'aurora-orm.json' must have a 'name' property`)
-      }
-
-      return configExtractEnv(json)
-    })
-  }
-
-  return configExtractEnv(config)
-}
-
 export function loadConnectionConfig() {
   try {
     const configString = fs.readFileSync(path.join(process.cwd(), 'aurora-orm.json')) as unknown as string
     const config = JSON.parse(configString) as ConnectionConfig
 
-    return formatConifg(config)
+    return configExtractEnv(config)
   } catch (e) {
     throw new Error('"aurora-orm.json" cannot be readed')
   }

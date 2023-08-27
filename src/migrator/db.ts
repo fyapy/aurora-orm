@@ -3,11 +3,12 @@ import type { Driver } from '../orm/driverAdapters'
 import { inspect } from 'node:util'
 import { connectToDatabase } from '../orm/connect'
 import * as queryBuilder from './queryBuilder'
+import { Tx } from '../orm'
 
 export interface DBConnection {
   driver: Driver
   createConnection(): Promise<void>
-  query(sql: string, values?: any[]): Promise<any[]>
+  query(sql: string, values?: any[], tx?: Tx): Promise<any[]>
 
   createTable(table: string, columns: Record<string, queryBuilder.Column>): Promise<void>
   dropTable(table: string): Promise<void>
@@ -28,14 +29,14 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
 
   const driver = await connectToDatabase(config)
 
-  async function createConnection(): Promise<void> {
+  async function createConnection() {
     if (connectionStatus === ConnectionStatus.CONNECTED) return
     if (connectionStatus === ConnectionStatus.ERROR) {
       throw new Error('Connection already failed, do not try to connect again')
     }
 
     try {
-      await driver.getConnect()
+      await driver.ping()
       connectionStatus = ConnectionStatus.CONNECTED
     } catch (err) {
       connectionStatus = ConnectionStatus.ERROR
@@ -44,9 +45,9 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     }
   }
 
-  async function query(sql: string, values?: any[]): Promise<any[]> {
+  async function query(sql: string, values?: any[], tx?: Tx): Promise<any[]> {
     await createConnection()
-    return await driver.query(sql, values ?? null)
+    return await driver.query(sql, values ?? null, tx)
   }
 
   async function createTable(table: string, columns: Record<string, queryBuilder.Column>) {

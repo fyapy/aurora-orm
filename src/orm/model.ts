@@ -15,7 +15,7 @@ import type {
   Set,
 } from './types'
 import { buildAliasMapper, insertValues } from './queryBuilder'
-import { ormConfig, DefaultConnection, subsctibeToConnection } from './connect'
+import { ormConfig, subsctibeToConnection } from './connect'
 
 type Repos = Record<string, ReturnType<typeof createModel>>
 const _repos: Repos = {}
@@ -45,7 +45,6 @@ export function createModel<
   primaryKey = 'id',
   query,
   queryRow,
-  connectionName = DefaultConnection,
   beforeCreate,
   afterCreate,
   beforeUpdate,
@@ -57,9 +56,8 @@ export function createModel<
   pool?: Pool
   primaryKey?: string
   mapping: Record<keyof D, ColumnData | JoinStrategy>
-  query?: (connectionName: string) => <T = any>(sql: string, values?: any[] | null, tx?: Tx) => Promise<T[]>
-  queryRow?: (connectionName: string) => <T = any>(sql: string, values: any[] | null, tx?: any | undefined) => Promise<T>
-  connectionName?: string,
+  query?: <T = any>(sql: string, values?: any[] | null, tx?: Tx) => Promise<T[]>
+  queryRow?: <T = any>(sql: string, values: any[] | null, tx?: Tx) => Promise<T>
   beforeCreate?: (setData?: Partial<Omit<D, S>>) => Promise<void>,
   afterCreate?: (data: Omit<D, S>) => Promise<void>,
   beforeUpdate?: (set: Set<Omit<D, S>>) => Promise<void>,
@@ -68,9 +66,9 @@ export function createModel<
   afterDelete?: (data: ID | Where<Omit<D, S>>, deleted: boolean) => Promise<void>,
 }) {
   type T = Omit<D, S>
-  type BaseFindParams = BaseFindOptions<T, Tx>
-  type FindAllParams = FindAllOptions<T, Tx>
-  type FindOneParams = FindOneOptions<T, Tx>
+  type BaseFindParams = BaseFindOptions<T>
+  type FindAllParams = FindAllOptions<T>
+  type FindOneParams = FindOneOptions<T>
 
   // database runtime
   const beforeCreateExists = typeof beforeCreate !== 'undefined'
@@ -80,23 +78,21 @@ export function createModel<
   const beforeDeleteExists = typeof beforeDelete !== 'undefined'
   const afterDeleteExists = typeof afterDelete !== 'undefined'
 
-  let connection = ormConfig.connections[connectionName]!
-  let dbQuery = query ? query(connectionName) : connection?.query
-  let dbQueryRow = queryRow ? queryRow(connectionName) : connection?.queryRow
+  let driver = ormConfig.driver!
+  let dbQuery = query ? query : driver?.query
+  let dbQueryRow = queryRow ? queryRow : driver?.queryRow
 
   if (process.env.NODE_ENV !== 'test') {
-    subsctibeToConnection((name, driver) => {
-      if (name !== connectionName || !!connection) return false
+    subsctibeToConnection(connectedDriver => {
+      if (driver !== null) return false
 
-      connection = driver
-      dbQuery = driver.query
-      dbQueryRow = driver.queryRow
+      driver = connectedDriver
+      dbQuery = connectedDriver.query
+      dbQueryRow = connectedDriver.queryRow
 
-      output.connection = driver
-      output.getConnect = driver.getConnect
-      output.startTrx = driver.startTrx
-      output.commit = driver.commit
-      output.rollback = driver.rollback
+      output.startTrx = connectedDriver.startTrx
+      output.commit = connectedDriver.commit
+      output.rollback = connectedDriver.rollback
 
       return true
     })
@@ -104,7 +100,7 @@ export function createModel<
     setTimeout(() => {
       // TODO: add global timeout handler
       // throw connection timeout error
-      if (typeof connection === 'undefined') {
+      if (driver === null) {
         throw new Error('aurora-orm cannot get connection during 5000 ms, check database connection!')
       }
     }, 5000)
@@ -642,31 +638,21 @@ export function createModel<
   }
 
   const output = {
-    table,
-    joins: joins as any,
     primaryKey,
-    allColumns,
-    columnAlias,
-    where,
-    runJoins,
-    cols,
-    ...({
-      create,
-      createMany,
-      update,
-      delete: del,
-      findAll,
-      findOne,
-      exists: exist,
-      count,
-    } as BaseModel<D, T, Tx>),
 
-    connection,
-    getConnect: connection?.getConnect,
-    startTrx: connection?.startTrx,
-    commit: connection?.commit,
-    rollback: connection?.rollback,
-  }
+    create,
+    createMany,
+    update,
+    delete: del,
+    findAll,
+    findOne,
+    exists: exist,
+    count,
+
+    startTrx: driver?.startTrx,
+    commit: driver?.commit,
+    rollback: driver?.rollback,
+  } as BaseModel<D, T>
 
   // @ts-ignore
   _repos[table] = output

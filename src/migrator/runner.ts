@@ -6,14 +6,9 @@ import { Migration, MigrationDirection, RunnerOptionConfig } from './types'
 import { loadMigrationFiles } from './utils'
 import { Migrator } from '../orm/driverAdapters/types'
 
-async function loadMigrations({db, databases, migrator}: {
-  db: DBConnection
-  migrator: Migrator
-  databases: Record<string, DBConnection>
-}) {
+async function loadMigrations(db: DBConnection, migrator: Migrator) {
   try {
     const dir = '/migrations'
-
     const files = await loadMigrationFiles(dir)
 
     return (
@@ -24,11 +19,10 @@ async function loadMigrations({db, databases, migrator}: {
         const actions = require(path.relative(__dirname, fullPath))
 
         return migration({
-          db,
           migrator,
-          databases,
           filePath,
           actions,
+          db,
         })
       }))
     ).sort((m1, m2) => {
@@ -91,63 +85,23 @@ async function runMigrations({ migrations, direction }: {
   }
 }
 
-async function connectionsForMigrations(options: RunnerOptionConfig): Promise<{
-  db: DBConnection
-  databases: Record<string, DBConnection>
-}> {
-  if (Array.isArray(options.config)) {
-    const migrationsConfig = options.migrationsConfig!
-
-    const db = await connectDB(migrationsConfig)
-    const connections = await Promise.all(options.config.map(config => {
-      if (config.name === migrationsConfig.name) {
-        return Promise.resolve(null)
-      }
-
-      return connectDB(config)
-    }))
-
-    const databases = options.config.reduce((acc, config, index) => {
-      acc[config.name!] = config.name === migrationsConfig.name
-        ? db
-        : connections[index]
-
-      return acc
-    }, {})
-
-    return {
-      db,
-      databases,
-    }
-  }
-
-  const db = await connectDB(options.config)
-
-  return {
-    db,
-    databases: {
-      [options.config.name ?? 'default']: db,
-    },
-  }
-}
-
 export async function runner(options: RunnerOptionConfig) {
-  const { db, databases } = await connectionsForMigrations(options)
+  const db = await connectDB(options.config)
 
   try {
     await db.createConnection()
 
     const migrator = db.driver.migrator({
-      idColumn,
-      nameColumn,
-      runOnColumn,
       migrationsTable,
+      runOnColumn,
+      nameColumn,
+      idColumn,
     })
 
     await ensureMigrationsTable(migrator)
 
     const [migrations, runNames] = await Promise.all([
-      loadMigrations({db, databases, migrator}),
+      loadMigrations(db, migrator),
       getRunMigrations(migrator),
     ])
 

@@ -10,12 +10,11 @@ export type Migrator = {
 }
 
 export interface Driver {
-  getConnect(): Promise<Tx>
   startTrx(tx?: Tx): Promise<Tx>
-  commit(tx: Tx, closeConnection?: boolean): Promise<void>
-  rollback(tx: Tx, closeConnection?: boolean): Promise<void>
-  queryRow<T = any>(sql: string, values: any[] | null, tx?: any | undefined): Promise<T>
-  query<T = any>(sql: string, values: any[] | null, tx?: any | undefined): Promise<T[]>
+  commit(tx: Tx): Promise<void>
+  rollback(tx: Tx): Promise<void>
+  queryRow<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T>
+  query<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T[]>
 
   prepareDatabase?(): Promise<void>
 
@@ -23,6 +22,7 @@ export interface Driver {
   parseAlterTable(ast: AlterTable): string
   parseDropTable(ast: DropTable): string
 
+  ping(): Promise<void>
   end(): Promise<void>
 
   migrator: (options: {

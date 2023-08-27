@@ -14,23 +14,15 @@ process.on('uncaughtException', (err) => {
 })
 
 const envPathArg = 'envPath'
-const migratinsDbConnectionNameArg = 'migratinsDbConnectionName'
 
 const { argv } = yargs.usage('Usage: $0 [up|down|create] [migrationName]')
   .option(envPathArg, {
     describe: 'Path to the .env file that should be used for configuration',
     type: 'string',
   })
-  .option(migratinsDbConnectionNameArg, {
-    describe: 'When you use multiple-databases specify connectionName to store migrations data',
-    type: 'string',
-  })
 
 
-const envPath = argv[envPathArg]
-const migratinsDbConnectionName = argv[migratinsDbConnectionNameArg]
-// Load config from ".env" file
-loadEnv(envPath)
+loadEnv(argv[envPathArg])
 
 
 const action = argv._.shift()
@@ -64,17 +56,6 @@ if (action === 'create') {
     })
 } else if (action === 'up' || action === 'down') {
   const config = loadConnectionConfig()
-
-  if (Array.isArray(config)) {
-    if (!migratinsDbConnectionName) {
-      throw new Error(`Please specify arg '${migratinsDbConnectionNameArg}', it is needed to specify database where aurora-orm will be store data about migrations`)
-    }
-
-    const singleConfig = config.find(c => c.name === migratinsDbConnectionName)
-    if (!singleConfig) {
-      throw new Error(`Connection name '${migratinsDbConnectionName}' from arg '${migratinsDbConnectionNameArg}' not found!`)
-    }
-  }
 
   runner({
     direction: action,

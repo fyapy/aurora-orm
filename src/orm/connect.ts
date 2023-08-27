@@ -4,21 +4,25 @@ import { loadEnv } from '../utils/env'
 import * as drivers from './driverAdapters'
 
 export interface Config {
-  connections: Record<string, Driver>
+  driver: Driver | null
   debug: boolean
 }
 
 export const ormConfig: Config = {
-  connections: {},
+  driver: null,
   debug: false,
 }
 
-type Subscribtion = (connectionName: string, driver: Driver) => boolean
+type Subscribtion = (driver: Driver) => boolean
 let subscribers: Subscribtion[] = []
 
-function setConnection(connectionName: string, driver: Driver) {
-  ormConfig.connections[connectionName] = driver
-  subscribers = subscribers.filter(cb => cb(connectionName, driver) === false)
+function setConnection(driver: Driver) {
+  if (ormConfig.driver !== null) {
+    throw new Error('aurora-orm already connected!\nPlease ensure that connect called only once')
+  }
+
+  ormConfig.driver = driver
+  subscribers = subscribers.filter(cb => cb(driver) === false)
 }
 
 export const subsctibeToConnection = (subscription: Subscribtion) => {
@@ -30,8 +34,6 @@ function ormLog(sql: string, values?: any[] | null) {
     console.log(sql, values)
   }
 }
-
-export const DefaultConnection = 'default' as const
 
 interface ConnectConfig {
   debug?: boolean
@@ -46,7 +48,6 @@ enum DatabaseTypes {
 export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   function deleteType() {
     if (config.type) delete config.type
-    if (config.name) delete config.name
 
     if (typeof config.debug === 'boolean') {
       ormConfig.debug = config.debug
@@ -76,16 +77,9 @@ export async function connect({ debug, envPath, connectNotify = true }: ConnectC
   loadEnv(envPath)
 
   const auroraConfig = loadConnectionConfig()
+  const driver = await connectToDatabase(auroraConfig)
 
-  if (Array.isArray(auroraConfig)) {
-    for (const connectConfig of auroraConfig) {
-      const ConnectionName = connectConfig.name!
-
-      setConnection(ConnectionName, await connectToDatabase(connectConfig))
-    }
-  } else {
-    setConnection(DefaultConnection, await connectToDatabase(auroraConfig))
-  }
+  setConnection(driver)
 
   if (connectNotify) {
     console.log('Aurora ORM succesfully connected');

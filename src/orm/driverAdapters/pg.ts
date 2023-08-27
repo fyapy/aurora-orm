@@ -1,4 +1,3 @@
-import type { PoolClient } from 'pg'
 import type {
   Postgresql,
   PostgresqlConnectionStringConfig,
@@ -6,6 +5,7 @@ import type {
 } from '../../connection'
 import type { Tx, QueryConfig } from '../types'
 import type { Driver } from './types'
+import {randomUUID} from 'node:crypto'
 import {
   type DefaultColumn,
   type CreateTable,
@@ -23,6 +23,9 @@ export async function postgreSQL({ config, ormLog }: {
 
     const pool = new Pool(config)
 
+    const transactions: Record<string, import('pg').PoolClient> = {}
+    const createTransactionId = () => randomUUID()
+
     await pool.connect()
 
     async function prepareDatabase() {
@@ -37,93 +40,83 @@ export async function postgreSQL({ config, ormLog }: {
       }
     }
 
+    async function ping() {
+      await pool.query('SELECT 1')
+    }
     async function end() {
       await pool.end()
     }
 
-    async function queryRow<T = any>(sql: string, values: any[] | null, tx?: PoolClient, prepare: boolean = false): Promise<T> {
+    async function queryRow<T = any>(sql: string, values: any[] | null, tx?: Tx, prepare: boolean = false): Promise<T> {
       ormLog(sql, values)
-      const client = tx ?? await pool.connect()
+      const client = typeof tx === 'string' ? transactions[tx] : pool
 
-      try {
-        if (Array.isArray(values)) {
+      if (Array.isArray(values)) {
+        const res = await client.query(SQLParams(sql), values)
+
+        return ((res as any).command === 'DELETE'
+          ? res
+          : res.rows[0]) as T
+      }
+
+      if (prepare === false) {
+        const res = await client.query(sql)
+
+        return res.rows[0] as T
+      }
+
+      const res = await client.query({
+        text: SQLParams(sql),
+        name: sql,
+      } as QueryConfig)
+
+      return res.rows[0] as T
+    }
+    async function query<T = any>(sql: string, values?: any[] | null, tx?: Tx, prepare: boolean = false) {
+      ormLog(sql, values)
+      const client = typeof tx === 'string' ? transactions[tx] : pool
+
+      if (Array.isArray(values)) {
+        if (prepare === false) {
           const res = await client.query(SQLParams(sql), values)
 
-          return ((res as any).command === 'DELETE'
-            ? res
-            : res.rows[0]) as T
-        }
-
-        if (prepare === false) {
-          const res = await client.query(sql)
-
-          return res.rows[0] as T
+          return res.rows as T[]
         }
 
         const res = await client.query({
           text: SQLParams(sql),
           name: sql,
+          values,
         } as QueryConfig)
 
-        return res.rows[0] as T
-      } catch (e) {
-        throw e
-      } finally {
-        if (!tx) client.release()
-      }
-    }
-    async function query<T = any>(sql: string, values?: any[] | null, tx?: PoolClient, prepare: boolean = false) {
-      ormLog(sql, values)
-      const client = tx ?? await pool.connect()
-
-      try {
-        if (Array.isArray(values)) {
-          if (prepare === false) {
-            const res = await client.query(SQLParams(sql), values)
-
-            return res.rows as T[]
-          }
-
-          const res = await client.query({
-            text: SQLParams(sql),
-            name: sql,
-            values,
-          } as QueryConfig)
-
-          return res.rows as T[]
-        }
-
-        const res = await client.query(sql)
-
         return res.rows as T[]
-      } catch (e) {
-        throw e
-      } finally {
-        if (!tx) client.release()
       }
-    }
-    async function getConnect(tx?: Tx): Promise<Tx> {
-      if (typeof tx !== 'undefined') {
-        return tx
-      }
-      return pool.connect()
+
+      const res = await client.query(sql)
+
+      return res.rows as T[]
     }
     async function startTrx(tx?: Tx) {
-      const _tx = tx ?? await getConnect()
-      await _tx.query('BEGIN')
-      return _tx
-    }
-    async function commit(tx: Tx, closeConnection = true) {
-      await tx.query('COMMIT')
-      if (closeConnection === true) {
-        tx.release()
+      if (typeof tx === 'string') {
+        return tx
       }
+
+      const id = createTransactionId()
+      const client = await pool.connect()
+      await client.query('BEGIN')
+      transactions[id] = client
+
+      return id
     }
-    async function rollback(tx: Tx, closeConnection = true) {
-      await tx.query('ROLLBACK')
-      if (closeConnection === true) {
-        tx.release()
-      }
+    async function commit(tx: Tx) {
+      const client = transactions[tx]
+      await client.query('COMMIT')
+      client.release()
+    }
+    async function rollback(tx: Tx) {
+      const client = transactions[tx]
+      await client.query('ROLLBACK')
+      client.release()
     }
 
     function columnDefault(def: string | number | DefaultColumn) {
@@ -205,7 +198,6 @@ export async function postgreSQL({ config, ormLog }: {
     }
 
     return {
-      getConnect,
       startTrx,
       commit,
       rollback,
@@ -215,6 +207,8 @@ export async function postgreSQL({ config, ormLog }: {
       parseCreateTable,
       parseAlterTable,
       parseDropTable,
+
+      ping,
       end,
 
       migrator({

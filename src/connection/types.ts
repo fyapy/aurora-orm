@@ -10,13 +10,11 @@
 //   }
 // }
 export interface PostgresqlConnectionStringConfig {
-  name?: string
   type?: 'postgresql'
   connectionString: string
   debug?: boolean
 }
 export interface Postgresql {
-  name?: string
   type?: 'postgresql'
   host: string
   port: number
