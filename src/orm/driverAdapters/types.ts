@@ -1,5 +1,5 @@
 import type { AlterTable, CreateTable, DropTable } from '../../migrator/queryBuilder'
-import type { BaseModel, Tx, ModelOptions, Repos, AnyObject } from '../types'
+import type { Model, Tx, ModelOptions, Repos, AnyObject } from '../types'
 
 export type Migrator = {
   delete(name: string, tx: Tx): Promise<void>
@@ -38,14 +38,14 @@ export interface Driver {
   }) => Migrator
 
   buildModelMethods<T extends AnyObject>(options: buildModelMethodsOptions<T>): {
-    findAll: BaseModel['findAll']
-    findOne: BaseModel['findOne']
-    exists: BaseModel['exists']
-    count: BaseModel['count']
+    findAll: Model['findAll']
+    findOne: Model['findOne']
+    exists: Model['exists']
+    count: Model['count']
 
-    create: BaseModel['create']
-    createMany: BaseModel['createMany']
-    update: BaseModel['update']
-    delete: BaseModel['delete']
+    create: Model['create']
+    createMany: Model['createMany']
+    update: Model['update']
+    delete: Model['delete']
   }
 }

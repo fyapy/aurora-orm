@@ -23,13 +23,12 @@ export async function pg({config, ormLog, mockBase = basePG}: {
   ormLog: OrmLog
   mockBase?: typeof basePG
 }): Promise<Driver> {
-  const base = await mockBase(config, ormLog)
+  const {query, queryRow, ...base} = await mockBase(config, ormLog)
   const TRUE = true
 
-  const query = base.query
-  const queryRow = base.queryRow
-
   return {
+    query,
+    queryRow,
     ...base,
     buildModelMethods<T extends AnyObject>({
       table,

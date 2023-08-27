@@ -1,4 +1,4 @@
-import type { BaseModel } from './types'
+import type { Model } from './types'
 
 export const isUniqueErr = (error: any, table?: string) => {
   if (table) {
@@ -73,7 +73,7 @@ export const manyMapper = (
 }
 
 export const joinStrategyWhere = (
-  repo: BaseModel,
+  repo: Model,
   data: any,
   foreignProp: string,
   referenceProp: string,
@@ -84,7 +84,7 @@ export const joinStrategyWhere = (
 export const makeUnique = (list: string[]) => [...new Set(list)]
 
 export const addMethods = <
-  T extends BaseModel,
+  T extends Model,
   M extends Record<string, (...args: any) => any>
 >(
   base: T,

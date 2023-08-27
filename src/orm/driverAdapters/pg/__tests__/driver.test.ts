@@ -1,6 +1,7 @@
 import type { AbstractClient, AbstractPoolRuntime } from '../types'
-import type { Tx } from '../../../types'
+import type { Model, Tx } from '../../../types'
 import { In, Increment } from '../../../queryBuilder'
+import { createModel } from '../../../model'
 import { basePG } from '../base'
 import { pg } from '../index'
 
@@ -39,7 +40,7 @@ class Pool implements AbstractPoolRuntime {
 }
 
 const mockBase = () => basePG({}, noop, async () => new Pool())
-const mockDriver = () => pg({
+const fakeDriver = () => pg({
   config: {},
   ormLog: noop,
   mockBase,
@@ -53,18 +54,21 @@ interface User {
 }
 
 describe('driver/pg/base', () => {
-  const userModel = async () => (await mockDriver()).buildModelMethods<User>({
-    primaryKey: 'id',
-    table: 'users',
-    mapping: {
-      id: 'id',
-      name: 'name',
-      age: 'age',
-      addictions: 'addictions',
-    },
-    repos: {},
-  })
+  let userModel: Model<User>
 
+  beforeAll(async () => {
+    userModel = createModel<User>({
+      mockDriver: await fakeDriver(),
+      primaryKey: 'id',
+      table: 'users',
+      mapping: {
+        id: 'id',
+        name: 'name',
+        age: 'age',
+        addictions: 'addictions',
+      },
+    })
+  })
 
   afterEach(clearSqlRows)
 
@@ -76,8 +80,9 @@ describe('driver/pg/base', () => {
     expect(getSqlRow().sql).toEqual('SELECT 1')
   })
 
+
   test('should be currect sql update query with sql operator', async () => {
-    await (await userModel()).update({
+    await userModel.update({
       where: {
         id: In([1, 2, 3]),
       },
@@ -93,7 +98,7 @@ describe('driver/pg/base', () => {
   })
 
   test('should be currect sql update query by id', async () => {
-    await (await userModel()).update({
+    await userModel.update({
       where: 1,
       set: {
         age: 3,
@@ -107,7 +112,7 @@ describe('driver/pg/base', () => {
   })
 
   test('should be currect sql update query when set array or null value', async () => {
-    await (await userModel()).update({
+    await userModel.update({
       where: 2,
       set: {
         addictions: [1],
@@ -122,7 +127,7 @@ describe('driver/pg/base', () => {
   })
 
   test('should be currect sql update query with returning flag', async () => {
-    await (await userModel()).update({
+    await userModel.update({
       where: 4,
       set: {
         age: 3,
@@ -140,7 +145,7 @@ describe('driver/pg/base', () => {
   })
 
   test('should be currect sql update query with returning flag with specific columns', async () => {
-    await (await userModel()).update({
+    await userModel.update({
       where: 4,
       set: {
         age: 3,
@@ -158,7 +163,7 @@ describe('driver/pg/base', () => {
   })
 
   test('should be currect sql update query with set-operator', async () => {
-    await (await userModel()).update({
+    await userModel.update({
       where: 4,
       set: {
         age: Increment(2),
