@@ -1,5 +1,6 @@
 import type { ConnectionConfig } from '../connection'
 import type { Driver } from '../orm/driverAdapters'
+import type { Foreign } from './queryBuilder'
 import type { Tx } from '../orm'
 import { inspect } from 'node:util'
 import { connectToDatabase } from '../orm/connect'
@@ -12,6 +13,7 @@ export interface DBConnection {
   createTable(table: string, columns: Record<string, queryBuilder.Column>, tx?: Tx): Promise<void>
   dropTable(table: string, tx?: Tx): Promise<void>
   alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>, tx?: Tx): Promise<void>
+  foreignKey(foreign: Foreign, reference: Foreign, tx?: Tx): Promise<void>
 
   connected(): boolean
   close(): Promise<void>
@@ -68,6 +70,14 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     await driver.query(sql, null, tx)
   }
 
+  async function foreignKey(foreign: Foreign, reference: Foreign, tx?: Tx) {
+    const ast = queryBuilder.foreignKey(foreign, reference)
+    const sql = driver.parseForeignKey(ast)
+
+    await createConnection()
+    await driver.query(sql, null, tx)
+  }
+
   return {
     driver,
     createConnection,
@@ -75,6 +85,7 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     createTable,
     dropTable,
     alterTable,
+    foreignKey,
 
     connected: () => connectionStatus === ConnectionStatus.CONNECTED,
     close() {

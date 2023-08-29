@@ -1,50 +1,8 @@
-import type { AbstractClient, AbstractPoolRuntime } from '../types'
-import type { Model, Tx } from '../../../types'
+import type { Model } from '../../../types'
 import { In, Increment } from '../../../queryBuilder'
 import { createModel } from '../../../model'
-import { basePG } from '../base'
-import { pg } from '../index'
-
-const noop = () => {}
-const asyncNoop = async () => {}
-
-let sqlRows = [] as [string, any[] | null][]
-
-const getSqlRow = (index: number = 0) => {
-  const data = sqlRows[index] ?? ['', null]
-
-  return {sql: data[0], values: data[1]}
-}
-
-const clearSqlRows = () => sqlRows = []
-
-async function mockQuery(sql: string, values: any[] | null, tx?: Tx) {
-  sqlRows.push([sql, values])
-  return {rows: []}
-}
-
-class Client implements AbstractClient {
-  query = mockQuery
-  end = asyncNoop
-  release = noop
-}
-
-class Pool implements AbstractPoolRuntime {
-  async connect() {
-    return new Client()
-  }
-
-  query = mockQuery
-  end = asyncNoop
-  release = noop
-}
-
-const mockBase = () => basePG({}, noop, async () => new Pool())
-const fakeDriver = () => pg({
-  config: {},
-  ormLog: noop,
-  mockBase,
-})
+import { addColumn, alterTable, now } from '../../../../migrator/queryBuilder'
+import { fakeDriver, mockBase, clearSqlRows, getSqlRow } from '../../../../utils/jest'
 
 interface User {
   id: number
@@ -71,15 +29,6 @@ describe('driver/pg/base', () => {
   })
 
   afterEach(clearSqlRows)
-
-  test('should basePG call method query and log SQL', async () => {
-    const base = await mockBase()
-
-    await base.query('SELECT 1')
-
-    expect(getSqlRow().sql).toEqual('SELECT 1')
-  })
-
 
   test('should be currect sql update query with sql operator', async () => {
     await userModel.update({

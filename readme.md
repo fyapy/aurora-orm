@@ -18,7 +18,7 @@ And don't use unstable features like decorators and reflect-metadata that give y
 -   Database-specific column types.
 -   Relations.
 -   Support functional programming composition pattern.
--   Indices.
+-   Indexes.
 -   Transactions.
 -   Migrations.
 -   Connection pooling.
@@ -94,7 +94,7 @@ Most of the times you want to store your connection options in a separate config
 
 ```json
 {
-  "type": "postgresql", // optinal, default value 'postgresql'
+  "driver": "pg", // optinal, default value 'pg'
   "host": "localhost",
   "port": 5432,
   "username": "test",

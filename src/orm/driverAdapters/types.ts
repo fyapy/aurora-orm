@@ -1,4 +1,4 @@
-import type { AlterTable, CreateTable, DropTable } from '../../migrator/queryBuilder'
+import type { AlterTable, CreateTable, DropTable, ForeignKey } from '../../migrator/queryBuilder'
 import type { Model, Tx, ModelOptions, Repos, AnyObject } from '../types'
 
 export type Migrator = {
@@ -26,6 +26,7 @@ export interface Driver {
   parseCreateTable(ast: CreateTable): string
   parseAlterTable(ast: AlterTable): string
   parseDropTable(ast: DropTable): string
+  parseForeignKey(ast: ForeignKey): string
 
   ping(): Promise<void>
   end(): Promise<void>

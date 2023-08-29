@@ -5,6 +5,7 @@ import {
   type DefaultColumn,
   type CreateTable,
   type AlterTable,
+  type ForeignKey,
   type DropTable,
   ColumnOperator,
 } from '../../../migrator/queryBuilder'
@@ -145,8 +146,6 @@ export async function basePG(
       })
       .join(', ')
 
-    sql += ');'
-
     return sql
   }
   function parseDropTable(ast: DropTable) {
@@ -159,7 +158,7 @@ export async function basePG(
     sql += Object.entries(ast.columns)
       .map(([name, opts]) => {
         if (opts.operator === ColumnOperator.AddColumn) {
-          let sql = `ADD COLUMN "${name}" ${ast.type}`
+          let sql = ` ADD COLUMN "${name}" ${opts.type}`
 
           if (opts.notNull === true) {
             sql += ' NOT NULL'
@@ -171,21 +170,23 @@ export async function basePG(
           return sql
         }
         if (opts.operator === ColumnOperator.DropColumn) {
-          return `DROP COLUMN "${name}"`
+          return ` DROP COLUMN "${name}"`
         }
         if (opts.operator === ColumnOperator.SetDefault) {
-          return `ALTER COLUMN "${name}" SET${columnDefault(opts.value)}`
+          return ` ALTER COLUMN "${name}" SET${columnDefault(opts.value)}`
         }
         if (opts.operator === ColumnOperator.SetType) {
-          return `ALTER COLUMN "${name}" TYPE ${opts.type}`
+          return ` ALTER COLUMN "${name}" TYPE ${opts.type}`
         }
 
-        throw new Error('AlterTable ast parse error')
+        throw new Error('AlterTable AST parse error')
       })
       .join(', ')
 
-    sql += ';'
     return sql
+  }
+  function parseForeignKey(ast: ForeignKey) {
+    return `ALTER TABLE "${ast.foreign.table}" ADD FOREIGN KEY ("${ast.foreign.key}") REFERENCES "${ast.reference.table}" ("${ast.reference.key}")`
   }
 
   return {
@@ -200,6 +201,7 @@ export async function basePG(
     parseCreateTable,
     parseAlterTable,
     parseDropTable,
+    parseForeignKey,
 
     ping,
     end,

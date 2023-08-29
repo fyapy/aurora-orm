@@ -18,41 +18,6 @@ export function createModel<T extends AnyObject>({
 }: ModelOptions<T>): Model<T> {
   let driver = ormConfig.driver!
 
-  function setDriver(newDriver: Driver) {
-    driver = newDriver
-
-    output.startTrx = newDriver.startTrx
-    output.commit = newDriver.commit
-    output.rollback = newDriver.rollback
-
-    const methods = newDriver.buildModelMethods<T>({
-      table,
-      mapping,
-      primaryKey,
-      beforeCreate,
-      afterCreate,
-      beforeUpdate,
-      afterUpdate,
-      beforeDelete,
-      afterDelete,
-      repos,
-    })
-
-    for (const method in methods) {
-      output[method] = methods[method]
-    }
-  }
-
-  if (process.env.NODE_ENV !== 'test') {
-    subsctibeToConnection(connectedDriver => {
-      if (driver !== null) return false
-
-      setDriver(connectedDriver)
-
-      return true
-    })
-  }
-
   const output = {
     primaryKey,
 
@@ -96,7 +61,42 @@ export function createModel<T extends AnyObject>({
 
   repos[table] = output
 
-  if (process.env.NODE_ENV === 'test' && typeof mockDriver !== 'undefined') {
+
+  function setDriver(newDriver: Driver) {
+    driver = newDriver
+
+    output.startTrx = newDriver.startTrx
+    output.commit = newDriver.commit
+    output.rollback = newDriver.rollback
+
+    const methods = newDriver.buildModelMethods<T>({
+      table,
+      mapping,
+      primaryKey,
+      beforeCreate,
+      afterCreate,
+      beforeUpdate,
+      afterUpdate,
+      beforeDelete,
+      afterDelete,
+      repos,
+    })
+
+    for (const method in methods) {
+      output[method] = methods[method]
+    }
+  }
+
+
+  if (process.env.NODE_ENV !== 'test') {
+    subsctibeToConnection(connectedDriver => {
+      if (driver !== null) return false
+
+      setDriver(connectedDriver)
+
+      return true
+    })
+  } else if (typeof mockDriver !== 'undefined') {
     setDriver(mockDriver)
   }
 

@@ -1,7 +1,8 @@
 const MigratorOperator = {
   CreateTable: 'create-table',
   DropTable: 'drop-table',
-  AlterTable: 'alter-table'
+  AlterTable: 'alter-table',
+  ForeignKey: 'foreign-key',
 } as const
 
 export const ColumnOperator = {
@@ -16,9 +17,10 @@ export const now: DefaultColumn = {sql: '(now())'}
 export const uuidGenerateV4: DefaultColumn = {sql: 'uuid_generate_v4()'}
 
 export type Default = string | number | DefaultColumn
+export type Type = 'uuid' | 'varchar' | 'smallint' | 'timestamptz' | 'text' | 'bool' | 'char'
 
 export interface Column {
-  type: 'uuid' | 'varchar' | 'smallint' | 'timestamptz' | 'text' | 'bool' | 'char'
+  type: Type
   primary?: boolean
   default?: Default
   notNull?: boolean
@@ -28,7 +30,7 @@ export const column = (opts: Column) => opts
 
 interface AddColumn {
   operator: typeof ColumnOperator.AddColumn
-  type: string
+  type: Type
   notNull?: boolean
   default?: Default
 }
@@ -83,3 +85,18 @@ export type DropTable = {
   table: string
 }
 export const dropTable = (table: string): DropTable => ({type: MigratorOperator.DropTable, table})
+
+export type Foreign = {
+  table: string
+  key: string
+}
+export type ForeignKey = {
+  type: typeof MigratorOperator.ForeignKey
+  foreign: Foreign
+  reference: Foreign
+}
+export const foreignKey = (foreign: Foreign, reference: Foreign): ForeignKey => ({
+  type: MigratorOperator.ForeignKey,
+  foreign,
+  reference,
+})
