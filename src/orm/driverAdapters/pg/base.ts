@@ -148,6 +148,7 @@ export async function basePG(
       })
       .join(', ')
 
+    sql += ')'
     return sql
   }
   function parseDropTable(ast: DropTable) {
