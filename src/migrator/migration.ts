@@ -53,6 +53,7 @@ export function migration({db, actions, filePath, migrator}: {
           dropTable: table => db.dropTable(table, tx),
           alterTable: (table, columns) => db.alterTable(table, columns, tx),
           foreignKey: (foreign, reference) => db.foreignKey(foreign, reference, tx),
+          dropConstraint: (table, column) => db.dropConstraint(table, column, tx),
         },
         column,
         defs,

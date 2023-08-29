@@ -14,6 +14,7 @@ export interface DBConnection {
   dropTable(table: string, tx?: Tx): Promise<void>
   alterTable(table: string, columns: Record<string, queryBuilder.AlterColumn>, tx?: Tx): Promise<void>
   foreignKey(foreign: Foreign, reference: Foreign, tx?: Tx): Promise<void>
+  dropConstraint(table: string, column: string, tx?: Tx): Promise<void>
 
   connected(): boolean
   close(): Promise<void>
@@ -78,6 +79,14 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     await driver.query(sql, null, tx)
   }
 
+  async function dropConstraint(table: string, column: string, tx?: Tx) {
+    const ast = queryBuilder.dropConstraint(table, column)
+    const sql = driver.parseDropConstraint(ast)
+
+    await createConnection()
+    await driver.query(sql, null, tx)
+  }
+
   return {
     driver,
     createConnection,
@@ -86,6 +95,7 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     dropTable,
     alterTable,
     foreignKey,
+    dropConstraint,
 
     connected: () => connectionStatus === ConnectionStatus.CONNECTED,
     close() {

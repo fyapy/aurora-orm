@@ -1,4 +1,4 @@
-import { addColumn, alterTable, column, createTable, foreignKey, now, uuidGenerateV4 } from '../../../../migrator/queryBuilder'
+import { addColumn, alterTable, column, createTable, dropConstraint, foreignKey, now, uuidGenerateV4 } from '../../../../migrator/queryBuilder'
 import { clearSqlRows, getSqlRow, mockBase } from '../../../../utils/jest'
 
 describe('driver/pg/migrator', () => {
@@ -48,5 +48,16 @@ describe('driver/pg/migrator', () => {
     )
 
     expect(createSql).toEqual('ALTER TABLE "panel_user_roles" ADD FOREIGN KEY ("user_id") REFERENCES "panel_users" ("id")')
+  })
+
+
+  test('should generate currect drop constraint key SQL', async () => {
+    const base = await mockBase()
+
+    const createSql = base.parseDropConstraint(
+      dropConstraint('users', 'city_id')
+    )
+
+    expect(createSql).toEqual('ALTER TABLE "users" DROP CONSTRAINT "users_city_id_fkey"')
   })
 })

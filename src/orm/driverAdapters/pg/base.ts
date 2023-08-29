@@ -1,7 +1,9 @@
 import type { AbstractClient, AbstractPoolRuntime, Config, OrmLog } from './types'
 import type { Tx, QueryConfig } from '../../types'
+import type { Migrator } from '../types'
 import {randomUUID} from 'node:crypto'
 import {
+  type DropConstraint,
   type DefaultColumn,
   type CreateTable,
   type AlterTable,
@@ -188,6 +190,9 @@ export async function basePG(
   function parseForeignKey(ast: ForeignKey) {
     return `ALTER TABLE "${ast.foreign.table}" ADD FOREIGN KEY ("${ast.foreign.key}") REFERENCES "${ast.reference.table}" ("${ast.reference.key}")`
   }
+  function parseDropConstraint(ast: DropConstraint) {
+    return `ALTER TABLE "${ast.table}" DROP CONSTRAINT "${ast.table}_${ast.column}_fkey"`
+  }
 
   return {
     startTrx,
@@ -202,6 +207,7 @@ export async function basePG(
     parseAlterTable,
     parseDropTable,
     parseForeignKey,
+    parseDropConstraint,
 
     ping,
     end,
@@ -211,7 +217,7 @@ export async function basePG(
       nameColumn,
       runOnColumn,
       migrationsTable,
-    }) {
+    }): Migrator {
       const tables = () => query(
         `SELECT table_name FROM information_schema.tables WHERE table_name = '${migrationsTable}'`,
       )

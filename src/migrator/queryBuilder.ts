@@ -1,10 +1,3 @@
-const MigratorOperator = {
-  CreateTable: 'create-table',
-  DropTable: 'drop-table',
-  AlterTable: 'alter-table',
-  ForeignKey: 'foreign-key',
-} as const
-
 export const ColumnOperator = {
   AddColumn: 'add-column',
   DropColumn: 'drop-column',
@@ -57,12 +50,10 @@ interface SetType {
 export const setType = (type: SetType['type']): SetType => ({operator: ColumnOperator.SetType, type})
 
 export type CreateTable = {
-  type: typeof MigratorOperator.CreateTable
   table: string
   columns: Record<string, Column>
 }
 export const createTable = (table: string, columns: Record<string, Column>): CreateTable => ({
-  type: MigratorOperator.CreateTable,
   table,
   columns,
 })
@@ -70,33 +61,37 @@ export const createTable = (table: string, columns: Record<string, Column>): Cre
 export type AlterColumn = AddColumn | DropColumn | SetDefault | SetType
 
 export interface AlterTable {
-  type: typeof MigratorOperator.AlterTable
   table: string
   columns: Record<string, AlterColumn>
 }
 export const alterTable = (table: string, columns: Record<string, AlterColumn>): AlterTable => ({
-  type: MigratorOperator.AlterTable,
   table,
   columns,
 })
 
 export type DropTable = {
-  type: typeof MigratorOperator.DropTable
   table: string
 }
-export const dropTable = (table: string): DropTable => ({type: MigratorOperator.DropTable, table})
+export const dropTable = (table: string): DropTable => ({table})
 
 export type Foreign = {
   table: string
   key: string
 }
 export type ForeignKey = {
-  type: typeof MigratorOperator.ForeignKey
   foreign: Foreign
   reference: Foreign
 }
 export const foreignKey = (foreign: Foreign, reference: Foreign): ForeignKey => ({
-  type: MigratorOperator.ForeignKey,
   foreign,
   reference,
+})
+
+export type DropConstraint = {
+  table: string
+  column: string
+}
+export const dropConstraint = (table: string, column: string): DropConstraint => ({
+  table,
+  column,
 })
