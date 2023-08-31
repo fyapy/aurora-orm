@@ -58,7 +58,7 @@ export const In = <T extends string | number | null>(value: T[]): types.Operator
   },
 })
 
-export const NotNull = (): types.Operator => ({
+export const NotNull: types.Operator = ({
   type: 'operator',
   name: 'not-null',
   fn: (options) => `${options.alias} IS NOT NULL`,
@@ -74,7 +74,7 @@ export const ILike = <T extends number | string | null>(value: T): types.Operato
   },
 })
 
-export const IsNull = (): types.Operator => ({
+export const IsNull: types.Operator = ({
   type: 'operator',
   name: 'is-null',
   fn: (options) => `${options.alias} IS NULL`,

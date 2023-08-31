@@ -152,7 +152,7 @@ export async function basePG(
     return sql
   }
   function parseDropTable(ast: DropTable) {
-    return `DROP TABLE "${ast.table}";`
+    return `DROP TABLE "${ast.table}"`
   }
 
   function parseAlterTable(ast: AlterTable) {
