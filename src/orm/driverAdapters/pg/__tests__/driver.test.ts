@@ -1,8 +1,7 @@
 import type { Model } from '../../../types'
-import { In, Increment } from '../../../queryBuilder'
 import { createModel } from '../../../model'
-import { addColumn, alterTable, now } from '../../../../migrator/queryBuilder'
-import { fakeDriver, mockBase, clearSqlRows, getSqlRow } from '../../../../utils/jest'
+import { In, Increment } from '../../../operators'
+import { fakeDriver, clearSqlRows, getSqlRow } from '../../../../utils/jest'
 
 interface User {
   id: number
@@ -32,12 +31,8 @@ describe('driver/pg/base', () => {
 
   test('should be currect sql update query with sql operator', async () => {
     await userModel.update({
-      where: {
-        id: In([1, 2, 3]),
-      },
-      set: {
-        age: 3,
-      },
+      where: {id: In([1, 2, 3])},
+      set: {age: 3},
     })
 
     const {sql, values} = getSqlRow()
@@ -49,9 +44,7 @@ describe('driver/pg/base', () => {
   test('should be currect sql update query by id', async () => {
     await userModel.update({
       where: 1,
-      set: {
-        age: 3,
-      },
+      set: {age: 3},
     })
 
     const {sql, values} = getSqlRow()
@@ -78,9 +71,7 @@ describe('driver/pg/base', () => {
   test('should be currect sql update query with returning flag', async () => {
     await userModel.update({
       where: 4,
-      set: {
-        age: 3,
-      },
+      set: {age: 3},
       returning: true,
     })
 
@@ -96,9 +87,7 @@ describe('driver/pg/base', () => {
   test('should be currect sql update query with returning flag with specific columns', async () => {
     await userModel.update({
       where: 4,
-      set: {
-        age: 3,
-      },
+      set: {age: 3},
       returning: ['id', 'name'],
     })
 
@@ -114,9 +103,7 @@ describe('driver/pg/base', () => {
   test('should be currect sql update query with set-operator', async () => {
     await userModel.update({
       where: 4,
-      set: {
-        age: Increment(2),
-      },
+      set: {age: Increment(2)},
       returning: ['id', 'name'],
     })
 

@@ -1,5 +1,5 @@
 import type { JoinStrategy } from './types'
-import { In } from './queryBuilder'
+import { In } from './operators'
 import { makeUnique, mapper, manyMapper, joinStrategyWhere } from './utils'
 
 export function OneToOne({
@@ -15,13 +15,13 @@ export function OneToOne({
     table,
     foreignProp,
     referenceProp,
-    async fn({ data, repos, select, join, tx, prop, primaryKey }) {
-      const joinRepo = repos[table]
+    async fn({ data, models, select, join, tx, prop, primaryKey }) {
+      const joinModel = models[table]
 
       if (Array.isArray(data)) {
         const values = makeUnique(data.map(d => d[foreignProp])).filter(d => d !== null)
 
-        const dataToJoin = await joinRepo.findAll({
+        const dataToJoin = await joinModel.findAll({
           where: {
             [referenceProp]: In(values),
           },
@@ -32,9 +32,9 @@ export function OneToOne({
 
         mapper(data, prop, foreignProp, dataToJoin as any[], referenceProp)
       } else {
-        const where = joinStrategyWhere(joinRepo, data, foreignProp, referenceProp)
+        const where = joinStrategyWhere(joinModel, data, foreignProp, referenceProp)
 
-        const _joinData = await joinRepo.findOne({
+        const _joinData = await joinModel.findOne({
           where,
           select,
           join,
@@ -64,11 +64,11 @@ export function OneToMany({
     table,
     foreignProp,
     referenceProp,
-    async fn({ data, repos, select, tx, join, prop, primaryKey }) {
-      const joinRepo = repos[table]
+    async fn({ data, models, select, tx, join, prop, primaryKey }) {
+      const joinModel = models[table]
 
       if (Array.isArray(data)) {
-        const dataToJoin = await joinRepo.findAll({
+        const dataToJoin = await joinModel.findAll({
           where: {
             [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))),
           },
@@ -79,8 +79,8 @@ export function OneToMany({
 
         manyMapper(data, prop, foreignProp, dataToJoin as any[], referenceProp)
       } else {
-        const where = joinStrategyWhere(joinRepo, data, foreignProp, referenceProp)
-        const _joinData = await joinRepo.findAll({
+        const where = joinStrategyWhere(joinModel, data, foreignProp, referenceProp)
+        const _joinData = await joinModel.findAll({
           where,
           select,
           join,
@@ -110,15 +110,15 @@ export function Exists({
     table,
     foreignProp,
     referenceProp,
-    async fn({ data, repos, tx, prop, primaryKey }) {
-      const joinRepo = repos[table]
+    async fn({ data, models, tx, prop, primaryKey }) {
+      const joinModel = models[table]
 
       if (Array.isArray(data)) {
         const where = primaryKey === referenceProp
           ? In(makeUnique(data.map(d => d[foreignProp])))
           : { [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))) }
 
-        const dataToJoin = await joinRepo.findAll({ where, tx })
+        const dataToJoin = await joinModel.findAll({ where, tx })
 
         // custom mapper
         const mapper = {}
@@ -128,8 +128,8 @@ export function Exists({
           item[prop] = mapper[item[foreignProp]] ?? false
         }
       } else {
-        const where = joinStrategyWhere(joinRepo, data, foreignProp, referenceProp)
-        const _joinData = await joinRepo.exists(where, tx)
+        const where = joinStrategyWhere(joinModel, data, foreignProp, referenceProp)
+        const _joinData = await joinModel.exists(where, tx)
 
         if (foreignProp !== primaryKey) {
           delete data[foreignProp]

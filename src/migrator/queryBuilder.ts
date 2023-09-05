@@ -10,7 +10,7 @@ export const now: DefaultColumn = {sql: '(now())'}
 export const uuidGenerateV4: DefaultColumn = {sql: 'uuid_generate_v4()'}
 
 export type Default = string | number | DefaultColumn
-export type Type = 'uuid' | 'varchar' | 'smallint' | 'timestamptz' | 'text' | 'bool' | 'char'
+export type Type = 'uuid' | 'varchar' | 'smallint' | 'integer' | 'real' | 'timestamptz' | 'text' | 'bool' | 'char'
 
 export interface Column {
   type: Type

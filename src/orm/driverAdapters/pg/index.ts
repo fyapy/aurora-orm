@@ -16,7 +16,9 @@ import type {
   AnyObject,
 } from '../../types'
 import { basePG } from './base'
-import { buildAliasMapper, insertValues } from '../../queryBuilder'
+import { buildAliasMapper, insertValues } from './utils'
+import { setOperators, whereOperators } from './operators'
+import { setOperator, whereOperator } from '../../operators'
 
 export async function pg({config, ormLog, mockBase = basePG}: {
   config: Config
@@ -40,7 +42,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
       afterUpdate,
       beforeDelete,
       afterDelete,
-      repos,
+      models,
     }) {
       type BaseFindParams = BaseFindOptions<T>
       type FindAllParams = FindAllOptions<T>
@@ -122,11 +124,10 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         if (typeof value === 'object') {
           const operator = value as Operator
 
-          if (operator !== null && operator.type === 'operator') {
-            return operator.fn({
-              values: _values,
-              alias,
-            })
+          if (operator !== null && operator.type === whereOperator) {
+            const op = whereOperators[operator.name]
+
+            return op(operator.value, {values: _values, alias})
           } else {
             _values.push(value as any)
             return `${alias} = ?`
@@ -224,7 +225,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
             const join = joins[prop]
 
             await join.fn({
-              repos,
+              models,
               data: result,
               tx: options.tx,
               select: select.length === 0
@@ -238,7 +239,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
             })
           } else if (typeof key === 'string') {
             await joins[key].fn({
-              repos,
+              models,
               data: result,
               tx: options.tx,
               prop: key,
@@ -348,9 +349,10 @@ export async function pg({config, ormLog, mockBase = basePG}: {
           const setValue = set[key] as SetOperator | number | string | boolean | null
 
           // SetOperator
-          if (typeof setValue === 'object' && setValue !== null && setValue.type === 'set-operator') {
+          if (typeof setValue === 'object' && setValue !== null && setValue.type === setOperator) {
             setValues[index] = setValue.value
-            const sql = setValue.fn(columnAlias(key as keyof T))
+            const operator = setOperators[setValue.name]
+            const sql = operator(columnAlias(key as keyof T))
 
             return acc !== ''
               ? `${acc}, ${sql}`

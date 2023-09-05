@@ -1,8 +1,8 @@
-import type { Driver } from './driverAdapters/types'
-import type {ModelOptions, Model, AnyObject, Repos} from './types'
-import { ormConfig, subsctibeToConnection } from './connect'
+import type {Driver} from './driverAdapters/types'
+import type {ModelOptions, Model, AnyObject, Models} from './types'
+import {ormConfig, subsctibeToConnection} from './connect'
 
-const repos: Repos = {}
+const models: Models = {}
 
 export function createModel<T extends AnyObject>({
   table,
@@ -59,7 +59,7 @@ export function createModel<T extends AnyObject>({
     rollback: driver?.rollback,
   } as Model<T>
 
-  repos[table] = output
+  models[table] = output
 
 
   function setDriver(newDriver: Driver) {
@@ -79,7 +79,7 @@ export function createModel<T extends AnyObject>({
       afterUpdate,
       beforeDelete,
       afterDelete,
-      repos,
+      models,
     })
 
     for (const method in methods) {

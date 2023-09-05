@@ -1,27 +1,24 @@
 export {
-  isUniqueErr,
   mapper,
   manyMapper,
   makeUnique,
   joinStrategyWhere,
-  addMethods,
 } from './utils'
-export { createModel } from './model'
 export {
-  buildAliasMapper,
+  In,
+  ILike,
+  NotIn,
+  IsNull,
+  NotNull,
+  Between,
   MoreThan,
   LessThan,
-  Between,
-  In,
-  NotNull,
-  ILike,
-  IsNull,
-  NotIn,
-  ILikeStart,
   NotEqual,
   Decrement,
   Increment,
-} from './queryBuilder'
-export * as JoinStrategies from './joinStrateries'
-export type { ID, Tx, Operator, JoinStrategy } from './types'
+  ILikeStart,
+} from './operators'
+export { createModel } from './model'
 export { connect, ormConfig } from './connect'
+export * as JoinStrategies from './joinStrateries'
+export * from './types'

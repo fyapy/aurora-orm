@@ -1,5 +1,5 @@
 import type { AlterTable, CreateTable, DropConstraint, DropTable, ForeignKey } from '../../migrator/queryBuilder'
-import type { Model, Tx, ModelOptions, Repos, AnyObject } from '../types'
+import type { Model, Tx, ModelOptions, Models, AnyObject } from '../types'
 
 export type Migrator = {
   delete(name: string, tx: Tx): Promise<void>
@@ -11,7 +11,7 @@ export type Migrator = {
 
 export interface buildModelMethodsOptions<T extends AnyObject> extends ModelOptions<T> {
   primaryKey: string
-  repos: Repos
+  models: Models
 }
 
 export interface Driver {

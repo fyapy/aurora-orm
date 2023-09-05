@@ -53,16 +53,17 @@ export interface FindOneOptions<T extends AnyObject> extends BaseFindOptions<T> 
 export interface Operator {
   type: 'operator'
   name: string
-  fn: (options: {
-    values: WhereValues
-    alias: string
-  }) => string
+  value?: any
+  // fn: (options: {
+  //   values: WhereValues
+  //   alias: string
+  // }) => string
 }
 export interface SetOperator {
   type: 'set-operator'
   name: string
-  value: number
-  fn: (alias: string) => string
+  value: any
+  // fn: (alias: string) => string
 }
 export type Where<T extends AnyObject> = {
   [K in keyof T]?: Operator | T[K]
@@ -87,13 +88,13 @@ export interface Model<T extends AnyObject = AnyObject> extends Writer<T>, Reade
   rollback: Driver['rollback']
 }
 
-export type Repos = Record<string, Model>
+export type Models = Record<string, Model>
 export type JoinStrategy<T = Record<string, any>> = {
   table: string
   foreignProp: string
   referenceProp: string
   fn(options: {
-    repos: Repos
+    models: Models
     data: T | T[]
     prop: string
     primaryKey: string

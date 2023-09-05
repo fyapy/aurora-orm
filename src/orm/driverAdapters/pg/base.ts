@@ -11,7 +11,11 @@ import {
   type DropTable,
   ColumnOperator,
 } from '../../../migrator/queryBuilder'
-import { SQLParams } from '../../queryBuilder'
+
+const SQLParams = (sql: string) => sql.split('?')
+  .reduce((acc, curr, index, arr) => acc += arr.length - 1 === index
+    ? curr
+    : `${curr}$${index + 1}`, '')
 
 const loadModule = async (config: Config) => {
   const {Pool} = await import('pg')

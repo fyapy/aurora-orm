@@ -1,13 +1,5 @@
 import type { Model } from './types'
 
-export const isUniqueErr = (error: any, table?: string) => {
-  if (table) {
-    return error.code === '23505' && error.severity === 'ERROR' && error.table === table
-  }
-
-  return error.code === '23505' && error.severity === 'ERROR'
-}
-
 export const mapper = (
   list: Record<string, any>[],
   mapToProp: string,
@@ -82,17 +74,3 @@ export const joinStrategyWhere = (
   : { [referenceProp]: data[foreignProp] }
 
 export const makeUnique = (list: string[]) => [...new Set(list)]
-
-export const addMethods = <
-  T extends Model,
-  M extends Record<string, (...args: any) => any>
->(
-  base: T,
-  methods: (base: T) => M,
-): T & M => {
-  for (const [key, method] of Object.entries(methods(base))) {
-    base[key] = method
-  }
-
-  return base as T & M
-}
