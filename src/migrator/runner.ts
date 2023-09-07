@@ -5,6 +5,7 @@ import { migration } from './migration'
 import { Migration, MigrationDirection, RunnerOptionConfig } from './types'
 import { loadMigrationFiles } from './utils'
 import { Migrator } from '../orm/driverAdapters/types'
+import { loadEnv } from '../utils/env'
 
 async function loadMigrations(db: DBConnection, migrator: Migrator) {
   try {
@@ -86,6 +87,7 @@ async function runMigrations({ migrations, direction }: {
 }
 
 export async function runner(options: RunnerOptionConfig) {
+  loadEnv()
   const db = await connectDB(options.config)
 
   try {
