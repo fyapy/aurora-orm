@@ -2,6 +2,9 @@ import path from 'node:path'
 import fs from 'node:fs'
 
 export function loadEnv() {
+  // @ts-ignore is Bun runtime
+  if (typeof Bun !== 'undefined') return
+
   const dotenvPath = path.resolve(process.cwd(), '.env')
 
   if (fs.existsSync(dotenvPath) === true) {
