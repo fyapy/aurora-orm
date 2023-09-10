@@ -57,6 +57,7 @@ export function createModel<T extends AnyObject>({
     startTrx: driver?.startTrx,
     commit: driver?.commit,
     rollback: driver?.rollback,
+    setDriver,
   } as Model<T>
 
   models[table] = output
@@ -87,8 +88,9 @@ export function createModel<T extends AnyObject>({
     }
   }
 
-
-  if (process.env.NODE_ENV !== 'test') {
+  if (typeof mockDriver !== 'undefined') {
+    setDriver(mockDriver)
+  } else {
     subsctibeToConnection(connectedDriver => {
       if (driver !== null) return false
 
@@ -96,8 +98,6 @@ export function createModel<T extends AnyObject>({
 
       return true
     })
-  } else if (typeof mockDriver !== 'undefined') {
-    setDriver(mockDriver)
   }
 
   return output

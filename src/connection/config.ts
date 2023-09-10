@@ -1,9 +1,9 @@
 import type { ConnectionConfig } from './types'
 import fs from 'node:fs'
 import path from 'node:path'
-import { getEnvVariable } from '../utils/env'
+import { getEnvVariable, loadEnv } from '../utils/env'
 
-const configExtractEnv = (json: ConnectionConfig) => Object.keys(json).reduce((acc, key) => {
+export const configExtractEnv = (json: ConnectionConfig) => Object.keys(json).reduce((acc, key) => {
   const val = json[key]
 
   if (typeof val === 'string' && val.startsWith('env:')) {
@@ -26,11 +26,12 @@ const configExtractEnv = (json: ConnectionConfig) => Object.keys(json).reduce((a
 
 export function loadConnectionConfig() {
   try {
+    loadEnv()
     const configString = fs.readFileSync(path.join(process.cwd(), 'aurora-orm.json')) as unknown as string
     const config = JSON.parse(configString) as ConnectionConfig
 
     return configExtractEnv(config)
   } catch (e) {
-    throw new Error('"aurora-orm.json" cannot be readed')
+    throw e
   }
 }

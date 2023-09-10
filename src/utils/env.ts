@@ -3,7 +3,7 @@ import fs from 'node:fs'
 
 export function loadEnv() {
   // @ts-ignore is Bun runtime
-  // if (typeof global.Bun !== 'undefined') return
+  if (typeof global.Bun !== 'undefined') return
 
   const dotenvPath = path.resolve(process.cwd(), '.env')
 

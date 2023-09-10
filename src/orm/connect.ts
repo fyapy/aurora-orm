@@ -2,7 +2,6 @@ import type { Driver } from './driverAdapters'
 import { ConnectionConfig, loadConnectionConfig } from '../connection'
 import { Drivers } from '../connection/types'
 import * as drivers from './driverAdapters'
-import { loadEnv } from '../utils/env'
 
 export interface Config {
   driver: Driver | null
@@ -63,7 +62,6 @@ export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
 }
 
 export async function connect({ debug, connectNotify = true }: ConnectConfig = {}) {
-  loadEnv()
   if (typeof debug !== 'undefined') {
     ormConfig.debug = debug
   }

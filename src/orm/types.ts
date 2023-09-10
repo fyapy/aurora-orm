@@ -54,16 +54,11 @@ export interface Operator {
   type: 'operator'
   name: string
   value?: any
-  // fn: (options: {
-  //   values: WhereValues
-  //   alias: string
-  // }) => string
 }
 export interface SetOperator {
   type: 'set-operator'
   name: string
   value: any
-  // fn: (alias: string) => string
 }
 export type Where<T extends AnyObject> = {
   [K in keyof T]?: Operator | T[K]
@@ -83,6 +78,7 @@ interface Reader<T extends AnyObject> {
 export interface Model<T extends AnyObject = AnyObject> extends Writer<T>, Reader<T> {
   primaryKey: string
 
+  setDriver(newDriver: Driver): void
   startTrx: Driver['startTrx']
   commit: Driver['commit']
   rollback: Driver['rollback']
