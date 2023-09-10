@@ -1,4 +1,4 @@
-import { addColumn, alterTable, column, createTable, dropConstraint, foreignKey, now, uuidGenerateV4 } from '../../../../migrator/queryBuilder'
+import { addColumn, alterTable, column, createTable, dropConstraint, foreignKey, insert, now, uuidV4 } from '../../../../migrator/queryBuilder'
 import { clearSqlRows, getSqlRow, mockBase } from '../../../../utils/jest'
 
 describe('driver/pg/migrator', () => {
@@ -29,7 +29,7 @@ describe('driver/pg/migrator', () => {
 
     const createSql = base.parseCreateTable(
       createTable('users', {
-        id: column({type: 'uuid', primary: true, default: uuidGenerateV4}),
+        id: column({type: 'uuid', primary: true, default: uuidV4}),
         created_at: column({type: 'timestamptz', notNull: true, default: now})
       })
     )
@@ -59,5 +59,15 @@ describe('driver/pg/migrator', () => {
     )
 
     expect(createSql).toEqual('ALTER TABLE "users" DROP CONSTRAINT "users_city_id_fkey"')
+  })
+
+  test('should generate currect insert SQL', async () => {
+    const base = await mockBase()
+
+    const createSql = base.parseInsert(
+      insert('users', {name: 'Lera', age: 20, active: true})
+    )
+
+    expect(createSql).toEqual('INSERT INTO "users" (name, age, active) VALUES (Lera, 20, true)')
   })
 })

@@ -9,6 +9,7 @@ import {
   type AlterTable,
   type ForeignKey,
   type DropTable,
+  type Insert,
   ColumnOperator,
 } from '../../../migrator/queryBuilder'
 
@@ -198,6 +199,9 @@ export async function basePG(
   function parseDropConstraint(ast: DropConstraint) {
     return `ALTER TABLE "${ast.table}" DROP CONSTRAINT "${ast.table}_${ast.column}_fkey"`
   }
+  function parseInsert(ast: Insert) {
+    return `INSERT INTO "${ast.table}" (${Object.keys(ast.values).join(', ')}) VALUES (${Object.values(ast.values).join(', ')})`
+  }
 
   return {
     startTrx,
@@ -213,6 +217,7 @@ export async function basePG(
     parseDropTable,
     parseForeignKey,
     parseDropConstraint,
+    parseInsert,
 
     ping,
     end,

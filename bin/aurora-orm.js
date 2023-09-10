@@ -2,11 +2,10 @@
 
 'use strict'
 
-const process = require('node:process')
-const { createMigration, runner } = require('../dist/migrator')
-const { loadConnectionConfig } = require('../dist/connection')
+const {createMigration, runner} = require('../dist/migrator')
+const {loadConnectionConfig} = require('../dist/connection')
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.error(err)
   process.exit(1)
 })
@@ -27,8 +26,6 @@ function parseArgv(argv) {
 
 const {action, migrationName} = parseArgv(process.argv)
 
-const MIGRATIONS_DIR = `${process.cwd()}/migrations`
-
 if (action === 'create') {
   if (!migrationName) {
     console.error("'migrationName' is required.")
@@ -37,7 +34,7 @@ if (action === 'create') {
 
   createMigration({
     name: migrationName,
-    directory: MIGRATIONS_DIR,
+    directory: `${process.cwd()}/migrations`,
   })
     .then(migrationPath => {
       console.log(`Created migration -- ${migrationPath}`)
@@ -50,15 +47,12 @@ if (action === 'create') {
 } else if (action === 'up' || action === 'down') {
   const config = loadConnectionConfig()
 
-  runner({
-    direction: action,
-    config,
-  })
+  runner({direction: action, config})
     .then(() => {
       console.log('Migrations complete!')
       process.exit(0)
     })
-    .catch((err) => {
+    .catch(err => {
       console.error(err)
       process.exit(1)
     })

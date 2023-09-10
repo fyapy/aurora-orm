@@ -7,7 +7,7 @@ export const ColumnOperator = {
 
 export type DefaultColumn = {sql: string}
 export const now: DefaultColumn = {sql: '(now())'}
-export const uuidGenerateV4: DefaultColumn = {sql: 'uuid_generate_v4()'}
+export const uuidV4: DefaultColumn = {sql: 'uuid_generate_v4()'}
 
 export type Default = string | number | DefaultColumn
 export type Type = 'uuid' | 'varchar' | 'smallint' | 'integer' | 'real' | 'timestamptz' | 'text' | 'bool' | 'char'
@@ -95,3 +95,10 @@ export const dropConstraint = (table: string, column: string): DropConstraint =>
   table,
   column,
 })
+
+export type Value = string | number | boolean
+export type Insert = {
+  table: string
+  values: Record<string, Value>
+}
+export const insert = (table: string, values: Record<string, Value>): Insert => ({table, values})

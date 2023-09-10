@@ -2,10 +2,10 @@ import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDire
 import type { DBConnection } from './db'
 import type { Tx } from '../orm/types'
 import path from 'node:path'
-import { column, now, uuidGenerateV4 } from './queryBuilder'
+import { column, now, uuidV4 } from './queryBuilder'
 import { Migrator } from '../orm/driverAdapters/types'
 
-const defs = {now, uuidGenerateV4}
+const defs = {now, uuidV4}
 
 export function migration({db, actions, filePath, migrator}: {
   db: DBConnection
@@ -54,6 +54,7 @@ export function migration({db, actions, filePath, migrator}: {
           alterTable: (table, columns) => db.alterTable(table, columns, tx),
           foreignKey: (foreign, reference) => db.foreignKey(foreign, reference, tx),
           dropConstraint: (table, column) => db.dropConstraint(table, column, tx),
+          insert: (table, values) => db.insert(table, values, tx),
         },
         column,
         defs,

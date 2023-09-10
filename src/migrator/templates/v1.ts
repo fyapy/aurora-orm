@@ -3,7 +3,7 @@ import type { DBConnection } from '../db'
 
 interface MigrationOptions {
   column: typeof column
-  defs: Record<'uuidGenerateV4' | 'now', DefaultColumn>
+  defs: Record<'uuidV4' | 'now', DefaultColumn>
   sql: DBConnection
   getSQLConnection(connectionName: string): DBConnection
 }

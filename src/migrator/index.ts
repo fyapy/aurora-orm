@@ -1,7 +1,7 @@
 export { createMigration } from './create'
 export { runner } from './runner'
 export {
-  uuidGenerateV4,
+  uuidV4,
   now,
   column,
   addColumn,

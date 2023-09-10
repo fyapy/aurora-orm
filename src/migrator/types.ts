@@ -3,9 +3,9 @@ import type { DefaultColumn, column } from './queryBuilder'
 import type { DBConnection } from './db'
 
 export interface RunMigration {
-  readonly path: string
-  readonly name: string
-  readonly timestamp: number
+  path: string
+  name: string
+  timestamp: number
 }
 
 export type MigrationDirection = 'up' | 'down'
@@ -18,7 +18,7 @@ export interface RunnerOptionConfig {
 
 export type MigrationAction = (options: {
   column: typeof column
-  defs: Record<'uuidGenerateV4' | 'now', DefaultColumn>
+  defs: Record<'uuidV4' | 'now', DefaultColumn>
   sql: DBConnection
 }) => Promise<void> | void
 
