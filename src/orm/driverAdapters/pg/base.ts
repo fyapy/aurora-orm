@@ -200,7 +200,10 @@ export async function basePG(
     return `ALTER TABLE "${ast.table}" DROP CONSTRAINT "${ast.table}_${ast.column}_fkey"`
   }
   function parseInsert(ast: Insert) {
-    return `INSERT INTO "${ast.table}" (${Object.keys(ast.values).join(', ')}) VALUES (${Object.values(ast.values).join(', ')})`
+    const values = Object.values(ast.values)
+      .map(value => typeof value === 'string' ? `'${value}'` : value)
+
+    return `INSERT INTO "${ast.table}" (${Object.keys(ast.values).join(', ')}) VALUES (${values.join(', ')})`
   }
 
   return {

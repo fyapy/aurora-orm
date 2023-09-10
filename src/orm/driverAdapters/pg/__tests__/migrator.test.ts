@@ -68,6 +68,6 @@ describe('driver/pg/migrator', () => {
       insert('users', {name: 'Lera', age: 20, active: true})
     )
 
-    expect(createSql).toEqual('INSERT INTO "users" (name, age, active) VALUES (Lera, 20, true)')
+    expect(createSql).toEqual('INSERT INTO "users" (name, age, active) VALUES (\'Lera\', 20, true)')
   })
 })
