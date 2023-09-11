@@ -1,6 +1,6 @@
 import type { Model } from '../../../types'
 import { createModel } from '../../../model'
-import { In, Increment } from '../../../operators'
+import { In, Includes, Increment } from '../../../operators'
 import { fakeDriver, clearSqlRows, getSqlRow } from '../../../../utils/jest'
 
 interface User {
@@ -114,5 +114,21 @@ describe('driver/pg/base', () => {
       'RETURNING "id", "name"',
     ].join(' '))
     expect(values).toEqual([2, 4])
+  })
+
+
+  test('should be currect sql findAll with sql Includes operator', async () => {
+    const altModel = createModel<{alt: string[]}>({
+      mockDriver: await fakeDriver(),
+      table: 'users',
+      mapping: {alt: 'alt'},
+    })
+
+    await altModel.findAll({alt: Includes('1')})
+
+    const {sql, values} = getSqlRow()
+
+    expect(sql).toEqual('SELECT "alt" FROM "users" WHERE $1 = ANY("alt")')
+    expect(values).toEqual(['1'])
   })
 })

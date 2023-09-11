@@ -2,10 +2,10 @@ import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDire
 import type { DBConnection } from './db'
 import type { Tx } from '../orm/types'
 import path from 'node:path'
-import { column, now, uuidV4 } from './queryBuilder'
+import { column, now, uuidV4, emptyArray } from './queryBuilder'
 import { Migrator } from '../orm/driverAdapters/types'
 
-const defs = {now, uuidV4}
+const defs = {now, uuidV4, emptyArray}
 
 export function migration({db, actions, filePath, migrator}: {
   db: DBConnection

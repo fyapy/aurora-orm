@@ -25,13 +25,9 @@ export const configExtractEnv = (json: ConnectionConfig) => Object.keys(json).re
 }, {} as ConnectionConfig)
 
 export function loadConnectionConfig() {
-  try {
-    loadEnv()
-    const configString = fs.readFileSync(path.join(process.cwd(), 'aurora-orm.json')) as unknown as string
-    const config = JSON.parse(configString) as ConnectionConfig
+  loadEnv()
+  const configString = fs.readFileSync(path.join(process.cwd(), 'aurora-orm.json')) as unknown as string
+  const config = JSON.parse(configString) as ConnectionConfig
 
-    return configExtractEnv(config)
-  } catch (e) {
-    throw e
-  }
+  return configExtractEnv(config)
 }

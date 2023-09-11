@@ -23,6 +23,11 @@ export const In = <T extends string | number | null>(value: T[]): Operator => ({
   name: 'in',
   value,
 })
+export const Includes = <T extends string | number>(value: T): Operator => ({
+  type: whereOperator,
+  name: 'includes',
+  value,
+})
 
 export const NotNull: Operator = ({type: whereOperator, name: 'not-null'})
 

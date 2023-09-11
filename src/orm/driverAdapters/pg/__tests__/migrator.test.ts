@@ -1,4 +1,4 @@
-import { addColumn, alterTable, column, createTable, dropConstraint, foreignKey, insert, now, uuidV4 } from '../../../../migrator/queryBuilder'
+import { addColumn, alterTable, column, createTable, dropConstraint, emptyArray, foreignKey, insert, now, uuidV4 } from '../../../../migrator/queryBuilder'
 import { clearSqlRows, getSqlRow, mockBase } from '../../../../utils/jest'
 
 describe('driver/pg/migrator', () => {
@@ -69,5 +69,15 @@ describe('driver/pg/migrator', () => {
     )
 
     expect(createSql).toEqual('INSERT INTO "users" (name, age, active) VALUES (\'Lera\', 20, true)')
+  })
+
+  test('should generate currect create table SQL with emptyArray', async () => {
+    const base = await mockBase()
+
+    const createSql = base.parseCreateTable(
+      createTable('users', {list: column({type: 'varchar', default: emptyArray})})
+    )
+
+    expect(createSql).toEqual('CREATE TABLE "users" ("list" varchar DEFAULT \'{}\')')
   })
 })

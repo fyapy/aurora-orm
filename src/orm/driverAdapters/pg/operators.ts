@@ -27,6 +27,11 @@ export const whereOperators = {
 
     return `${opts.alias} = ANY(?)`
   },
+  'includes': (value: string, opts: Options) => {
+    opts.values.push(value)
+
+    return `? = ANY(${opts.alias})`
+  },
   'not-null': (value: string, opts: Options) => `${opts.alias} IS NOT NULL`,
   'ilike': (value: string, opts: Options) => {
     opts.values.push(`%${value}%`)

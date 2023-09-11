@@ -14,6 +14,7 @@ export {
   MoreThan,
   LessThan,
   NotEqual,
+  Includes,
   Decrement,
   Increment,
   ILikeStart,

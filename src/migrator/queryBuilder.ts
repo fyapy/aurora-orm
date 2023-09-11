@@ -8,6 +8,7 @@ export const ColumnOperator = {
 export type DefaultColumn = {sql: string}
 export const now: DefaultColumn = {sql: '(now())'}
 export const uuidV4: DefaultColumn = {sql: 'uuid_generate_v4()'}
+export const emptyArray: DefaultColumn = {sql: "'{}'"}
 
 export type Default = string | number | DefaultColumn
 export type Type = 'uuid' | 'varchar' | 'smallint' | 'integer' | 'real' | 'timestamptz' | 'text' | 'bool' | 'char'

@@ -18,7 +18,7 @@ export interface RunnerOptionConfig {
 
 export type MigrationAction = (options: {
   column: typeof column
-  defs: Record<'uuidV4' | 'now', DefaultColumn>
+  defs: Record<'uuidV4' | 'now' | 'emptyArray', DefaultColumn>
   sql: DBConnection
 }) => Promise<void> | void
 
