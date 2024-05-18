@@ -36,6 +36,7 @@ function ormLog(sql: string, values?: any[] | null) {
 }
 
 interface ConnectConfig {
+  config?: ConnectionConfig
   debug?: boolean
   connectNotify?: boolean
 }
@@ -61,13 +62,15 @@ export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   }
 }
 
-export async function connect({ debug, connectNotify = true }: ConnectConfig = {}) {
+export async function connect({ debug, config, connectNotify = true }: ConnectConfig = {}) {
   if (typeof debug !== 'undefined') {
     ormConfig.debug = debug
   }
 
-  const auroraConfig = loadConnectionConfig()
   const timeout = 5000
+  const auroraConfig = typeof config !== 'undefined'
+    ? config
+    : loadConnectionConfig()
 
   setTimeout(() => {
     if (ormConfig.driver === null) {
