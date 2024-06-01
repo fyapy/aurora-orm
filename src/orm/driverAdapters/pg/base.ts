@@ -194,7 +194,7 @@ export async function basePG(
     return sql
   }
   function parseForeignKey(ast: ForeignKey) {
-    return `ALTER TABLE "${ast.foreign.table}" ADD FOREIGN KEY ("${ast.foreign.key}") REFERENCES "${ast.reference.table}" ("${ast.reference.key}")`
+    return `ALTER TABLE "${ast.foreign.table}" ADD FOREIGN KEY ("${ast.foreign.key}") REFERENCES "${ast.reference.table}" ("${ast.reference.key}") ON DELETE CASCADE`
   }
   function parseDropConstraint(ast: DropConstraint) {
     return `ALTER TABLE "${ast.table}" DROP CONSTRAINT "${ast.table}_${ast.column}_fkey"`
