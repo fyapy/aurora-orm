@@ -47,7 +47,7 @@ describe('driver/pg/migrator', () => {
       foreignKey({table: 'panel_user_roles', key: 'user_id'}, {table: 'panel_users', key: 'id'})
     )
 
-    expect(createSql).toEqual('ALTER TABLE "panel_user_roles" ADD FOREIGN KEY ("user_id") REFERENCES "panel_users" ("id")')
+    expect(createSql).toEqual('ALTER TABLE "panel_user_roles" ADD FOREIGN KEY ("user_id") REFERENCES "panel_users" ("id") ON DELETE CASCADE')
   })
 
 

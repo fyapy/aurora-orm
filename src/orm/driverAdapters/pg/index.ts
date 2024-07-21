@@ -20,6 +20,8 @@ import { buildAliasMapper, insertValues } from './utils'
 import { setOperators, whereOperators } from './operators'
 import { setOperator, whereOperator } from '../../operators'
 
+export {whereOperators}
+
 export async function pg({config, ormLog, mockBase = basePG}: {
   config: Config
   ormLog: OrmLog

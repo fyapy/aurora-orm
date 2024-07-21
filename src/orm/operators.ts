@@ -1,5 +1,7 @@
 import type {Operator, SetOperator} from './types'
 
+export {whereOperators as pgWhereOperators} from './driverAdapters/pg/operators'
+
 export const whereOperator = 'operator'
 
 export const MoreThan = <T extends number | string>(value: T): Operator => ({
