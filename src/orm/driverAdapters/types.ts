@@ -47,6 +47,7 @@ export interface Driver {
     findOne: Model['findOne']
     findOrFail: Model['findOrFail']
     exists: Model['exists']
+    existsOrFail: Model['existsOrFail']
     count: Model['count']
 
     create: Model['create']

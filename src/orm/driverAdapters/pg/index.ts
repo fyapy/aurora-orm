@@ -29,6 +29,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
 }): Promise<Driver> {
   const {query, queryRow, ...base} = await mockBase(config, ormLog)
   const TRUE = true
+  const FALSE = false
 
   return {
     whereOperators,
@@ -591,6 +592,16 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         }
       }
 
+      async function existsOrFail(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean> {
+        const isExists = await exists(id, tx)
+
+        if (isExists === FALSE) {
+          throw new AuroraFail(modelName)
+        }
+
+        return isExists
+      }
+
       async function count(value: Where<T> | Where<T>[], tx?: Tx): Promise<number> {
         const whereProps = where(value)
         const sql = `SELECT COUNT(*)::integer as count FROM "${table}" ${whereProps.sql}`
@@ -606,6 +617,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         findOne,
         findOrFail,
         exists,
+        existsOrFail,
         count,
 
         create,

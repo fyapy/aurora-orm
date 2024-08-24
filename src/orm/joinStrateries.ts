@@ -32,7 +32,10 @@ export function OneToOne({
 
         mapper(prop, data, referenceProp, foreignList, foreignProp)
       } else {
-        const where = { [foreignProp]: data[referenceProp] }
+        // only findOne join optimization
+        const where = foreighModel.primaryKey === referenceProp
+          ? data[foreignProp]
+          : { [referenceProp]: data[foreignProp] }
 
         const foreignData = await foreighModel.findOne({
           where,
@@ -68,7 +71,7 @@ export function OneToMany({
       const foreighModel = models[table]
 
       if (Array.isArray(data)) {
-        const dataToJoin = await foreighModel.findAll({
+        const foreignList = await foreighModel.findAll({
           where: {
             [foreignProp]: In(makeUnique(data.map(d => d[referenceProp]))),
           },
@@ -77,7 +80,7 @@ export function OneToMany({
           tx,
         })
 
-        manyMapper(prop, data, referenceProp, dataToJoin, foreignProp)
+        manyMapper(prop, data, referenceProp, foreignList, foreignProp)
       } else {
         const where = { [foreignProp]: data[referenceProp] }
 
@@ -119,11 +122,11 @@ export function Exists({
           ? In(makeUnique(data.map(d => d[foreignProp])))
           : { [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))) }
 
-        const dataToJoin = await foreighModel.findAll({ where, tx })
+        const foreignList = await foreighModel.findAll({ where, tx })
 
         // custom mapper
         const mapper = {}
-        dataToJoin.forEach((c: any) => mapper[c[referenceProp]] = true)
+        foreignList.forEach((c: any) => mapper[c[referenceProp]] = true)
 
         for (const item of data) {
           item[prop] = mapper[item[foreignProp]] ?? false

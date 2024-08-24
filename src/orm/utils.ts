@@ -9,7 +9,7 @@ export const mapper = (
     for (const item of list) {
       item[newPropName] = null
     }
-    return;
+    return
   }
 
   const mapper = {}
@@ -37,7 +37,7 @@ export const manyMapper = (
     for (const item of list) {
       item[newPropName] = []
     }
-    return;
+    return
   }
 
   const mapper: Record<string, any[]> = {}
@@ -61,15 +61,6 @@ export const manyMapper = (
     }
   }
 }
-
-// export const joinStrategyWhere = (
-//   model: Model,
-//   data: any,
-//   foreignProp: string,
-//   referenceProp: string,
-// ) => model.primaryKey === referenceProp
-//   ? data[foreignProp]
-//   : { [referenceProp]: data[foreignProp] }
 
 export function tableNameToModelName(table: string) {
   const name = table.replace(/s$/, '').replace(/\_/g, '')

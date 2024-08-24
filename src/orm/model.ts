@@ -53,6 +53,10 @@ export function createModel<T extends AnyObject>({
       console.warn('exists method called before aurora-orm connected')
       return false
     },
+    async existsOrFail() {
+      console.warn('existsOrFail method called before aurora-orm connected')
+      return false
+    },
     async count() {
       console.warn('count method called before aurora-orm connected')
       return 0

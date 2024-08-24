@@ -83,7 +83,7 @@ export async function connect({ debug, config, connectNotify = true }: ConnectCo
   setConnection(driver)
 
   if (connectNotify === true) {
-    console.log('Aurora ORM succesfully connected');
+    console.log('Aurora ORM succesfully connected')
   }
 
   return ormConfig

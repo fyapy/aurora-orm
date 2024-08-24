@@ -80,6 +80,7 @@ interface Reader<T extends AnyObject> {
   findOne(id: ID | Where<T> | Where<T>[] | FindOneOptions<T>): Promise<T>
   findOrFail(id: ID | Where<T> | Where<T>[] | FindOneOptions<T>): Promise<T>
   exists(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean>
+  existsOrFail(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean>
   count(value: Where<T> | Where<T>[], tx?: Tx): Promise<number>
 }
 
