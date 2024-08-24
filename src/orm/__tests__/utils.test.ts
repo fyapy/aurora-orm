@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { manyMapper, mapper } from '../utils'
 
 function createData(): Array<{

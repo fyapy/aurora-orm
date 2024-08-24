@@ -1,7 +1,8 @@
 import type { Model } from '../../../types'
 import { createModel } from '../../../model'
 import { In, Includes, Increment } from '../../../operators'
-import { fakeDriver, clearSqlRows, getSqlRow } from '../../../../utils/jest'
+import { fakeDriver, clearSqlRows, getSqlRow } from '../../../../utils/tests'
+import { afterEach, beforeAll, describe, expect, test } from 'vitest'
 
 interface User {
   id: number

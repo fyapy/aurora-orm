@@ -14,7 +14,9 @@ export const getSqlRow = (index: number = 0) => {
   return {sql: data[0], values: data[1]}
 }
 
-export const clearSqlRows = () => sqlRows = []
+export function clearSqlRows() {
+  sqlRows = []
+}
 
 async function mockQuery(sql: string, values: any[] | null, tx?: Tx) {
   sqlRows.push([sql, values])

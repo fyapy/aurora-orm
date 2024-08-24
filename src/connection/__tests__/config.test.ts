@@ -1,9 +1,10 @@
+import {describe, expect, test} from 'vitest'
 import {configExtractEnv, loadConnectionConfig} from '../config'
 
 describe('connection/config', () => {
-  const connectionString = 'postgres://aabdullin:123@localhost:5432/aurora'
+  const connectionString = 'postgres://amir:123@localhost:5432/aurora'
 
-  test('should load aurora-orm.json', () => {
+  test('should load aurora-orm.json', t => {
     const config = loadConnectionConfig()
 
     expect(config).toEqual({connectionString, driver: 'pg'})
