@@ -32,10 +32,7 @@ export function OneToOne({
 
         mapper(prop, data, referenceProp, foreignList, foreignProp)
       } else {
-        // only findOne join optimization
-        const where = foreighModel.primaryKey === referenceProp
-          ? data[foreignProp]
-          : { [referenceProp]: data[foreignProp] }
+        const where = { [referenceProp]: data[foreignProp] }
 
         const foreignData = await foreighModel.findOne({
           where,
