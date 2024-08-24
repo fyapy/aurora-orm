@@ -18,6 +18,7 @@ export {
   Decrement,
   Increment,
   ILikeStart,
+  whereOperator,
 } from './operators'
 export { createModel } from './model'
 export { connect, ormConfig } from './connect'
