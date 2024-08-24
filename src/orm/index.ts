@@ -3,7 +3,7 @@ export {
   manyMapper,
   makeUnique,
   tableNameToModelName,
-} from './utils'
+} from './utils.js'
 export {
   In,
   ILike,
@@ -19,8 +19,8 @@ export {
   Increment,
   ILikeStart,
   whereOperator,
-} from './operators'
-export { createModel } from './model'
-export { connect, ormConfig } from './connect'
-export * as JoinStrategies from './joinStrateries'
-export * from './types'
+} from './operators.js'
+export { createModel } from './model.js'
+export { connect, ormConfig } from './connect.js'
+export * as JoinStrategies from './joinStrateries.js'
+export * from './types.js'

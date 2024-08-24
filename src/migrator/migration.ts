@@ -1,9 +1,9 @@
-import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDirection } from './types'
-import type { DBConnection } from './db'
-import type { Tx } from '../orm/types'
+import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDirection } from './types.js'
+import type { DBConnection } from './db.js'
+import type { Tx } from '../orm/types.js'
 import path from 'node:path'
-import { column, now, uuidV4, emptyArray } from './queryBuilder'
-import { Migrator } from '../orm/driverAdapters/types'
+import { column, now, uuidV4, emptyArray } from './queryBuilder.js'
+import { Migrator } from '../orm/driverAdapters/types.js'
 
 const defs = {now, uuidV4, emptyArray}
 

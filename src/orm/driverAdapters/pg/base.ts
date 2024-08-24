@@ -1,6 +1,6 @@
-import type { AbstractClient, AbstractPoolRuntime, Config, OrmLog } from './types'
-import type { Tx, QueryConfig } from '../../types'
-import type { Migrator } from '../types'
+import type { AbstractClient, AbstractPoolRuntime, Config, OrmLog } from './types.js'
+import type { Tx, QueryConfig } from '../../types.js'
+import type { Migrator } from '../types.js'
 import {randomUUID} from 'node:crypto'
 import {
   type DropConstraint,
@@ -11,7 +11,7 @@ import {
   type DropTable,
   type Insert,
   ColumnOperator,
-} from '../../../migrator/queryBuilder'
+} from '../../../migrator/queryBuilder.js'
 
 const SQLParams = (sql: string) => sql.split('?')
   .reduce((acc, curr, index, arr) => acc += arr.length - 1 === index
@@ -19,7 +19,7 @@ const SQLParams = (sql: string) => sql.split('?')
     : `${curr}$${index + 1}`, '')
 
 const loadModule = async (config: Config) => {
-  const {Pool} = await import('pg')
+  const Pool = (await import('pg')).default.Pool
 
   return new Pool(config) as any as AbstractPoolRuntime
 }

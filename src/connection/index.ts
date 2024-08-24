@@ -3,5 +3,5 @@ export type {
   ConnectionConfig,
   Postgresql,
   PostgresqlConnectionStringConfig,
-} from './types'
-export { loadConnectionConfig } from './config'
+} from './types.js'
+export { loadConnectionConfig } from './config.js'

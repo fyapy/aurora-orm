@@ -1,6 +1,6 @@
-import type { ConnectionConfig } from '../connection'
-import type { DefaultColumn, column } from './queryBuilder'
-import type { DBConnection } from './db'
+import type { ConnectionConfig } from '../connection/index.js'
+import type { DefaultColumn, column } from './queryBuilder.js'
+import type { DBConnection } from './db.js'
 
 export interface RunMigration {
   path: string

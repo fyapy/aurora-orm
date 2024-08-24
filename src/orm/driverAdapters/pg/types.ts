@@ -2,8 +2,8 @@ import type {
   PostgresqlConnectionStringConfig,
   RemoveIdnetifiers,
   Postgresql,
-} from '../../../connection/types'
-import type { QueryConfig } from '../../types'
+} from '../../../connection/types.js'
+import type { QueryConfig } from '../../types.js'
 
 export type Config = RemoveIdnetifiers<PostgresqlConnectionStringConfig | Postgresql>
 

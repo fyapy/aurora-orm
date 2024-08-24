@@ -1,7 +1,7 @@
-import type { ConnectionConfig } from './types'
+import type { ConnectionConfig } from './types.js'
 import fs from 'node:fs'
 import path from 'node:path'
-import { getEnvVariable, loadEnv } from '../utils/env'
+import { getEnvVariable, loadEnv } from '../utils/env.js'
 
 export const configExtractEnv = (json: ConnectionConfig) => Object.keys(json).reduce((acc, key) => {
   const val = json[key]

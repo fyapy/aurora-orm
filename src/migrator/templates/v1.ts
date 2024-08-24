@@ -1,5 +1,5 @@
-import type { DefaultColumn, column } from '../queryBuilder'
-import type { DBConnection } from '../db'
+import type { DefaultColumn, column } from '../queryBuilder.js'
+import type { DBConnection } from '../db.js'
 
 interface MigrationOptions {
   column: typeof column

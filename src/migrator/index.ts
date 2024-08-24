@@ -1,5 +1,5 @@
-export { createMigration } from './create'
-export { runner } from './runner'
+export { createMigration } from './create.js'
+export { runner } from './runner.js'
 export {
   uuidV4,
   now,
@@ -8,4 +8,4 @@ export {
   dropColumn,
   setDefault,
   setType,
-} from './queryBuilder'
+} from './queryBuilder.js'

@@ -1,7 +1,7 @@
-import type { Driver } from './driverAdapters'
-import { ConnectionConfig, loadConnectionConfig } from '../connection'
-import { Drivers } from '../connection/types'
-import * as drivers from './driverAdapters'
+import type { Driver } from './driverAdapters/index.js'
+import { ConnectionConfig, loadConnectionConfig } from '../connection/index.js'
+import { Drivers } from '../connection/types.js'
+import * as drivers from './driverAdapters/index.js'
 
 export interface Config {
   driver: Driver | null

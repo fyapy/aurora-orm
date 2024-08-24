@@ -1,6 +1,6 @@
-import type { JoinStrategy } from './types'
-import { In } from './operators'
-import { makeUnique, mapper, manyMapper } from './utils'
+import type { JoinStrategy } from './types.js'
+import { In } from './operators.js'
+import { makeUnique, mapper, manyMapper } from './utils.js'
 
 export function OneToOne({
   table,

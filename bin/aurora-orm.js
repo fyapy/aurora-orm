@@ -2,8 +2,8 @@
 
 'use strict'
 
-const {createMigration, runner} = require('../dist/migrator')
-const {loadConnectionConfig} = require('../dist/connection')
+import {createMigration, runner} from '../dist/migrator/index.js'
+import {loadConnectionConfig} from '../dist/connection/index.js'
 
 process.on('uncaughtException', err => {
   console.error(err)

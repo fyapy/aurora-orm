@@ -1,10 +1,10 @@
-import type { ConnectionConfig } from '../connection'
-import type { Foreign, Value } from './queryBuilder'
-import type { Driver } from '../orm/driverAdapters'
-import type { Tx } from '../orm'
+import type { ConnectionConfig } from '../connection/index.js'
+import type { Foreign, Value } from './queryBuilder.js'
+import type { Driver } from '../orm/driverAdapters/index.js'
+import type { Tx } from '../orm/index.js'
 import { inspect } from 'node:util'
-import { connectToDatabase } from '../orm/connect'
-import * as queryBuilder from './queryBuilder'
+import { connectToDatabase } from '../orm/connect.js'
+import * as queryBuilder from './queryBuilder.js'
 
 export interface DBConnection {
   driver: Driver

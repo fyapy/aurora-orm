@@ -1,5 +1,5 @@
-import type { AlterTable, CreateTable, DropConstraint, DropTable, ForeignKey, Insert } from '../../migrator/queryBuilder'
-import type { Model, Tx, ModelOptions, Models, AnyObject, WhereOperatorOptions } from '../types'
+import type { AlterTable, CreateTable, DropConstraint, DropTable, ForeignKey, Insert } from '../../migrator/queryBuilder.js'
+import type { Model, Tx, ModelOptions, Models, AnyObject, WhereOperatorOptions } from '../types.js'
 
 export type Migrator = {
   delete(name: string, tx: Tx): Promise<void>

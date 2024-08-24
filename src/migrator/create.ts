@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import mkdirp from 'mkdirp'
+import * as mkdirp from 'mkdirp'
 
 
 export async function createMigration({ name, directory }: {
@@ -12,9 +12,9 @@ export async function createMigration({ name, directory }: {
 
   const time = new Date().valueOf()
 
-  const templateFileName = path.resolve(__dirname, '../../templates/migration-template.js')
-  // file name looks like migrations/1391877300255_migration-title.js
-  const newFile = `${directory}/${time}_${name}.js`
+  const templateFileName = path.resolve(import.meta.dirname, '../../templates/migration-template.ts')
+  // file name looks like migrations/1391877300255_migration-title.ts
+  const newFile = `${directory}/${time}_${name}.ts`
 
   await new Promise((resolve, reject) => fs.createReadStream(templateFileName)
     .pipe(fs.createWriteStream(newFile))

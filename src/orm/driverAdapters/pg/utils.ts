@@ -1,4 +1,4 @@
-import type {AnyObject, ColumnData} from '../../types'
+import type {AnyObject, ColumnData} from '../../types.js'
 
 export function buildAliasMapper<T extends AnyObject>(obj: Record<keyof T, ColumnData>) {
   const _mapper = new Map<keyof T, string>()

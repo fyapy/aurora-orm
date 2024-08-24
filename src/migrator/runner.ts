@@ -1,10 +1,11 @@
 import path from 'node:path'
-import { idColumn, migrationsTable, nameColumn, runOnColumn } from './constants'
-import { connectDB, DBConnection } from './db'
-import { migration } from './migration'
-import { Migration, MigrationDirection, RunnerOptionConfig } from './types'
-import { loadMigrationFiles } from './utils'
-import { Migrator } from '../orm/driverAdapters/types'
+import * as tsx from 'tsx/esm/api'
+import { idColumn, migrationsTable, nameColumn, runOnColumn } from './constants.js'
+import { connectDB, DBConnection } from './db.js'
+import { migration } from './migration.js'
+import { Migration, MigrationDirection, RunnerOptionConfig } from './types.js'
+import { loadMigrationFiles } from './utils.js'
+import { Migrator } from '../orm/driverAdapters/types.js'
 
 async function loadMigrations(db: DBConnection, migrator: Migrator) {
   try {
@@ -15,8 +16,11 @@ async function loadMigrations(db: DBConnection, migrator: Migrator) {
       await Promise.all(files.map(async file => {
         const filePath = `${dir}/${file}`
         const fullPath = path.join(process.cwd(), filePath)
+        const actionPath = `file://${fullPath.replace(/\\/g, '/')}`
 
-        const actions = require(path.relative(__dirname, fullPath))
+        const actions = file.endsWith('.ts')
+          ? (await tsx.tsImport(actionPath, import.meta.url)).default
+          : (await import(actionPath)).default
 
         return migration({
           migrator,

@@ -1,6 +1,6 @@
-import type {Operator, SetOperator} from './types'
+import type {Operator, SetOperator} from './types.js'
 
-export {whereOperators as pgWhereOperators} from './driverAdapters/pg/operators'
+export {whereOperators as pgWhereOperators} from './driverAdapters/pg/operators.js'
 
 export const whereOperator = 'operator'
 

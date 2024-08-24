@@ -1,5 +1,5 @@
-import type { Config, OrmLog } from './types'
-import type { Driver } from '../types'
+import type { Config, OrmLog } from './types.js'
+import type { Driver } from '../types.js'
 import {
   type ColumnData,
   type JoinStrategy,
@@ -15,12 +15,12 @@ import {
   type SetOperator,
   type AnyObject,
   AuroraFail,
-} from '../../types'
-import { basePG } from './base'
-import { buildAliasMapper, insertValues } from './utils'
-import { setOperators, whereOperators } from './operators'
-import { setOperator, whereOperator } from '../../operators'
-import { tableNameToModelName } from '../../utils'
+} from '../../types.js'
+import { basePG } from './base.js'
+import { buildAliasMapper, insertValues } from './utils.js'
+import { setOperators, whereOperators } from './operators.js'
+import { setOperator, whereOperator } from '../../operators.js'
+import { tableNameToModelName } from '../../utils.js'
 
 export async function pg({config, ormLog, mockBase = basePG}: {
   config: Config
