@@ -1,5 +1,3 @@
-import type { Model } from './types'
-
 export const mapper = (
   newPropName: string,
   list: Record<string, any>[],
@@ -64,13 +62,13 @@ export const manyMapper = (
   }
 }
 
-export const joinStrategyWhere = (
-  repo: Model,
-  data: any,
-  foreignProp: string,
-  referenceProp: string,
-) => repo.primaryKey === referenceProp
-  ? data[foreignProp]
-  : { [referenceProp]: data[foreignProp] }
+// export const joinStrategyWhere = (
+//   model: Model,
+//   data: any,
+//   foreignProp: string,
+//   referenceProp: string,
+// ) => model.primaryKey === referenceProp
+//   ? data[foreignProp]
+//   : { [referenceProp]: data[foreignProp] }
 
 export const makeUnique = (list: string[]) => [...new Set(list)]

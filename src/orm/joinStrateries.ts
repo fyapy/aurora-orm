@@ -1,6 +1,6 @@
 import type { JoinStrategy } from './types'
 import { In } from './operators'
-import { makeUnique, mapper, manyMapper, joinStrategyWhere } from './utils'
+import { makeUnique, mapper, manyMapper } from './utils'
 
 export function OneToOne({
   table,
@@ -32,7 +32,7 @@ export function OneToOne({
 
         mapper(prop, data, referenceProp, foreignList, foreignProp)
       } else {
-        const where = joinStrategyWhere(foreighModel, data, foreignProp, referenceProp)
+        const where = { [foreignProp]: data[referenceProp] }
 
         const foreignData = await foreighModel.findOne({
           where,
@@ -79,7 +79,8 @@ export function OneToMany({
 
         manyMapper(prop, data, referenceProp, dataToJoin, foreignProp)
       } else {
-        const where = joinStrategyWhere(foreighModel, data, foreignProp, referenceProp)
+        const where = { [foreignProp]: data[referenceProp] }
+
         const foreighData = await foreighModel.findAll({
           where,
           select,
@@ -128,7 +129,8 @@ export function Exists({
           item[prop] = mapper[item[foreignProp]] ?? false
         }
       } else {
-        const where = joinStrategyWhere(foreighModel, data, foreignProp, referenceProp)
+        const where = { [foreignProp]: data[referenceProp] }
+
         const foreighData = await foreighModel.exists(where, tx)
 
         if (foreignProp !== primaryKey) {

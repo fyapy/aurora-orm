@@ -2,7 +2,6 @@ export {
   mapper,
   manyMapper,
   makeUnique,
-  joinStrategyWhere,
 } from './utils'
 export {
   In,
