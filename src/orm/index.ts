@@ -2,6 +2,7 @@ export {
   mapper,
   manyMapper,
   makeUnique,
+  tableNameToModelName,
 } from './utils'
 export {
   In,

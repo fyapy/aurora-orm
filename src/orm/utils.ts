@@ -71,4 +71,10 @@ export const manyMapper = (
 //   ? data[foreignProp]
 //   : { [referenceProp]: data[foreignProp] }
 
+export function tableNameToModelName(table: string) {
+  const name = table.replace(/s$/, '').replace(/\_/g, '')
+
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
+
 export const makeUnique = (list: string[]) => [...new Set(list)]

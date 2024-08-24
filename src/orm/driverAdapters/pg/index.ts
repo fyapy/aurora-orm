@@ -20,6 +20,7 @@ import { basePG } from './base'
 import { buildAliasMapper, insertValues } from './utils'
 import { setOperators, whereOperators } from './operators'
 import { setOperator, whereOperator } from '../../operators'
+import { tableNameToModelName } from '../../utils'
 
 export async function pg({config, ormLog, mockBase = basePG}: {
   config: Config
@@ -560,7 +561,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return result
       }
 
-      const modelName = table.replace(/s$/, '').replace('_', '')
+      const modelName = tableNameToModelName(table)
 
       async function findOrFail(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<T> {
         const data = await findOne(params)
