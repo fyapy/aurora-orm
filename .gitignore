@@ -5,4 +5,3 @@ dist
 yarn-error.log
 .env
 /migrations
-aurora-orm.json

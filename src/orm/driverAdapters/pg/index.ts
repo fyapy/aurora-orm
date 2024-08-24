@@ -1,26 +1,25 @@
 import type { Config, OrmLog } from './types'
 import type { Driver } from '../types'
-import type {
-  ColumnData,
-  JoinStrategy,
-  FindAllOptions,
-  FindOneOptions,
-  BaseFindOptions,
-  Operator,
-  WhereValues,
-  Where,
-  Join,
-  Tx,
-  ID,
-  SetOperator,
-  AnyObject,
+import {
+  type ColumnData,
+  type JoinStrategy,
+  type FindAllOptions,
+  type FindOneOptions,
+  type BaseFindOptions,
+  type Operator,
+  type WhereValues,
+  type Where,
+  type Join,
+  type Tx,
+  type ID,
+  type SetOperator,
+  type AnyObject,
+  AuroraFail,
 } from '../../types'
 import { basePG } from './base'
 import { buildAliasMapper, insertValues } from './utils'
 import { setOperators, whereOperators } from './operators'
 import { setOperator, whereOperator } from '../../operators'
-
-export {whereOperators}
 
 export async function pg({config, ormLog, mockBase = basePG}: {
   config: Config
@@ -31,6 +30,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
   const TRUE = true
 
   return {
+    whereOperators,
     query,
     queryRow,
     ...base,
@@ -560,6 +560,16 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return result
       }
 
+      async function findOrFail(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<T> {
+        const data = await findOne(params)
+
+        if (typeof data === 'undefined') {
+          throw new AuroraFail(table)
+        }
+
+        return data
+      }
+
       async function exists(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean> {
         let sql = `SELECT COUNT(*)::integer as count FROM "${table}"`
         const isPrimitive = typeof id !== 'object'
@@ -591,6 +601,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
       return {
         findAll,
         findOne,
+        findOrFail,
         exists,
         count,
 

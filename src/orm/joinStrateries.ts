@@ -4,6 +4,7 @@ import { makeUnique, mapper, manyMapper, joinStrategyWhere } from './utils'
 
 export function OneToOne({
   table,
+  // Хули 1
   foreignProp,
   referenceProp = 'id',
 }: {
@@ -53,6 +54,7 @@ export function OneToOne({
 
 export function OneToMany({
   table,
+  // Хули 2
   foreignProp = 'id',
   referenceProp,
 }: {

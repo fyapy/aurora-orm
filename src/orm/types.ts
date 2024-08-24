@@ -68,17 +68,37 @@ export type Set<T extends AnyObject> = {
 }
 export type WhereValues = Array<string | number | Array<string | number | null>>
 
+export interface WhereOperatorOptions {
+  values: WhereValues
+  alias: string
+}
+
+export type WhereOperator = (value: string, opts: WhereOperatorOptions) => string
+
 interface Reader<T extends AnyObject> {
   findAll(value?: Where<T> | Where<T>[] | FindAllOptions<T>): Promise<T[]>
   findOne(id: ID | Where<T> | Where<T>[] | FindOneOptions<T>): Promise<T>
+  findOrFail(id: ID | Where<T> | Where<T>[] | FindOneOptions<T>): Promise<T>
   exists(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean>
   count(value: Where<T> | Where<T>[], tx?: Tx): Promise<number>
+}
+
+export class AuroraFail extends Error {
+  status: number
+
+  constructor(message: string) {
+    super()
+
+    this.status = 404
+    this.message = message
+  }
 }
 
 export interface Model<T extends AnyObject = AnyObject> extends Writer<T>, Reader<T> {
   primaryKey: string
 
   setDriver(newDriver: Driver): void
+  getDriver(): Driver
   startTrx: Driver['startTrx']
   commit: Driver['commit']
   rollback: Driver['rollback']

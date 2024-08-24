@@ -45,6 +45,10 @@ export function createModel<T extends AnyObject>({
       console.warn('findOne method called before aurora-orm connected')
       return {} as any
     },
+    async findOrFail() {
+      console.warn('findOrFail method called before aurora-orm connected')
+      return {} as any
+    },
     async exists() {
       console.warn('exists method called before aurora-orm connected')
       return false
@@ -57,6 +61,7 @@ export function createModel<T extends AnyObject>({
     startTrx: driver?.startTrx,
     commit: driver?.commit,
     rollback: driver?.rollback,
+    getDriver: () => driver,
     setDriver,
   } as Model<T>
 

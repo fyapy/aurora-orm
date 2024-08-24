@@ -1,0 +1,4 @@
+{
+  "connectionString": "postgres://aabdullin:123@localhost:5432/aurora",
+  "driver": "pg"
+}

@@ -1,5 +1,5 @@
 import type { AlterTable, CreateTable, DropConstraint, DropTable, ForeignKey, Insert } from '../../migrator/queryBuilder'
-import type { Model, Tx, ModelOptions, Models, AnyObject } from '../types'
+import type { Model, Tx, ModelOptions, Models, AnyObject, WhereOperatorOptions } from '../types'
 
 export type Migrator = {
   delete(name: string, tx: Tx): Promise<void>
@@ -15,6 +15,8 @@ export interface buildModelMethodsOptions<T extends AnyObject> extends ModelOpti
 }
 
 export interface Driver {
+  whereOperators: Record<string, (value: string, opts: WhereOperatorOptions) => string>
+
   startTrx(tx?: Tx): Promise<Tx>
   commit(tx: Tx): Promise<void>
   rollback(tx: Tx): Promise<void>
@@ -43,6 +45,7 @@ export interface Driver {
   buildModelMethods<T extends AnyObject>(options: buildModelMethodsOptions<T>): {
     findAll: Model['findAll']
     findOne: Model['findOne']
+    findOrFail: Model['findOrFail']
     exists: Model['exists']
     count: Model['count']
 
