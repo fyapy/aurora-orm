@@ -1,50 +1,50 @@
 import type { Model } from './types'
 
 export const mapper = (
+  newPropName: string,
   list: Record<string, any>[],
-  mapToProp: string,
-  listMapByProp: string,
-  map: Record<string, any>[],
-  mapByProp: string,
+  referenceProp: string,
+  foreighList: Record<string, any>[],
+  foreignProp: string,
 ) => {
-  if (map.length === 0) {
+  if (foreighList.length === 0) {
     for (const item of list) {
-      item[mapToProp] = null
+      item[newPropName] = null
     }
     return;
   }
 
   const mapper = {}
-  map.forEach(c => mapper[c[mapByProp]] = c)
+  foreighList.forEach(c => mapper[c[foreignProp]] = c)
 
-  const deleteForeight = listMapByProp !== 'id'
+  const deleteForeight = referenceProp !== 'id'
 
 
   for (const item of list) {
-    item[mapToProp] = mapper[item[listMapByProp]] ?? null
+    item[newPropName] = mapper[item[referenceProp]] ?? null
 
     if (deleteForeight) {
-      delete item[listMapByProp]
+      delete item[referenceProp]
     }
   }
 }
 export const manyMapper = (
+  newPropName: string,
   list: Record<string, any>[],
-  mapToProp: string,
-  listMapByProp: string,
-  map: Record<string, any>[],
-  mapByProp: string,
+  referenceProp: string,
+  foreighList: Record<string, any>[],
+  foreignProp: string,
 ) => {
-  if (map.length === 0) {
+  if (foreighList.length === 0) {
     for (const item of list) {
-      item[mapToProp] = []
+      item[newPropName] = []
     }
     return;
   }
 
   const mapper: Record<string, any[]> = {}
-  map.forEach(c => {
-    const key = c[mapByProp]
+  foreighList.forEach(c => {
+    const key = c[foreignProp]
     if (typeof mapper[key] !== 'undefined') {
       mapper[key].push(c)
     } else {
@@ -52,14 +52,14 @@ export const manyMapper = (
     }
   })
 
-  const deleteForeight = listMapByProp !== 'id'
+  const deleteForeight = referenceProp !== 'id'
 
 
   for (const item of list) {
-    item[mapToProp] = mapper[item[listMapByProp]] ?? []
+    item[newPropName] = mapper[item[referenceProp]] ?? []
 
     if (deleteForeight) {
-      delete item[listMapByProp]
+      delete item[referenceProp]
     }
   }
 }

@@ -9,7 +9,7 @@ export type Migrator = {
   createTable(): Promise<void>
 }
 
-export interface buildModelMethodsOptions<T extends AnyObject> extends ModelOptions<T> {
+export interface BuildModelMethodsOptions<T extends AnyObject> extends ModelOptions<T> {
   primaryKey: string
   models: Models
 }
@@ -42,7 +42,7 @@ export interface Driver {
     nameColumn: string
   }) => Migrator
 
-  buildModelMethods<T extends AnyObject>(options: buildModelMethodsOptions<T>): {
+  buildModelMethods<T extends AnyObject>(options: BuildModelMethodsOptions<T>): {
     findAll: Model['findAll']
     findOne: Model['findOne']
     findOrFail: Model['findOrFail']

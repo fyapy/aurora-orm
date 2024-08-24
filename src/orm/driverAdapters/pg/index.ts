@@ -560,11 +560,13 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return result
       }
 
+      const modelName = table.replace(/s$/, '').replace('_', '')
+
       async function findOrFail(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<T> {
         const data = await findOne(params)
 
         if (typeof data === 'undefined') {
-          throw new AuroraFail(table)
+          throw new AuroraFail(modelName)
         }
 
         return data

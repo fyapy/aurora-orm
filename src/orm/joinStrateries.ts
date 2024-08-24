@@ -4,7 +4,6 @@ import { makeUnique, mapper, manyMapper, joinStrategyWhere } from './utils'
 
 export function OneToOne({
   table,
-  // Хули 1
   foreignProp,
   referenceProp = 'id',
 }: {
@@ -17,36 +16,36 @@ export function OneToOne({
     foreignProp,
     referenceProp,
     async fn({ data, models, select, join, tx, prop, primaryKey }) {
-      const joinModel = models[table]
+      const foreighModel = models[table]
 
       if (Array.isArray(data)) {
-        const values = makeUnique(data.map(d => d[foreignProp])).filter(d => d !== null)
+        const values = makeUnique(data.map(d => d[referenceProp])).filter(d => d !== null)
 
-        const dataToJoin = await joinModel.findAll({
+        const foreignList = await foreighModel.findAll({
           where: {
-            [referenceProp]: In(values),
+            [foreignProp]: In(values),
           },
           select,
           join,
           tx,
         })
 
-        mapper(data, prop, foreignProp, dataToJoin as any[], referenceProp)
+        mapper(prop, data, referenceProp, foreignList, foreignProp)
       } else {
-        const where = joinStrategyWhere(joinModel, data, foreignProp, referenceProp)
+        const where = joinStrategyWhere(foreighModel, data, foreignProp, referenceProp)
 
-        const _joinData = await joinModel.findOne({
+        const foreignData = await foreighModel.findOne({
           where,
           select,
           join,
           tx,
         })
 
-        if (foreignProp !== primaryKey) {
-          delete data[foreignProp]
+        if (referenceProp !== primaryKey) {
+          delete data[referenceProp]
         }
 
-        data[prop] = _joinData
+        data[prop] = foreignData
       }
     },
   }
@@ -54,46 +53,45 @@ export function OneToOne({
 
 export function OneToMany({
   table,
-  // Хули 2
-  foreignProp = 'id',
-  referenceProp,
+  foreignProp,
+  referenceProp = 'id',
 }: {
   table: string
-  foreignProp?: string
-  referenceProp: string
+  foreignProp: string
+  referenceProp?: string
 }): JoinStrategy<any> {
   return {
     table,
     foreignProp,
     referenceProp,
     async fn({ data, models, select, tx, join, prop, primaryKey }) {
-      const joinModel = models[table]
+      const foreighModel = models[table]
 
       if (Array.isArray(data)) {
-        const dataToJoin = await joinModel.findAll({
+        const dataToJoin = await foreighModel.findAll({
           where: {
-            [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))),
+            [foreignProp]: In(makeUnique(data.map(d => d[referenceProp]))),
           },
           select,
           join,
           tx,
         })
 
-        manyMapper(data, prop, foreignProp, dataToJoin as any[], referenceProp)
+        manyMapper(prop, data, referenceProp, dataToJoin, foreignProp)
       } else {
-        const where = joinStrategyWhere(joinModel, data, foreignProp, referenceProp)
-        const _joinData = await joinModel.findAll({
+        const where = joinStrategyWhere(foreighModel, data, foreignProp, referenceProp)
+        const foreighData = await foreighModel.findAll({
           where,
           select,
           join,
           tx,
         })
 
-        if (foreignProp !== primaryKey) {
-          delete data[foreignProp]
+        if (referenceProp !== primaryKey) {
+          delete data[referenceProp]
         }
 
-        data[prop] = _joinData
+        data[prop] = foreighData
       }
     },
   }
@@ -113,14 +111,14 @@ export function Exists({
     foreignProp,
     referenceProp,
     async fn({ data, models, tx, prop, primaryKey }) {
-      const joinModel = models[table]
+      const foreighModel = models[table]
 
       if (Array.isArray(data)) {
         const where = primaryKey === referenceProp
           ? In(makeUnique(data.map(d => d[foreignProp])))
           : { [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))) }
 
-        const dataToJoin = await joinModel.findAll({ where, tx })
+        const dataToJoin = await foreighModel.findAll({ where, tx })
 
         // custom mapper
         const mapper = {}
@@ -130,14 +128,14 @@ export function Exists({
           item[prop] = mapper[item[foreignProp]] ?? false
         }
       } else {
-        const where = joinStrategyWhere(joinModel, data, foreignProp, referenceProp)
-        const _joinData = await joinModel.exists(where, tx)
+        const where = joinStrategyWhere(foreighModel, data, foreignProp, referenceProp)
+        const foreighData = await foreighModel.exists(where, tx)
 
         if (foreignProp !== primaryKey) {
           delete data[foreignProp]
         }
 
-        data[prop] = _joinData
+        data[prop] = foreighData
       }
     },
   }
