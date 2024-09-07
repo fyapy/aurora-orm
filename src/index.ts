@@ -1,3 +1,3 @@
 export * from './orm/index.js'
-export { runner } from './migrator/runner.js'
+export * from './migrator/index.js'
 export { Drivers } from './connection/types.js'
