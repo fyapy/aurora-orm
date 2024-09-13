@@ -1,6 +1,6 @@
 {
   "name": "aurora-orm",
-  "version": "0.2.31",
+  "version": "0.2.32",
   "description": "Data-Mapper ORM and migration management tool for TypeScript and Node.js. Support PostgreSQL.",
   "main": "dist/index.js",
   "type": "module",

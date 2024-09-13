@@ -2,8 +2,7 @@
 
 'use strict'
 
-import {createMigration, runner} from '../dist/migrator/index.js'
-import {loadConnectionConfig} from '../dist/connection/index.js'
+import {createMigration} from '../dist/migrator/index.js'
 
 process.on('uncaughtException', err => {
   console.error(err)
@@ -44,19 +43,7 @@ if (action === 'create') {
       console.error(err)
       process.exit(1)
     })
-} else if (action === 'up' || action === 'down') {
-  const config = loadConnectionConfig()
-
-  runner({direction: action, config})
-    .then(() => {
-      console.log('Migrations complete!')
-      process.exit(0)
-    })
-    .catch(err => {
-      console.error(err)
-      process.exit(1)
-    })
 } else {
-  console.error('Invalid Action: Must be [up|down|create].')
+  console.error('Invalid Action: Must be [create].')
   process.exit(1)
 }

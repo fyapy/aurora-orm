@@ -1,5 +1,5 @@
 import type { Driver } from './driverAdapters/index.js'
-import { ConnectionConfig, loadConnectionConfig } from '../connection/index.js'
+import { ConnectionConfig } from '../connection/index.js'
 import { Drivers } from '../connection/types.js'
 import * as drivers from './driverAdapters/index.js'
 
@@ -36,7 +36,7 @@ function ormLog(sql: string, values?: any[] | null) {
 }
 
 interface ConnectConfig {
-  config?: ConnectionConfig
+  config: ConnectionConfig
   debug?: boolean
   connectNotify?: boolean
 }
@@ -57,20 +57,17 @@ export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
     default:
       const endOfError = `, сhoose one of these types: ${Object.values(Drivers)}`
       throw new Error(config.driver
-        ? `aurora-orm.json connection have unknown driver '${config.driver}'${endOfError}`
-        : `aurora-orm.json don't have "driver" property${endOfError}`)
+        ? `config have unknown driver '${config.driver}'${endOfError}`
+        : `config don't have "driver" property${endOfError}`)
   }
 }
 
-export async function connect({ debug, config, connectNotify = true }: ConnectConfig = {}) {
+export async function connect({ debug, config, connectNotify = true }: ConnectConfig) {
   if (typeof debug !== 'undefined') {
     ormConfig.debug = debug
   }
 
   const timeout = 5000
-  const auroraConfig = typeof config !== 'undefined'
-    ? config
-    : loadConnectionConfig()
 
   setTimeout(() => {
     if (ormConfig.driver === null) {
@@ -78,7 +75,7 @@ export async function connect({ debug, config, connectNotify = true }: ConnectCo
     }
   }, timeout)
 
-  const driver = await connectToDatabase(auroraConfig)
+  const driver = await connectToDatabase(config)
 
   setConnection(driver)
 
