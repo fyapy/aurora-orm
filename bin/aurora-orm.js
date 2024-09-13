@@ -2,25 +2,21 @@
 
 'use strict'
 
+import path from 'node:path'
 import {createMigration} from '../dist/migrator/index.js'
 
-process.on('uncaughtException', err => {
-  console.error(err)
+process.on('uncaughtException', e => {
+  console.error(e)
   process.exit(1)
 })
 
 function parseArgv(argv) {
+  const migrationName = argv.pop()
   const action = argv.pop()
-  if (action === 'up' || action === 'down') {
-    return {action}
-  }
 
-  const secondAction = argv.pop()
-  if (secondAction === 'create') {
-    return {action: secondAction, migrationName: action}
-  }
-
-  return {}
+  return action === 'create'
+    ? {action, migrationName}
+    : {}
 }
 
 const {action, migrationName} = parseArgv(process.argv)
@@ -31,18 +27,18 @@ if (action === 'create') {
     process.exit(1)
   }
 
-  createMigration({
-    name: migrationName,
-    directory: `${process.cwd()}/migrations`,
-  })
-    .then(migrationPath => {
-      console.log(`Created migration -- ${migrationPath}`)
-      process.exit(0)
+  try {
+    const migrationPath = createMigration({
+      directory: path.join(process.cwd(), '/migrations'),
+      name: migrationName,
     })
-    .catch(err => {
-      console.error(err)
-      process.exit(1)
-    })
+
+    console.log(`Created migration -- ${migrationPath}`)
+    process.exit(0)
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
 } else {
   console.error('Invalid Action: Must be [create].')
   process.exit(1)

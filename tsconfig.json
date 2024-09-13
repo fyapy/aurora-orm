@@ -14,13 +14,13 @@
     "noUnusedLocals": true,
     "noImplicitOverride": true
   },
+  "include": ["src", "scripts"],
   "exclude": [
     "node_modules",
     "templates",
     "dist",
     "bin",
     "migrations",
-    "docs",
     "benchmarks",
     "**/*.test.ts",
     "**/*.mock.ts",

@@ -1,6 +1,6 @@
 # Aurora-ORM <a href="https://npmjs.com/package/aurora-orm"><img src="https://badgen.net/npm/v/aurora-orm" alt="npm package"></a>
 
-> Decorator-less, type safe, near-zero runtime ORM for Node.js and TypeScript.
+> Decorator-less, type safe, near-zero runtime ORM for Node.js and TypeScript
 
 Aurora ORM support PostgreSQL.
 
@@ -13,68 +13,18 @@ And don't use unstable features like decorators and reflect-metadata that give y
 
 ## Features
 
-- Models and type safe columns mapping.
-- Database-specific column types.
-- Relations.
-- Support functional programming composition pattern.
-- Indexes.
-- Transactions.
-- Migrations.
-- Connection pooling.
-- Elegant-syntax.
-- Logging.
-- TypeScript and JavaScript support.
-- Support modern transpilers like [SWC](https://swc.rs/) or [ESbuild](https://esbuild.github.io/).
-- Produced code is performant, flexible, clean and maintainable.
-
-With Aurora ORM your models look like this:
-
-```typescript
-import {createModel} from 'aurora-orm'
-
-export interface User {
-  id: number
-  name: string
-  age: number | null
-  password: string
-  addictions: number[]
-}
-
-export const UserModel = createModel<User>({
-  table: 'users',
-  mapping: {
-    // Type Safe columns mapping
-    id: 'id',
-    name: 'name',
-    age: 'age',
-    password: {
-      name: 'password',
-      hidden: true,
-    },
-    addictions: 'addictions',
-  },
-})
-```
-
-And your domain logic looks like this:
-
-```typescript
-const user = await UserModel.create({
-  name: 'John',
-  age: 26,
-  password: 'iLoveCats',
-  addictions: [4],
-})
-
-const allUsers = await UserModel.findAll()
-const firstUser = await UserModel.findOne(1) // find by id
-const john = await UserModel.findOne({
-  name: 'John',
-  age: 26,
-}) // find by name and age
-
-await UserModel.delete(john)
-```
+- Models and type safe columns mapping
+- Database-specific column types
+- Transactions
+- Relations
+- Indexes
+- Logging
+- Migrations
+- Connection pooling
+- TypeScript and JavaScript support
+- Support functional programming composition pattern
+- Produced code is performant, flexible, clean and maintainable
+- Support modern transpilers like [SWC](https://swc.rs/) or [ESbuild](https://esbuild.github.io/)
 
 ## Installation
 
@@ -102,3 +52,53 @@ await connect({
   },
 })
 ```
+
+#### Define model
+
+```ts
+import {createModel} from 'aurora-orm'
+
+export interface User {
+  id: number
+  name: string
+  age: number | null
+  password: string
+  addictions: number[]
+}
+
+export const UserModel = createModel<User>({
+  table: 'users',
+  mapping: {
+    // Type Safe columns mapping
+    id: 'id',
+    name: 'name',
+    age: 'age',
+    password: {
+      name: 'password',
+      hidden: true,
+    },
+    addictions: 'addictions',
+  },
+})
+```
+
+#### And your domain logic looks like this:
+
+```ts
+const user = await UserModel.create({
+  name: 'John',
+  age: 26,
+  password: 'iLoveCats',
+  addictions: [4],
+})
+
+const allUsers = await UserModel.findAll()
+const firstUser = await UserModel.findOne(1) // find by id
+const john = await UserModel.findOne({
+  name: 'John',
+  age: 26,
+}) // find by name and age
+
+await UserModel.delete(john)
+```
+

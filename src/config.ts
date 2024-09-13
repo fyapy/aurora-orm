@@ -1,5 +1,5 @@
 export enum Drivers {
-  PG = 'pg'
+  PG = 'pg',
 }
 
 export interface PostgresqlConnectionStringConfig {
