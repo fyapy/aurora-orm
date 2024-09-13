@@ -9,7 +9,7 @@ export interface RunMigration {
 }
 
 export type MigrationDirection = 'up' | 'down'
-export interface RunnerOptionConfig {
+export interface RunMigrationsOptions {
   direction: MigrationDirection
 
   config: ConnectionConfig

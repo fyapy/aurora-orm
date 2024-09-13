@@ -1,5 +1,5 @@
 export { createMigration } from './create.js'
-export { runner } from './runner.js'
+export { runMigrations } from './runner.js'
 export {
   uuidV4,
   now,

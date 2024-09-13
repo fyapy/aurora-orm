@@ -1,6 +1,6 @@
 {
   "name": "aurora-orm",
-  "version": "0.2.33",
+  "version": "0.2.34",
   "description": "Near-zero runtime ORM and migration tool for PostgreSQL with TypeScript and Node.js",
   "main": "dist/index.js",
   "type": "module",

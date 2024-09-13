@@ -3,7 +3,7 @@ import * as tsx from 'tsx/esm/api'
 import { idColumn, migrationsTable, nameColumn, runOnColumn } from './constants.js'
 import { connectDB, DBConnection } from './db.js'
 import { migration } from './migration.js'
-import { Migration, MigrationDirection, RunnerOptionConfig } from './types.js'
+import { Migration, MigrationDirection, RunMigrationsOptions } from './types.js'
 import { loadMigrationFiles } from './utils.js'
 import { Migrator } from '../orm/driverAdapters/types.js'
 
@@ -58,7 +58,7 @@ async function getRunMigrations(migrator: Migrator): Promise<string[]> {
 }
 
 
-function getMigrationsToRun(options: RunnerOptionConfig, runNames: string[], migrations: Migration[]): Migration[] {
+function getMigrationsToRun(options: RunMigrationsOptions, runNames: string[], migrations: Migration[]): Migration[] {
   if (options.direction === 'down') {
     const downMigrations: Array<string | Migration> = runNames
       .map((migrationName) => migrations.find(({ name }) => name === migrationName) || migrationName)
@@ -79,7 +79,7 @@ function getMigrationsToRun(options: RunnerOptionConfig, runNames: string[], mig
   return upMigrations.slice(0, Math.abs(count))
 }
 
-async function runMigrations({ migrations, direction }: {
+async function runMigrationsList({ migrations, direction }: {
   migrations: Migration[]
   direction: MigrationDirection
 }) {
@@ -89,7 +89,7 @@ async function runMigrations({ migrations, direction }: {
   }
 }
 
-export async function runner(options: RunnerOptionConfig) {
+export async function runMigrations(options: RunMigrationsOptions) {
   const db = await connectDB(options.config)
 
   try {
@@ -125,9 +125,9 @@ export async function runner(options: RunnerOptionConfig) {
     toRun.forEach(m => console.info(`> - ${m.name}`))
 
 
-    await runMigrations({
-      migrations: toRun,
+    await runMigrationsList({
       direction: options.direction,
+      migrations: toRun,
     })
   } catch (err) {
     throw err
