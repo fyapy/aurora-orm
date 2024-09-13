@@ -1,20 +1,19 @@
 {
   "name": "aurora-orm",
-  "version": "0.2.34",
+  "license": "MIT",
+  "version": "0.2.35",
+  "author": "Amir Abdullin",
   "description": "Near-zero runtime ORM and migration tool for PostgreSQL with TypeScript and Node.js",
+  "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
     "aurora-orm": "bin/aurora-orm.js"
   },
-  "author": "Amir Abdullin",
-  "license": "MIT",
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "tsc --removeComments && tsc --declaration --emitDeclarationOnly",
+    "build": "tsup",
     "test": "vitest run",
-    "bench": "node ./benchmarks/aurora_sync/index.js",
-    "prepublish": "pnpm run build"
+    "bench": "node ./benchmarks/aurora_sync/index.js"
   },
   "files": [
     "templates",
@@ -41,7 +40,7 @@
     "@types/node": "22.5.0",
     "@types/pg": "8.11.9",
     "pg": "8.12.0",
-    "rimraf": "6.0.1",
+    "tsup": "8.2.4",
     "tsx": "4.19.1",
     "typescript": "4.9.4",
     "vitest": "2.1.1"

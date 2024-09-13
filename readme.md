@@ -40,7 +40,8 @@ import {connect, Drivers} from 'aurora-orm'
 
 await connect({
   config: {
-    driver: Drivers.PG, // optinal, default value 'pg'
+    // optional, default value 'Drivers.PG'
+    driver: Drivers.PG,
 
     connectionString: 'postgres://test:test@localhost:5432/test',
     // or
@@ -51,6 +52,44 @@ await connect({
     database: 'test',
   },
 })
+```
+
+#### Run migrations
+
+Create migrator script:
+
+```ts
+import {runMigrations, Drivers} from 'aurora-orm'
+
+// Some code to load connectionString
+const connectionString = 'postgres://test:test@localhost:5432/test'
+
+const direction = process.argv[2] as 'down' | 'up'
+
+runMigrations({
+  direction,
+  config: {driver: Drivers.PG, connectionString},
+})
+  .then(() => {
+    console.log('Migrations complete!')
+    process.exit(0)
+  })
+  .catch(e => {
+    console.error(e)
+    process.exit(1)
+  })
+```
+
+And add to `package.json` scripts:
+
+```json
+{
+  "scripts": {
+    "migrator:down": "tsx ./src/migrator.ts down",
+    "migrator:up": "tsx ./src/migrator.ts up",
+    "migrator:create": "aurora-orm create"
+  },
+}
 ```
 
 #### Define model
