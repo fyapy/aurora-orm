@@ -3,6 +3,7 @@ export {
   manyMapper,
   makeUnique,
   tableNameToModelName,
+  AuroraFail,
 } from './utils.js'
 export {
   In,
