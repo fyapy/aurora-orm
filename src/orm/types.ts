@@ -84,17 +84,6 @@ interface Reader<T extends AnyObject> {
   count(value: Where<T> | Where<T>[], tx?: Tx): Promise<number>
 }
 
-export class AuroraFail extends Error {
-  status: number
-
-  constructor(message: string) {
-    super()
-
-    this.status = 404
-    this.message = message
-  }
-}
-
 export interface Model<T extends AnyObject = AnyObject> extends Writer<T>, Reader<T> {
   primaryKey: string
 

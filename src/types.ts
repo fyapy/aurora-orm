@@ -3,22 +3,20 @@ export enum Drivers {
 }
 
 export interface PostgresqlConnectionStringConfig {
-  driver?: Drivers.PG
   connectionString: string
+  driver?: Drivers
   debug?: boolean
 }
-export interface Postgresql {
-  driver?: Drivers.PG
+export interface PostgresqlConfig {
   host: string
   port: number
   username: string
   password: string
   database: string
+  driver?: Drivers
   debug?: boolean
 }
 
 export type ConnectionConfig =
-  | Postgresql
+  | PostgresqlConfig
   | PostgresqlConnectionStringConfig
-
-export type RemoveIdnetifiers<T extends Record<string, any>> = Omit<T, 'driver' | 'debug'>

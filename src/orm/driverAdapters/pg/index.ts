@@ -1,29 +1,15 @@
-import type { Config, OrmLog } from './types.js'
+import type { ColumnData, JoinStrategy, FindAllOptions, FindOneOptions, BaseFindOptions, Operator, WhereValues, Where, Join, Tx, ID, SetOperator, AnyObject } from '../../types.js'
+import type { ConnectionConfig } from '../../../types.js'
 import type { Driver } from '../types.js'
-import {
-  type ColumnData,
-  type JoinStrategy,
-  type FindAllOptions,
-  type FindOneOptions,
-  type BaseFindOptions,
-  type Operator,
-  type WhereValues,
-  type Where,
-  type Join,
-  type Tx,
-  type ID,
-  type SetOperator,
-  type AnyObject,
-  AuroraFail,
-} from '../../types.js'
+import type { OrmLog } from './types.js'
 import { basePG } from './base.js'
 import { buildAliasMapper, insertValues } from './utils.js'
 import { setOperators, whereOperators } from './operators.js'
 import { setOperator, whereOperator } from '../../operators.js'
-import { tableNameToModelName } from '../../utils.js'
+import { AuroraFail, tableNameToModelName } from '../../utils.js'
 
 export async function pg({config, ormLog, mockBase = basePG}: {
-  config: Config
+  config: ConnectionConfig
   ormLog: OrmLog
   mockBase?: typeof basePG
 }): Promise<Driver> {

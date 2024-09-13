@@ -1,4 +1,4 @@
-import type { ConnectionConfig } from '../connection/index.js'
+import type { ConnectionConfig } from '../types.js'
 import type { Foreign, Value } from './queryBuilder.js'
 import type { Driver } from '../orm/driverAdapters/index.js'
 import type { Tx } from '../orm/index.js'

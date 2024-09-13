@@ -39,9 +39,9 @@ class Pool implements AbstractPoolRuntime {
   release = noop
 }
 
-export const mockBase = () => basePG({}, noop, async () => new Pool())
+export const mockBase = () => basePG({} as any, noop, async () => new Pool())
 export const fakeDriver = () => pg({
-  config: {},
+  config: {} as any,
   ormLog: noop,
   mockBase,
 })

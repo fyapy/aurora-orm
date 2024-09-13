@@ -1,4 +1,4 @@
-import type { ConnectionConfig } from '../connection/index.js'
+import type { ConnectionConfig } from '../types.js'
 import type { DefaultColumn, column } from './queryBuilder.js'
 import type { DBConnection } from './db.js'
 

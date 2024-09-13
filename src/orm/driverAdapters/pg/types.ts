@@ -1,11 +1,4 @@
-import type {
-  PostgresqlConnectionStringConfig,
-  RemoveIdnetifiers,
-  Postgresql,
-} from '../../../connection/types.js'
 import type { QueryConfig } from '../../types.js'
-
-export type Config = RemoveIdnetifiers<PostgresqlConnectionStringConfig | Postgresql>
 
 export interface AbstractClient {
   query(sql: string | QueryConfig, values?: any[] | null): Promise<any>

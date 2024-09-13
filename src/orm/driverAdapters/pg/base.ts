@@ -1,4 +1,5 @@
-import type { AbstractClient, AbstractPoolRuntime, Config, OrmLog } from './types.js'
+import type { AbstractClient, AbstractPoolRuntime, OrmLog } from './types.js'
+import type { ConnectionConfig } from '../../../types.js'
 import type { Tx, QueryConfig } from '../../types.js'
 import type { Migrator } from '../types.js'
 import {randomUUID} from 'node:crypto'
@@ -18,14 +19,14 @@ const SQLParams = (sql: string) => sql.split('?')
     ? curr
     : `${curr}$${index + 1}`, '')
 
-const loadModule = async (config: Config) => {
+const loadModule = async (config: ConnectionConfig) => {
   const Pool = (await import('pg')).default.Pool
 
   return new Pool(config) as any as AbstractPoolRuntime
 }
 
 export async function basePG(
-  config: Config,
+  config: ConnectionConfig,
   ormLog: OrmLog,
   loadPool = loadModule
 ) {

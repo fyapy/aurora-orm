@@ -69,3 +69,14 @@ export function tableNameToModelName(table: string) {
 }
 
 export const makeUnique = (list: string[]) => [...new Set(list)]
+
+export class AuroraFail extends Error {
+  status: number
+
+  constructor(message: string) {
+    super()
+
+    this.status = 404
+    this.message = message
+  }
+}
