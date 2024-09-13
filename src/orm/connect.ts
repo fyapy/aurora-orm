@@ -1,5 +1,5 @@
 import type { Driver } from './driverAdapters/index.js'
-import { ConnectionConfig, Drivers } from '../types.js'
+import { ConnectionConfig, Drivers } from '../config.js'
 import * as drivers from './driverAdapters/index.js'
 
 export interface Config {

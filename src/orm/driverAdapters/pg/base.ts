@@ -1,17 +1,17 @@
 import type { AbstractClient, AbstractPoolRuntime, OrmLog } from './types.js'
-import type { ConnectionConfig } from '../../../types.js'
+import type { ConnectionConfig } from '../../../config.js'
 import type { Tx, QueryConfig } from '../../types.js'
 import type { Migrator } from '../types.js'
 import {randomUUID} from 'node:crypto'
 import {
-  type DropConstraint,
-  type DefaultColumn,
-  type CreateTable,
-  type AlterTable,
-  type ForeignKey,
-  type DropTable,
-  type Insert,
   ColumnOperator,
+  DropConstraint,
+  DefaultColumn,
+  CreateTable,
+  AlterTable,
+  ForeignKey,
+  DropTable,
+  Insert,
 } from '../../../migrator/queryBuilder.js'
 
 const SQLParams = (sql: string) => sql.split('?')

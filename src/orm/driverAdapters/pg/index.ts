@@ -1,5 +1,5 @@
 import type { ColumnData, JoinStrategy, FindAllOptions, FindOneOptions, BaseFindOptions, Operator, WhereValues, Where, Join, Tx, ID, SetOperator, AnyObject } from '../../types.js'
-import type { ConnectionConfig } from '../../../types.js'
+import type { ConnectionConfig } from '../../../config.js'
 import type { Driver } from '../types.js'
 import type { OrmLog } from './types.js'
 import { basePG } from './base.js'
