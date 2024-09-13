@@ -1,7 +1,10 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['./src/index.ts'],
+  entry: {
+    index: './src/index.ts',
+    v1: './src/migrator/v1.ts',
+  },
   target: 'node22',
   format: ['esm'],
   outDir: 'dist',

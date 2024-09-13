@@ -1,4 +1,4 @@
-import { createMigration } from 'aurora-orm/dist/migrator/templates/v1.js'
+import { createMigration } from 'aurora-orm/dist/v1'
 
 export default createMigration({
   async up({ sql }) {
