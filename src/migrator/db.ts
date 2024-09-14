@@ -1,8 +1,9 @@
-import type { ConnectionConfig } from '../config.js'
-import type { Foreign, Value } from './queryBuilder.js'
-import type { Driver } from '../orm/driverAdapters/index.js'
-import type { Tx } from '../orm/index.js'
-import { connectToDatabase } from '../orm/connect.js'
+import type {Driver} from '../orm/driverAdapters/index.js'
+import type {Foreign, Value} from './queryBuilder.js'
+import type {ConnectionConfig} from '../config.js'
+import type {Tx} from '../orm/index.js'
+
+import {connectToDatabase} from '../orm/connect.js'
 import * as queryBuilder from './queryBuilder.js'
 
 export interface DBConnection {
@@ -42,7 +43,7 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
       connectionStatus = ConnectionStatus.CONNECTED
     } catch (e) {
       connectionStatus = ConnectionStatus.ERROR
-      console.error(`Could not connect to database:`, e)
+      console.error('Could not connect to database:', e)
       throw e
     }
   }

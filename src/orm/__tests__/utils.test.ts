@@ -1,5 +1,6 @@
-import { describe, expect, test } from 'vitest'
-import { manyMapper, mapper } from '../utils'
+import {describe, expect, test} from 'vitest'
+
+import {manyMapper, mapper} from '../utils.js'
 
 function createData(): Array<{
   id: number

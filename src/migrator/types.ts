@@ -1,6 +1,6 @@
-import type { ConnectionConfig } from '../config.js'
-import type { DefaultColumn, column } from './queryBuilder.js'
-import type { DBConnection } from './db.js'
+import type {DefaultColumn, column} from './queryBuilder.js'
+import type {ConnectionConfig} from '../config.js'
+import type {DBConnection} from './db.js'
 
 export interface RunMigration {
   path: string
@@ -8,7 +8,7 @@ export interface RunMigration {
   timestamp: number
 }
 
-export type MigrationDirection = 'up' | 'down'
+export type MigrationDirection = 'down' | 'up'
 export interface RunMigrationsOptions {
   direction: MigrationDirection
 
@@ -18,7 +18,7 @@ export interface RunMigrationsOptions {
 
 export type MigrationAction = (options: {
   column: typeof column
-  defs: Record<'uuidV4' | 'now' | 'emptyArray', DefaultColumn>
+  defs: Record<'emptyArray' | 'uuidV4' | 'now', DefaultColumn>
   sql: DBConnection
 }) => Promise<void> | void
 

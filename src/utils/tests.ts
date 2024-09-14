@@ -1,7 +1,8 @@
-import type { Tx } from '../orm/types.js'
-import { AbstractClient, AbstractPoolRuntime } from '../orm/driverAdapters/pg/types.js'
-import { basePG } from '../orm/driverAdapters/pg/base.js'
-import { pg } from '../orm/driverAdapters/pg/index.js'
+import type {Tx} from '../orm/types.js'
+
+import {AbstractPoolRuntime, AbstractClient} from '../orm/driverAdapters/pg/types.js'
+import {basePG} from '../orm/driverAdapters/pg/base.js'
+import {pg} from '../orm/driverAdapters/pg/index.js'
 
 const noop = () => {}
 const asyncNoop = async () => {}
@@ -18,6 +19,7 @@ export function clearSqlRows() {
   sqlRows = []
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function mockQuery(sql: string, values: any[] | null, tx?: Tx) {
   sqlRows.push([sql, values])
   return {rows: []}

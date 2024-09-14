@@ -1,4 +1,4 @@
-import type { WhereOperatorOptions } from "../../types.js"
+import type {WhereOperatorOptions} from '../../types.js'
 
 export const whereOperators = {
   'more-than': (value: string, opts: WhereOperatorOptions) => {

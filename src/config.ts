@@ -18,5 +18,5 @@ export interface PostgresqlConfig {
 }
 
 export type ConnectionConfig =
-  | PostgresqlConfig
   | PostgresqlConnectionStringConfig
+  | PostgresqlConfig

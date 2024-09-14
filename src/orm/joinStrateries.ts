@@ -1,6 +1,7 @@
-import type { JoinStrategy } from './types.js'
-import { In } from './operators.js'
-import { makeUnique, mapper, manyMapper } from './utils.js'
+import type {JoinStrategy} from './types.js'
+
+import {makeUnique, manyMapper, mapper} from './utils.js'
+import {In} from './operators.js'
 
 export function OneToOne({
   table,
@@ -15,7 +16,7 @@ export function OneToOne({
     table,
     foreignProp,
     referenceProp,
-    async fn({ data, models, select, join, tx, prop, primaryKey }) {
+    async fn({data, models, select, join, tx, prop, primaryKey}) {
       const foreighModel = models[table]
 
       if (Array.isArray(data)) {
@@ -35,7 +36,7 @@ export function OneToOne({
         // only findOne join optimization
         const where = foreighModel.primaryKey === referenceProp
           ? data[foreignProp]
-          : { [foreignProp]: data[referenceProp] }
+          : {[foreignProp]: data[referenceProp]}
 
         const foreignData = await foreighModel.findOne({
           where,
@@ -67,7 +68,7 @@ export function OneToMany({
     table,
     foreignProp,
     referenceProp,
-    async fn({ data, models, select, tx, join, prop, primaryKey }) {
+    async fn({data, models, select, tx, join, prop, primaryKey}) {
       const foreighModel = models[table]
 
       if (Array.isArray(data)) {
@@ -82,7 +83,7 @@ export function OneToMany({
 
         manyMapper(prop, data, referenceProp, foreignList, foreignProp)
       } else {
-        const where = { [foreignProp]: data[referenceProp] }
+        const where = {[foreignProp]: data[referenceProp]}
 
         const foreighData = await foreighModel.findAll({
           where,
@@ -114,15 +115,15 @@ export function Exists({
     table,
     foreignProp,
     referenceProp,
-    async fn({ data, models, tx, prop, primaryKey }) {
+    async fn({data, models, tx, prop, primaryKey}) {
       const foreighModel = models[table]
 
       if (Array.isArray(data)) {
         const where = primaryKey === referenceProp
           ? In(makeUnique(data.map(d => d[foreignProp])))
-          : { [referenceProp]: In(makeUnique(data.map(d => d[foreignProp]))) }
+          : {[referenceProp]: In(makeUnique(data.map(d => d[foreignProp])))}
 
-        const foreignList = await foreighModel.findAll({ where, tx })
+        const foreignList = await foreighModel.findAll({where, tx})
 
         // custom mapper
         const mapper = {}
@@ -132,7 +133,7 @@ export function Exists({
           item[prop] = mapper[item[foreignProp]] ?? false
         }
       } else {
-        const where = { [foreignProp]: data[referenceProp] }
+        const where = {[foreignProp]: data[referenceProp]}
 
         const foreighData = await foreighModel.exists(where, tx)
 

@@ -1,27 +1,27 @@
 export {
-  mapper,
-  manyMapper,
-  makeUnique,
-  tableNameToModelName,
-  AuroraFail,
-} from './utils.js'
-export {
-  In,
-  ILike,
-  NotIn,
-  IsNull,
-  NotNull,
-  Between,
+  whereOperator,
+  ILikeStart,
+  Decrement,
+  Increment,
   MoreThan,
   LessThan,
   NotEqual,
   Includes,
-  Decrement,
-  Increment,
-  ILikeStart,
-  whereOperator,
+  NotNull,
+  Between,
+  IsNull,
+  ILike,
+  NotIn,
+  In,
 } from './operators.js'
-export { createModel } from './model.js'
-export { connect, ormConfig } from './connect.js'
+export {
+  tableNameToModelName,
+  manyMapper,
+  makeUnique,
+  AuroraFail,
+  mapper,
+} from './utils.js'
 export * as JoinStrategies from './joinStrateries.js'
+export {ormConfig, connect} from './connect.js'
+export {createModel} from './model.js'
 export * from './types.js'

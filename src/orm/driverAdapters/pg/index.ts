@@ -1,12 +1,13 @@
-import type { ColumnData, JoinStrategy, FindAllOptions, FindOneOptions, BaseFindOptions, Operator, WhereValues, Where, Join, Tx, ID, SetOperator, AnyObject } from '../../types.js'
-import type { ConnectionConfig } from '../../../config.js'
-import type { Driver } from '../types.js'
-import type { OrmLog } from './types.js'
-import { basePG } from './base.js'
-import { buildAliasMapper, insertValues } from './utils.js'
-import { setOperators, whereOperators } from './operators.js'
-import { setOperator, whereOperator } from '../../operators.js'
-import { AuroraFail, tableNameToModelName } from '../../utils.js'
+import type {BaseFindOptions, FindAllOptions, FindOneOptions, JoinStrategy, WhereValues, SetOperator, ColumnData, AnyObject, Operator, Where, Join, Tx, ID} from '../../types.js'
+import type {ConnectionConfig} from '../../../config.js'
+import type {Driver} from '../types.js'
+import type {OrmLog} from './types.js'
+
+import {tableNameToModelName, AuroraFail} from '../../utils.js'
+import {whereOperator, setOperator} from '../../operators.js'
+import {whereOperators, setOperators} from './operators.js'
+import {buildAliasMapper, insertValues} from './utils.js'
+import {basePG} from './base.js'
 
 export async function pg({config, ormLog, mockBase = basePG}: {
   config: ConnectionConfig
@@ -46,7 +47,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
       const afterDeleteExists = typeof afterDelete !== 'undefined'
 
       // columns
-      const allMapping = Object.entries<ColumnData | JoinStrategy>(mapping)
+      const allMapping = Object.entries<JoinStrategy | ColumnData>(mapping)
 
       type Joins = Record<keyof T, JoinStrategy>
       const joins = (allMapping as Array<[keyof T, JoinStrategy]>).reduce<Joins>((acc, [key, value]) => {
@@ -132,12 +133,12 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         const _values: WhereValues = []
 
         for (const key of keys) {
-          _whereSQL({ key, _values, values } as any)
+          _whereSQL({key, _values, values} as any)
         }
 
         return _values
       }
-      const where = (values: Where<T> | Where<T>[]) => {
+      const where = (values: Where<T>[] | Where<T>) => {
         const keys = Object.keys(values)
         const _values: WhereValues = []
         let sql = ''
@@ -173,7 +174,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         } else {
           // Without OR operator
           for (const key of keys) {
-            const condition = _whereSQL({ key, _values, values })
+            const condition = _whereSQL({key, _values, values})
 
             sql += sql === ''
               ? condition
@@ -201,7 +202,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return sql
       }
 
-      function runJoins(result: T | T[], options: BaseFindParams) {
+      function runJoins(result: T[] | T, options: BaseFindParams) {
         if (typeof options.join === 'undefined') {
           return
         }
@@ -323,20 +324,20 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         set,
         tx,
       }: {
-        where: ID | Where<T>
+        where: Where<T> | ID
         set: Set<T>
         tx?: Tx
-        returning?: boolean | Array<keyof T>
+        returning?: Array<keyof T> | boolean
       }): Promise<T> {
         const keys = Object.keys(set)
 
         if (keys.length === 0) {
-          return findOne({ where: id, tx })
+          return findOne({where: id, tx})
         }
 
         const setValues = getSetValues(set)
         const sqlSet = keys.reduce((acc, key, index) => {
-          const setValue = set[key] as SetOperator | number | string | boolean | null
+          const setValue = set[key] as SetOperator | boolean | number | string | null
 
           // SetOperator
           if (typeof setValue === 'object' && setValue !== null && setValue.type === setOperator) {
@@ -397,7 +398,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         }
       }
 
-      async function del(id: ID | Where<T>, tx?: Tx): Promise<boolean> {
+      async function del(id: Where<T> | ID, tx?: Tx): Promise<boolean> {
         const isPrimitive = typeof id !== 'object'
         const values = isPrimitive
           ? [id]
@@ -425,7 +426,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return deleted
       }
 
-      function isWhere(params: any): params is Where<T> | Where<T>[] {
+      function isWhere(params: any): params is Where<T>[] | Where<T> {
         if (hasWhereColumn === true && typeof params.where !== 'undefined') {
           return typeof params.where !== 'object'
             ? true
@@ -457,7 +458,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return sqlCols
       }
 
-      async function findAll(params: Where<T> | Where<T>[] | FindAllParams = {}): Promise<T[]> {
+      async function findAll(params: FindAllParams | Where<T>[] | Where<T> = {}): Promise<T[]> {
         if (isWhere(params)) {
           // not without FindParams
           const whereProps = where(params)
@@ -521,7 +522,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         }
       }
 
-      async function findOne(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<T> {
+      async function findOne(params: FindOneParams | Where<T>[] | Where<T> | ID): Promise<T> {
         if (typeof params !== 'object') {
           // isPrimitive
           const sql = `SELECT ${allColumns} FROM "${table}" WHERE "${primaryKey}" = ?`
@@ -550,7 +551,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
 
       const modelName = tableNameToModelName(table)
 
-      async function findOrFail(params: ID | Where<T> | Where<T>[] | FindOneParams): Promise<T> {
+      async function findOrFail(params: FindOneParams | Where<T>[] | Where<T> | ID): Promise<T> {
         const data = await findOne(params)
 
         if (typeof data === 'undefined') {
@@ -560,7 +561,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return data
       }
 
-      async function exists(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean> {
+      async function exists(id: Where<T>[] | Where<T> | ID, tx?: Tx): Promise<boolean> {
         let sql = `SELECT COUNT(*)::integer as count FROM "${table}"`
         const isPrimitive = typeof id !== 'object'
 
@@ -578,7 +579,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         }
       }
 
-      async function existsOrFail(id: ID | Where<T> | Where<T>[], tx?: Tx): Promise<boolean> {
+      async function existsOrFail(id: Where<T>[] | Where<T> | ID, tx?: Tx): Promise<boolean> {
         const isExists = await exists(id, tx)
 
         if (isExists === FALSE) {
@@ -588,7 +589,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
         return isExists
       }
 
-      async function count(value: Where<T> | Where<T>[], tx?: Tx): Promise<number> {
+      async function count(value: Where<T>[] | Where<T>, tx?: Tx): Promise<number> {
         const whereProps = where(value)
         const sql = `SELECT COUNT(*)::integer as count FROM "${table}" ${whereProps.sql}`
 

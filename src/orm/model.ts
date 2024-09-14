@@ -1,6 +1,7 @@
+import type {ModelOptions, AnyObject, Models, Model} from './types.js'
 import type {Driver} from './driverAdapters/types.js'
-import type {ModelOptions, Model, AnyObject, Models} from './types.js'
-import {ormConfig, subsctibeToConnection} from './connect.js'
+
+import {subsctibeToConnection, ormConfig} from './connect.js'
 
 const models: Models = {}
 

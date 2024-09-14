@@ -1,8 +1,10 @@
-import type { Model } from '../../../types'
-import { createModel } from '../../../model'
-import { In, Includes, Increment } from '../../../operators'
-import { fakeDriver, clearSqlRows, getSqlRow } from '../../../../utils/tests'
-import { afterEach, beforeAll, describe, expect, test } from 'vitest'
+import {afterEach, beforeAll, describe, expect, test} from 'vitest'
+
+import type {Model} from '../../../types.js'
+
+import {clearSqlRows, fakeDriver, getSqlRow} from '../../../../utils/tests.js'
+import {Increment, Includes, In} from '../../../operators.js'
+import {createModel} from '../../../model.js'
 
 interface User {
   id: number

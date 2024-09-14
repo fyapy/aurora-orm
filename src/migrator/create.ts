@@ -1,7 +1,7 @@
-import fs from 'node:fs'
 import path from 'node:path'
+import fs from 'node:fs'
 
-export function createMigrationFile({ name, directory }: {
+export function createMigrationFile({name, directory}: {
   name: string
   directory: string
 }) {

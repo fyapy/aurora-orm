@@ -1,9 +1,9 @@
-import type { DefaultColumn, column } from './queryBuilder.js'
-import type { DBConnection } from './db.js'
+import type {DefaultColumn, column} from './queryBuilder.js'
+import type {DBConnection} from './db.js'
 
 interface MigrationOptions {
   column: typeof column
-  defs: Record<'uuidV4' | 'now' | 'emptyArray', DefaultColumn>
+  defs: Record<'emptyArray' | 'uuidV4' | 'now', DefaultColumn>
   sql: DBConnection
   getSQLConnection(connectionName: string): DBConnection
 }

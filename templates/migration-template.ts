@@ -1,10 +1,10 @@
-import { createMigration } from 'aurora-orm/v1'
+import {createMigration} from 'aurora-orm/v1'
 
 export default createMigration({
-  async up({ sql }) {
+  async up({}) {
 
   },
-  async down({ sql }) {
+  async down({}) {
 
   },
 })

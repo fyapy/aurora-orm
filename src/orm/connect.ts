@@ -1,5 +1,6 @@
-import type { Driver } from './driverAdapters/index.js'
-import { ConnectionConfig, Drivers } from '../config.js'
+import type {Driver} from './driverAdapters/index.js'
+
+import {ConnectionConfig, Drivers} from '../config.js'
 import * as drivers from './driverAdapters/index.js'
 
 export interface Config {
@@ -50,18 +51,18 @@ export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   }
 
   switch (config.driver) {
-    case Drivers.PG:
-      deleteDriverType()
-      return drivers.pg({ config, ormLog })
-    default:
-      const endOfError = `, сhoose one of these types: ${Object.values(Drivers)}`
-      throw new Error(config.driver
-        ? `config have unknown driver '${config.driver}'${endOfError}`
-        : `config don't have "driver" property${endOfError}`)
+  case Drivers.PG:
+    deleteDriverType()
+    return drivers.pg({config, ormLog})
+  default:
+    const endOfError = `, сhoose one of these types: ${Object.values(Drivers)}`
+    throw new Error(config.driver
+      ? `config have unknown driver '${config.driver}'${endOfError}`
+      : `config don't have "driver" property${endOfError}`)
   }
 }
 
-export async function connect({ debug, config, connectNotify = true }: ConnectConfig) {
+export async function connect({debug, config, connectNotify = true}: ConnectConfig) {
   if (typeof debug !== 'undefined') {
     ormConfig.debug = debug
   }

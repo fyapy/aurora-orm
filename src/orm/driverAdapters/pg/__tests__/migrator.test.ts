@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, test } from 'vitest'
-import { addColumn, alterTable, column, createTable, dropConstraint, emptyArray, foreignKey, insert, now, uuidV4 } from '../../../../migrator/queryBuilder'
-import { clearSqlRows, getSqlRow, mockBase } from '../../../../utils/tests'
+import {afterEach, describe, expect, test} from 'vitest'
+
+import {dropConstraint, createTable, alterTable, emptyArray, foreignKey, addColumn, column, insert, uuidV4, now} from '../../../../migrator/queryBuilder.js'
+import {clearSqlRows, getSqlRow, mockBase} from '../../../../utils/tests.js'
 
 describe('driver/pg/migrator', () => {
   afterEach(clearSqlRows)

@@ -1,4 +1,4 @@
-import type {Operator, SetOperator} from './types.js'
+import type {SetOperator, Operator} from './types.js'
 
 export {whereOperators as pgWhereOperators} from './driverAdapters/pg/operators.js'
 

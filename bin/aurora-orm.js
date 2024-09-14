@@ -3,6 +3,7 @@
 'use strict'
 
 import path from 'node:path'
+
 import {createMigrationFile} from '../index'
 
 process.on('uncaughtException', e => {
@@ -23,7 +24,7 @@ const {action, migrationName} = parseArgv(process.argv)
 
 if (action === 'create') {
   if (!migrationName) {
-    console.error("'migrationName' is required.")
+    console.error('\'migrationName\' is required.')
     process.exit(1)
   }
 

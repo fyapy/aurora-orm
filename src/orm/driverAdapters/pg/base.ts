@@ -1,8 +1,10 @@
-import type { AbstractClient, AbstractPoolRuntime, OrmLog } from './types.js'
-import type { ConnectionConfig } from '../../../config.js'
-import type { Tx, QueryConfig } from '../../types.js'
-import type { Migrator } from '../types.js'
 import {randomUUID} from 'node:crypto'
+
+import type {AbstractPoolRuntime, AbstractClient, OrmLog} from './types.js'
+import type {ConnectionConfig} from '../../../config.js'
+import type {QueryConfig, Tx} from '../../types.js'
+import type {Migrator} from '../types.js'
+
 import {
   ColumnOperator,
   DropConstraint,
@@ -119,14 +121,14 @@ export async function basePG(
     client.release()
   }
 
-  function columnDefault(def: string | number | DefaultColumn) {
+  function columnDefault(def: DefaultColumn | string | number) {
     switch (typeof def) {
-      case 'number':
-        return ` DEFAULT ${def}`
-      case 'object':
-        return ` DEFAULT ${def.sql}`
-      case 'string':
-        return ` DEFAULT '${def}'`
+    case 'number':
+      return ` DEFAULT ${def}`
+    case 'object':
+      return ` DEFAULT ${def.sql}`
+    case 'string':
+      return ` DEFAULT '${def}'`
     }
   }
   function parseCreateTable(ast: CreateTable) {

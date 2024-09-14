@@ -1,5 +1,10 @@
 import fs from 'node:fs'
-import { exec } from './utils.js'
+
+import {exec} from './utils.js'
+
+console.info('Package start linting!')
+
+await exec('pnpm lint')
 
 console.info('Package start building!')
 

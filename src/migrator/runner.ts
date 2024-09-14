@@ -1,10 +1,11 @@
 import path from 'node:path'
-import { idColumn, migrationsTable, nameColumn, runOnColumn } from './constants.js'
-import { connectDB, DBConnection } from './db.js'
-import { migration } from './migration.js'
-import { Migration, RunMigrationsOptions } from './types.js'
-import { loadMigrationFiles } from './utils.js'
-import { Migrator } from '../orm/driverAdapters/types.js'
+
+import {migrationsTable, runOnColumn, nameColumn, idColumn} from './constants.js'
+import {RunMigrationsOptions, Migration} from './types.js'
+import {Migrator} from '../orm/driverAdapters/types.js'
+import {DBConnection, connectDB} from './db.js'
+import {loadMigrationFiles} from './utils.js'
+import {migration} from './migration.js'
 
 async function loadMigrations(db: DBConnection, migrator: Migrator) {
   try {
@@ -49,8 +50,8 @@ async function ensureMigrationsTable(migrator: Migrator) {
 
 function getMigrationsToRun(options: RunMigrationsOptions, runNames: string[], migrations: Migration[]): Migration[] {
   if (options.direction === 'down') {
-    const downMigrations: Array<string | Migration> = runNames
-      .map((migrationName) => migrations.find(({ name }) => name === migrationName) || migrationName)
+    const downMigrations: Array<Migration | string> = runNames
+      .map((migrationName) => migrations.find(({name}) => name === migrationName) || migrationName)
 
     const toRun = downMigrations.slice(-Math.abs(1)).reverse()
 
@@ -62,7 +63,7 @@ function getMigrationsToRun(options: RunMigrationsOptions, runNames: string[], m
     return toRun as Migration[]
   }
 
-  const upMigrations = migrations.filter(({ name }) => runNames.indexOf(name) < 0)
+  const upMigrations = migrations.filter(({name}) => runNames.indexOf(name) < 0)
   const count = Infinity
 
   return upMigrations.slice(0, Math.abs(count))
