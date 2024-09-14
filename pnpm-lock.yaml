@@ -19,13 +19,13 @@ importers:
         version: 8.12.0
       tsup:
         specifier: 8.2.4
-        version: 8.2.4(postcss@8.4.45)(tsx@4.19.1)(typescript@4.9.4)
+        version: 8.2.4(postcss@8.4.45)(tsx@4.19.1)(typescript@5.6.2)
       tsx:
         specifier: 4.19.1
         version: 4.19.1
       typescript:
-        specifier: 4.9.4
-        version: 4.9.4
+        specifier: 5.6.2
+        version: 5.6.2
       vitest:
         specifier: 2.1.1
         version: 2.1.1(@types/node@22.5.0)
@@ -1050,9 +1050,9 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  typescript@4.9.4:
-    resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
-    engines: {node: '>=4.2.0'}
+  typescript@5.6.2:
+    resolution: {integrity: sha512-NW8ByodCSNCwZeghjN3o+JX5OFH0Ojg6sadjEKY4huZ52TqbJTJnDo5+Tw98lSy63NZvi4n+ez5m2u5d4PkZyw==}
+    engines: {node: '>=14.17'}
     hasBin: true
 
   undici-types@6.19.8:
@@ -1968,7 +1968,7 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  tsup@8.2.4(postcss@8.4.45)(tsx@4.19.1)(typescript@4.9.4):
+  tsup@8.2.4(postcss@8.4.45)(tsx@4.19.1)(typescript@5.6.2):
     dependencies:
       bundle-require: 5.0.0(esbuild@0.23.1)
       cac: 6.7.14
@@ -1988,7 +1988,7 @@ snapshots:
       tree-kill: 1.2.2
     optionalDependencies:
       postcss: 8.4.45
-      typescript: 4.9.4
+      typescript: 5.6.2
     transitivePeerDependencies:
       - jiti
       - supports-color
@@ -2002,7 +2002,7 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  typescript@4.9.4: {}
+  typescript@5.6.2: {}
 
   undici-types@6.19.8: {}
 
