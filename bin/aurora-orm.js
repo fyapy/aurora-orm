@@ -3,7 +3,7 @@
 'use strict'
 
 import path from 'node:path'
-import {createMigrationFile} from '../dist/index'
+import {createMigrationFile} from '../index'
 
 process.on('uncaughtException', e => {
   console.error(e)

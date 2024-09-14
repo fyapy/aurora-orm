@@ -3,8 +3,6 @@
     "target": "ESNext",
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "rootDir": "src",
-    "outDir": "dist",
     "lib": ["es2019"],
     "esModuleInterop": true,
     "sourceMap": false,
@@ -14,15 +12,5 @@
     "noUnusedLocals": true,
     "noImplicitOverride": true
   },
-  "include": ["src", "scripts"],
-  "exclude": [
-    "node_modules",
-    "templates",
-    "dist",
-    "bin",
-    "migrations",
-    "benchmarks",
-    "**/*.test.ts",
-    "**/*.mock.ts",
-  ]
+  "include": ["src", "scripts", "templates"]
 }
