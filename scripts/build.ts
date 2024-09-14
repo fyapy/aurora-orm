@@ -12,6 +12,7 @@ delete packageJson.scripts
 
 fs.writeFileSync('./dist/package.json', JSON.stringify(packageJson, null, 2))
 
+fs.cpSync('./readme.md', './dist/readme.md', {recursive: true})
 fs.cpSync('./templates', './dist/templates', {recursive: true})
 fs.cpSync('./bin', './dist/bin', {recursive: true})
 
