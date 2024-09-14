@@ -3,7 +3,7 @@
 'use strict'
 
 import path from 'node:path'
-import {createMigration} from '../dist/migrator/index.js'
+import {createMigrationFile} from '../dist/index'
 
 process.on('uncaughtException', e => {
   console.error(e)
@@ -28,12 +28,12 @@ if (action === 'create') {
   }
 
   try {
-    const migrationPath = createMigration({
+    const migrationPath = createMigrationFile({
       directory: path.join(process.cwd(), '/migrations'),
       name: migrationName,
     })
 
-    console.log(`Created migration -- ${migrationPath}`)
+    console.log(`Created migration - ${migrationPath}`)
     process.exit(0)
   } catch (e) {
     console.error(e)

@@ -1,4 +1,4 @@
-export { createMigration } from './create.js'
+export { createMigrationFile } from './create.js'
 export { runMigrations } from './runner.js'
 export {
   uuidV4,

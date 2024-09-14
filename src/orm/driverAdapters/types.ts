@@ -5,7 +5,7 @@ export type Migrator = {
   delete(name: string, tx: Tx): Promise<void>
   insert(name: string, tx: Tx): Promise<void>
   tables(): Promise<any[]>
-  selectAll(): Promise<any[]>
+  selectAll<T = any>(): Promise<T[]>
   createTable(): Promise<void>
 }
 

@@ -1,6 +1,6 @@
 # Aurora-ORM <a href="https://npmjs.com/package/aurora-orm"><img src="https://badgen.net/npm/v/aurora-orm" alt="npm package"></a>
 
-> Decorator-less, type safe, near-zero runtime ORM for Node.js and TypeScript
+> Near-zero runtime ORM for Node.js and TypeScript
 
 Aurora ORM support PostgreSQL.
 
@@ -66,18 +66,10 @@ const connectionString = 'postgres://test:test@localhost:5432/test'
 
 const direction = process.argv[2] as 'down' | 'up'
 
-runMigrations({
+await runMigrations({
   direction,
   config: {driver: Drivers.PG, connectionString},
 })
-  .then(() => {
-    console.log('Migrations complete!')
-    process.exit(0)
-  })
-  .catch(e => {
-    console.error(e)
-    process.exit(1)
-  })
 ```
 
 And add to `package.json` scripts:

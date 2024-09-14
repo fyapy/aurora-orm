@@ -25,8 +25,8 @@ export type MigrationAction = (options: {
 export interface MigrationBuilderActions {
   version: 'v1'
   connectionNames?: string[]
-  up?: MigrationAction | false
-  down?: MigrationAction | false
+  up?: MigrationAction
+  down?: MigrationAction
 }
 
 export interface Migration {
@@ -34,7 +34,6 @@ export interface Migration {
   path: string
   timestamp: number
   db: DBConnection
-  up: MigrationBuilderActions['up']
-  down: MigrationBuilderActions['down']
+  getActions(): Promise<MigrationBuilderActions>
   apply(direction: MigrationDirection): Promise<void>
 }

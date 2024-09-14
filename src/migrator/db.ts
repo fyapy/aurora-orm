@@ -2,7 +2,6 @@ import type { ConnectionConfig } from '../config.js'
 import type { Foreign, Value } from './queryBuilder.js'
 import type { Driver } from '../orm/driverAdapters/index.js'
 import type { Tx } from '../orm/index.js'
-import { inspect } from 'node:util'
 import { connectToDatabase } from '../orm/connect.js'
 import * as queryBuilder from './queryBuilder.js'
 
@@ -41,10 +40,10 @@ export async function connectDB(config: ConnectionConfig): Promise<DBConnection>
     try {
       await driver.ping()
       connectionStatus = ConnectionStatus.CONNECTED
-    } catch (err) {
+    } catch (e) {
       connectionStatus = ConnectionStatus.ERROR
-      console.error(`Could not connect to database: ${inspect(err)}`)
-      throw err
+      console.error(`Could not connect to database:`, e)
+      throw e
     }
   }
 

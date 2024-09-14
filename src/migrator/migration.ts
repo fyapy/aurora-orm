@@ -1,48 +1,42 @@
-import type { Migration, MigrationAction, MigrationBuilderActions, MigrationDirection } from './types.js'
+import type { Migration, MigrationBuilderActions, MigrationDirection } from './types.js'
 import type { DBConnection } from './db.js'
-import type { Tx } from '../orm/types.js'
+import * as tsx from 'tsx/esm/api'
 import path from 'node:path'
 import { column, now, uuidV4, emptyArray } from './queryBuilder.js'
 import { Migrator } from '../orm/driverAdapters/types.js'
 
 const defs = {now, uuidV4, emptyArray}
 
-export function migration({db, actions, filePath, migrator}: {
+export function migration({db, actionPath, filePath, migrator}: {
   db: DBConnection
   filePath: string
-  actions: MigrationBuilderActions
+  actionPath: string
   migrator: Migrator
 }): Migration {
   const name = path.basename(filePath, path.extname(filePath))
   const timestamp = Number(name.split('_')[0])
 
-  function getAction(direction: MigrationDirection) {
-    const action = actions[direction]
+  let _actions: MigrationBuilderActions
 
-    if (typeof action !== 'function') {
-      throw new Error(
-        `Unknown value for direction: ${direction}. Is the migration ${name} exporting a '${direction}' function?`,
-      )
+  async function getActions() {
+    if (typeof _actions !== 'undefined') {
+      return _actions
     }
 
-    return action
-  }
+    _actions = filePath.endsWith('.ts')
+      ? (await tsx.tsImport(actionPath, import.meta.url)).default
+      : (await import(actionPath)).default
 
-  async function markAsRun(action: MigrationAction, tx: Tx) {
-    if (action === actions.down) {
-      console.info(`### MIGRATION ${name} (DOWN) ###`)
-      return await migrator.delete(name, tx)
-    }
-    if (action === actions.up) {
-      console.info(`### MIGRATION ${name} (UP) ###`)
-      return await migrator.insert(name, tx)
-    }
-
-    throw new Error('Unknown direction')
+    return _actions
   }
 
   async function apply(direction: MigrationDirection) {
-    const action = getAction(direction)
+    const actions =  await getActions()
+    const action = actions[direction]
+
+    if (typeof action !== 'function') {
+      throw new Error(`Unknown value for direction: ${direction}. Is the migration ${name} exporting a '${direction}' function?`)
+    }
 
     const tx = await db.driver.startTrx()
     try {
@@ -60,21 +54,30 @@ export function migration({db, actions, filePath, migrator}: {
         defs,
       })
 
-      await markAsRun(action, tx)
+
+      // mark as run
+      if (action === actions.down) {
+        console.info(`### MIGRATION ${name} (DOWN) ###`)
+        return await migrator.delete(name, tx)
+      }
+      if (action === actions.up) {
+        console.info(`### MIGRATION ${name} (UP) ###`)
+        return await migrator.insert(name, tx)
+      }
+
       await db.driver.commit(tx)
-    } catch (err) {
+    } catch (e) {
       await db.driver.rollback(tx)
-      throw err
+      throw e
     }
   }
 
   return {
-    name,
     db,
+    name,
     timestamp,
     path: filePath,
-    up: actions.up,
-    down: actions.down,
+    getActions,
     apply,
   }
 }
