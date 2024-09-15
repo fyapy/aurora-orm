@@ -1,7 +1,7 @@
 import {connectionString, idleTimeout, iter} from './constants.js'
 import {createModel, connect, Drivers} from '../../src/index.js'
 import {downMigrations, upMigrations} from './migrator.js'
-import {formatResult, readJSON,bench} from '../utils.js'
+import {formatResult, readJSON, bench} from '../utils.js'
 import {User} from './data.js'
 
 const users = readJSON<User[]>('./scripts/benchmark/data/users.json')

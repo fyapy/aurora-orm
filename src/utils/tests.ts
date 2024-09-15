@@ -1,11 +1,6 @@
-import {AbstractPoolRuntime, AbstractClient} from '../orm/drivers/pg/types.js'
-import {basePG} from '../orm/drivers/pg/base.js'
 import {pg} from '../orm/drivers/pg/index.js'
 
-const noop = () => {}
-const asyncNoop = async () => {}
-
-let sqlRows = [] as [string, any[] | null][]
+let sqlRows = [] as [string, undefined | any[]][]
 
 export const getSqlRow = (index: number = 0) => {
   const data = sqlRows[index] ?? ['', null]
@@ -17,30 +12,37 @@ export function clearSqlRows() {
   sqlRows = []
 }
 
-async function mockQuery(sql: string, values: any[] | null) {
-  sqlRows.push([sql, values])
-  return {rows: []}
+type Query = (sql: string, values?: any[]) => Promise<{rows: any[]}>
+
+export interface AbstractClient {
+  query: Query
+  release(): void
 }
 
-class MockClient implements AbstractClient {
-  query = mockQuery
-  end = asyncNoop
-  release = noop
+export interface AbstractPool {
+  connect(): Promise<AbstractClient>
+  query: Query
+  end(): Promise<void>
 }
 
-class MockPool implements AbstractPoolRuntime {
-  async connect() {
-    return new MockClient()
+export function createFakePool(): AbstractPool {
+  const query: Query = async (sql, values) => {
+    sqlRows.push([sql, values])
+    return {rows: []}
   }
 
-  query = mockQuery
-  end = asyncNoop
-  release = noop
+  return {
+    query,
+    connect: async () => ({
+      query,
+      release: () => {},
+    }),
+    end: async () => {},
+  }
 }
 
-export const createBase = () => basePG({} as any, noop, MockPool as any)
 export const fakeDriver = () => pg({
   config: {} as any,
-  ormLog: noop,
-  createBase,
+  ormLog: () => {},
+  createFakePool,
 })

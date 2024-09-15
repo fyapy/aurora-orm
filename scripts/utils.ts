@@ -16,7 +16,7 @@ export function writeJSON(path: string, json: any) {
   return fs.writeFileSync(path, JSON.stringify(json, null, 2))
 }
 
-export function cpy(from: string, to: string) {
+export function cp(from: string, to: string) {
   return fs.cpSync(from, to, {recursive: true})
 }
 

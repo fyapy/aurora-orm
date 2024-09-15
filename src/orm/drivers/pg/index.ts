@@ -1,28 +1,132 @@
+import {randomUUID} from 'node:crypto'
+import pglib from 'pg'
+
 import type {BaseFindOptions, FindAllOptions, FindOneOptions, JoinStrategy, WhereValues, SetOperator, ColumnData, AnyObject, Operator, Where, Join, Tx, ID} from '../../types.js'
 import type {ConnectionConfig} from '../../../config.js'
-import type {Driver} from '../types.js'
+import type {Migrator, Driver} from '../types.js'
 import type {OrmLog} from './types.js'
 
+import {migratorAstParsers, formatParams} from '../../../utils/sql.js'
+import {AbstractClient, AbstractPool} from '../../../utils/tests.js'
 import {tableNameToModelName, AuroraFail} from '../../utils.js'
 import {whereOperator, setOperator} from '../../operators.js'
 import {whereOperators, setOperators} from './operators.js'
 import {buildAliasMapper, insertValues} from './utils.js'
-import {basePG} from './base.js'
 
-export async function pg({config, ormLog, createBase = basePG}: {
+export async function pg({config, ormLog, createFakePool}: {
   config: ConnectionConfig
   ormLog: OrmLog
-  createBase?: typeof basePG
+  createFakePool?(): AbstractPool
 }): Promise<Driver> {
-  const base = await createBase(config, ormLog)
-  const queryRow = base.queryRow
-  const query = base.query
+  const pool = typeof createFakePool === 'undefined' ? new pglib.Pool(config) : createFakePool()
+
+  const transactions: Record<string, AbstractClient> = {}
+
+  async function prepareDatabase() {
+    await pool.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+  }
+
+  async function ping() {
+    await pool.query('SELECT 1')
+  }
+  async function end() {
+    await pool.end()
+  }
+
+  async function queryRow<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T> {
+    ormLog(sql, values)
+    const client = typeof tx === 'string' ? transactions[tx] : pool
+
+    if (Array.isArray(values)) {
+      const res = await client.query(formatParams(sql), values)
+
+      return ((res as any).command === 'DELETE'
+        ? res
+        : res.rows[0]) as T
+    }
+
+    return (await client.query(sql)).rows[0] as T
+  }
+  async function query<T = any>(sql: string, values?: any[] | null, tx?: Tx) {
+    ormLog(sql, values)
+    const client = typeof tx === 'string' ? transactions[tx] : pool
+
+    if (Array.isArray(values)) {
+      return (await client.query(formatParams(sql), values)).rows as T[]
+    }
+
+    return (await client.query(sql)).rows as T[]
+  }
+
+  async function startTrx(tx?: Tx) {
+    if (typeof tx === 'string') {
+      return tx
+    }
+
+    const id = randomUUID()
+    const client = await pool.connect()
+    await client.query('BEGIN')
+    transactions[id] = client
+
+    return id
+  }
+  async function commit(tx: Tx) {
+    const client = transactions[tx]
+    await client.query('COMMIT')
+    client.release()
+  }
+  async function rollback(tx: Tx) {
+    const client = transactions[tx]
+    await client.query('ROLLBACK')
+    client.release()
+  }
 
   const TRUE = true
   const FALSE = false
 
   return {
-    ...base,
+    prepareDatabase,
+    ping,
+    end,
+    queryRow,
+    query,
+    startTrx,
+    commit,
+    rollback,
+
+    ...migratorAstParsers(),
+
+    migrator({
+      idColumn,
+      nameColumn,
+      runOnColumn,
+      migrationsTable,
+    }): Migrator {
+      const tables = () => query(
+        `SELECT table_name FROM information_schema.tables WHERE table_name = '${migrationsTable}'`,
+      )
+      const selectAll = () => query(
+        `SELECT ${nameColumn} FROM ${migrationsTable} ORDER BY ${runOnColumn}, ${idColumn}`,
+      )
+      async function createTable() {
+        await query(
+          `CREATE TABLE ${migrationsTable} (${idColumn} SERIAL PRIMARY KEY, ${nameColumn} varchar(255) NOT NULL, ${runOnColumn} timestamptz NOT NULL)`,
+        )
+      }
+
+      return {
+        async delete(name, tx) {
+          await query(`DELETE FROM "${migrationsTable}" WHERE ${nameColumn} = '${name}'`, [], tx)
+        },
+        async insert(name, tx) {
+          await query(`INSERT INTO "${migrationsTable}" (${nameColumn}, ${runOnColumn}) VALUES ('${name}', NOW())`, [], tx)
+        },
+        tables,
+        selectAll,
+        createTable,
+      }
+    },
+
     whereOperators,
     buildModelMethods<T extends AnyObject>({
       table,
@@ -475,12 +579,10 @@ export async function pg({config, ormLog, createBase = basePG}: {
         }
 
         if (typeof params.skip === 'number') {
-          sql += ' OFFSET ?'
-          whereProps.values.push(params.skip)
+          sql += ` OFFSET ${params.skip}`
         }
         if (typeof params.limit === 'number') {
-          sql += ' LIMIT ?'
-          whereProps.values.push(params.limit)
+          sql += ` LIMIT ${params.limit}`
         }
 
         const result = await query<T>(sql, whereProps.values, params.tx)

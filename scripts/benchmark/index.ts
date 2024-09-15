@@ -13,5 +13,5 @@ import pg from './pg.js'
 
 await pg()
 await postgres()
-await typeorm()
 await auroraorm()
+await typeorm()

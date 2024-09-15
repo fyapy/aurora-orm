@@ -1,13 +1,16 @@
 import {afterEach, describe, expect, test} from 'vitest'
 
 import {dropConstraint, createTable, alterTable, emptyArray, foreignKey, addColumn, column, insert, uuidV4, now} from '../../../../migrator/queryBuilder.js'
-import {clearSqlRows, createBase, getSqlRow} from '../../../../utils/tests.js'
+import {createFakePool, clearSqlRows, getSqlRow} from '../../../../utils/tests.js'
+import {migratorAstParsers} from '../../../../utils/sql.js'
 
 describe('driver/pg/migrator', () => {
+  const methods = migratorAstParsers()
+
   afterEach(clearSqlRows)
 
   test('should basePG call method query and log SQL', async () => {
-    const base = await createBase()
+    const base = createFakePool()
 
     await base.query('SELECT 1')
 
@@ -15,9 +18,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect alter table SQL', async () => {
-    const base = await createBase()
-
-    const alterSql = base.parseAlterTable(
+    const alterSql = methods.parseAlterTable(
       alterTable('users', {
         created_at: addColumn({type: 'timestamptz', notNull: true, default: now})
       })
@@ -27,9 +28,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect create table SQL', async () => {
-    const base = await createBase()
-
-    const createSql = base.parseCreateTable(
+    const createSql = methods.parseCreateTable(
       createTable('users', {
         id: column({type: 'uuid', primary: true, default: uuidV4}),
         created_at: column({type: 'timestamptz', notNull: true, default: now})
@@ -43,9 +42,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect add foreign key SQL', async () => {
-    const base = await createBase()
-
-    const createSql = base.parseForeignKey(
+    const createSql = methods.parseForeignKey(
       foreignKey({table: 'panel_user_roles', key: 'user_id'}, {table: 'panel_users', key: 'id'})
     )
 
@@ -54,9 +51,7 @@ describe('driver/pg/migrator', () => {
 
 
   test('should generate currect drop constraint key SQL', async () => {
-    const base = await createBase()
-
-    const createSql = base.parseDropConstraint(
+    const createSql = methods.parseDropConstraint(
       dropConstraint('users', 'city_id')
     )
 
@@ -64,9 +59,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect insert SQL', async () => {
-    const base = await createBase()
-
-    const createSql = base.parseInsert(
+    const createSql = methods.parseInsert(
       insert('users', {name: 'Lera', age: 20, active: true})
     )
 
@@ -74,9 +67,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect create table SQL with emptyArray', async () => {
-    const base = await createBase()
-
-    const createSql = base.parseCreateTable(
+    const createSql = methods.parseCreateTable(
       createTable('users', {list: column({type: 'varchar', default: emptyArray})})
     )
 

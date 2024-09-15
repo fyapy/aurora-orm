@@ -1,4 +1,4 @@
-import {writeJSON, readJSON, exec, cpy} from './utils.js'
+import {writeJSON, readJSON, exec, cp} from './utils.js'
 
 console.info('Package start linting!')
 
@@ -15,8 +15,8 @@ delete packageJson.scripts
 
 writeJSON('./dist/package.json', packageJson)
 
-cpy('./readme.md', './dist/readme.md')
-cpy('./templates', './dist/templates')
-cpy('./bin', './dist/bin')
+cp('./readme.md', './dist/readme.md')
+cp('./templates', './dist/templates')
+cp('./bin', './dist/bin')
 
 console.info('Package successfully builded!')
