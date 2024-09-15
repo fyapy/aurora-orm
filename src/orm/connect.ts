@@ -1,7 +1,7 @@
-import type {Driver} from './driverAdapters/index.js'
+import type {Driver} from './drivers/index.js'
 
 import {ConnectionConfig, Drivers} from '../config.js'
-import * as drivers from './driverAdapters/index.js'
+import * as drivers from './drivers/index.js'
 
 export interface Config {
   driver: Driver | null
@@ -69,7 +69,7 @@ export async function connect({debug, config, connectNotify = true}: ConnectConf
 
   const timeout = 5000
 
-  setTimeout(() => {
+  const timer = setTimeout(() => {
     if (ormConfig.driver === null) {
       throw new Error(`aurora-orm cannot get connection during ${timeout} ms, check database connection!`)
     }
@@ -77,11 +77,12 @@ export async function connect({debug, config, connectNotify = true}: ConnectConf
 
   const driver = await connectToDatabase(config)
 
+  clearTimeout(timer)
   setConnection(driver)
 
   if (connectNotify === true) {
     console.log('Aurora ORM succesfully connected')
   }
 
-  return ormConfig
+  return driver
 }

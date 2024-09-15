@@ -1,6 +1,7 @@
 import {randomUUID} from 'node:crypto'
+import pg from 'pg'
 
-import type {AbstractPoolRuntime, AbstractClient, OrmLog} from './types.js'
+import type {NewAbstractPoolRuntime, AbstractClient, OrmLog} from './types.js'
 import type {ConnectionConfig} from '../../../config.js'
 import type {QueryConfig, Tx} from '../../types.js'
 import type {Migrator} from '../types.js'
@@ -21,22 +22,14 @@ const SQLParams = (sql: string) => sql.split('?')
     ? curr
     : `${curr}$${index + 1}`, '')
 
-const loadModule = async (config: ConnectionConfig) => {
-  const Pool = (await import('pg')).default.Pool
-
-  return new Pool(config) as any as AbstractPoolRuntime
-}
-
 export async function basePG(
   config: ConnectionConfig,
   ormLog: OrmLog,
-  loadPool = loadModule
+  Pool = pg.Pool as any as NewAbstractPoolRuntime,
 ) {
-  const pool = await loadPool(config)
+  const pool = new Pool(config)
 
   const transactions: Record<string, AbstractClient> = {}
-
-  await pool.connect()
 
   async function prepareDatabase() {
     await pool.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')

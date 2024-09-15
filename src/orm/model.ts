@@ -1,5 +1,5 @@
 import type {ModelOptions, AnyObject, Models, Model} from './types.js'
-import type {Driver} from './driverAdapters/types.js'
+import type {Driver} from './drivers/types.js'
 
 import {subsctibeToConnection, ormConfig} from './connect.js'
 

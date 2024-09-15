@@ -10,7 +10,10 @@
     "strict": true,
     "noImplicitAny": false,
     "noUnusedLocals": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "include": ["src", "scripts", "templates"]
 }

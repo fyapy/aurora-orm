@@ -2,7 +2,7 @@ import perfectionist from 'eslint-plugin-perfectionist'
 import ts from 'typescript-eslint'
 
 export default ts.config(
-  {ignores: ['dist/*', 'benchmarks/*']},
+  {ignores: ['dist/*']},
   ...ts.configs.recommended,
   perfectionist.configs['recommended-line-length'],
   {

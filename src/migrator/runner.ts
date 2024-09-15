@@ -1,35 +1,28 @@
 import path from 'node:path'
 
 import {migrationsTable, runOnColumn, nameColumn, idColumn} from './constants.js'
-import {RunMigrationsOptions, Migration} from './types.js'
-import {Migrator} from '../orm/driverAdapters/types.js'
+import {RunMigrationsOptions, RunMigration, Migration, Logger} from './types.js'
+import {loadMigrationFilePaths} from './utils.js'
+import {Migrator} from '../orm/drivers/types.js'
 import {DBConnection, connectDB} from './db.js'
-import {loadMigrationFiles} from './utils.js'
 import {migration} from './migration.js'
 
-async function loadMigrations(db: DBConnection, migrator: Migrator) {
+async function loadMigrations(
+  logger: Logger,
+  db: DBConnection,
+  migrator: Migrator,
+  directory = path.join(process.cwd(), '/migrations'),
+) {
   try {
-    const dir = '/migrations'
-    const files = await loadMigrationFiles(dir)
+    const filePaths = await loadMigrationFilePaths(directory)
 
-    return (
-      await Promise.all(files.map(async file => {
-        const filePath = `${dir}/${file}`
-        const fullPath = path.join(process.cwd(), filePath)
-        const actionPath = `file://${fullPath.replace(/\\/g, '/')}`
+    return filePaths
+      .map(filePath => migration({filePath, migrator, logger, db}))
+      .sort((m1, m2) => {
+        const compare = m1.timestamp - m2.timestamp
 
-        return migration({
-          actionPath,
-          filePath,
-          migrator,
-          db,
-        })
-      }))
-    ).sort((m1, m2) => {
-      const compare = m1.timestamp - m2.timestamp
-
-      return compare !== 0 ? compare : m1.name.localeCompare(m2.name)
-    })
+        return compare !== 0 ? compare : m1.name.localeCompare(m2.name)
+      })
   } catch (e: any) {
     throw new Error(`Can't get migration files: ${e.stack}`)
   }
@@ -71,6 +64,7 @@ function getMigrationsToRun(options: RunMigrationsOptions, runNames: string[], m
 
 export async function runMigrationsSilent(options: RunMigrationsOptions) {
   const db = await connectDB(options.config)
+  const logger = options.logger ?? console.info
 
   try {
     await db.createConnection()
@@ -84,9 +78,9 @@ export async function runMigrationsSilent(options: RunMigrationsOptions) {
 
     await ensureMigrationsTable(migrator)
 
-    const [runList, migrations] = await Promise.all([
-      migrator.selectAll<{name: string}>(),
-      loadMigrations(db, migrator),
+    const [migrations, runList] = await Promise.all([
+      loadMigrations(logger, db, migrator, options.directory),
+      migrator.selectAll<RunMigration>(),
     ])
 
     if (runList.length === 0 && typeof db.driver.prepareDatabase !== 'undefined') {
@@ -96,23 +90,24 @@ export async function runMigrationsSilent(options: RunMigrationsOptions) {
     const toRun: Migration[] = getMigrationsToRun(options, runList.map(item => item[nameColumn]), migrations)
 
     if (toRun.length === 0) {
-      console.info('> No migrations to run!')
-      return
+      return logger('> No migrations to run!')
     }
 
-    console.info('> Migrating files:')
-    toRun.forEach(m => console.info(`> ${m.name}`))
+    logger('> Migrating files:')
+    toRun.forEach(m => logger(`> File: ${m.name}`))
 
 
     for (const migration of migrations) {
-      console.info(`> Run: ${migration.name} (${options.direction})`)
+      logger(`> Run: ${migration.name} (${options.direction})`)
       await migration.apply(options.direction)
     }
+
+    logger('> Migrations complete!')
   } catch (e) {
     throw e
   } finally {
     if (db.connected()) {
-      db.close()
+      await db.close()
     }
   }
 }
@@ -121,7 +116,6 @@ export async function runMigrations(options: RunMigrationsOptions) {
   try {
     await runMigrationsSilent(options)
 
-    console.log('Migrations complete!')
     process.exit(0)
   } catch (e) {
     console.error(e)

@@ -1,19 +1,20 @@
 import * as tsx from 'tsx/esm/api'
 import path from 'node:path'
+import url from 'node:url'
 
-import type {MigrationBuilderActions, MigrationDirection, Migration} from './types.js'
+import type {MigrationBuilderActions, MigrationDirection, Migration, Logger} from './types.js'
 import type {DBConnection} from './db.js'
 
 import {emptyArray, column, uuidV4, now} from './queryBuilder.js'
-import {Migrator} from '../orm/driverAdapters/types.js'
+import {Migrator} from '../orm/drivers/types.js'
 
 const defs = {now, uuidV4, emptyArray}
 
-export function migration({db, actionPath, filePath, migrator}: {
+export function migration({db, filePath, migrator, logger}: {
   db: DBConnection
   filePath: string
-  actionPath: string
   migrator: Migrator
+  logger: Logger
 }): Migration {
   const name = path.basename(filePath, path.extname(filePath))
   const timestamp = Number(name.split('_')[0])
@@ -25,9 +26,7 @@ export function migration({db, actionPath, filePath, migrator}: {
       return _actions
     }
 
-    _actions = filePath.endsWith('.ts')
-      ? (await tsx.tsImport(actionPath, import.meta.url)).default
-      : (await import(actionPath)).default
+    _actions = (await tsx.tsImport(url.pathToFileURL(filePath).href, import.meta.url)).default
 
     return _actions
   }
@@ -59,12 +58,12 @@ export function migration({db, actionPath, filePath, migrator}: {
 
       // mark as run
       if (action === actions.down) {
-        console.info(`### MIGRATION ${name} (DOWN) ###`)
-        return await migrator.delete(name, tx)
+        logger(`> Completed: ${name} (down)`)
+        await migrator.delete(name, tx)
       }
       if (action === actions.up) {
-        console.info(`### MIGRATION ${name} (UP) ###`)
-        return await migrator.insert(name, tx)
+        logger(`> Completed: ${name} (up)`)
+        await migrator.insert(name, tx)
       }
 
       await db.driver.commit(tx)

@@ -9,20 +9,21 @@ import {whereOperators, setOperators} from './operators.js'
 import {buildAliasMapper, insertValues} from './utils.js'
 import {basePG} from './base.js'
 
-export async function pg({config, ormLog, mockBase = basePG}: {
+export async function pg({config, ormLog, createBase = basePG}: {
   config: ConnectionConfig
   ormLog: OrmLog
-  mockBase?: typeof basePG
+  createBase?: typeof basePG
 }): Promise<Driver> {
-  const {query, queryRow, ...base} = await mockBase(config, ormLog)
+  const base = await createBase(config, ormLog)
+  const queryRow = base.queryRow
+  const query = base.query
+
   const TRUE = true
   const FALSE = false
 
   return {
-    whereOperators,
-    query,
-    queryRow,
     ...base,
+    whereOperators,
     buildModelMethods<T extends AnyObject>({
       table,
       mapping,
@@ -203,11 +204,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
       }
 
       function runJoins(result: T[] | T, options: BaseFindParams) {
-        if (typeof options.join === 'undefined') {
-          return
-        }
-
-        return Promise.all(options.join.map(async key => {
+        return Promise.all(options.join!.map(async key => {
           if (Array.isArray(key)) {
             const prop = key[0]
             const selectAndSunJoins = key[1] ?? []
@@ -464,8 +461,7 @@ export async function pg({config, ormLog, mockBase = basePG}: {
           const whereProps = where(params)
           const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-          const result = await query<T>(sql, whereProps.values)
-          return result
+          return await query<T>(sql, whereProps.values)
         }
 
         // FindParams
@@ -492,7 +488,9 @@ export async function pg({config, ormLog, mockBase = basePG}: {
           return result
         }
 
-        await runJoins(result, params)
+        if (typeof params.join !== 'undefined') {
+          await runJoins(result, params)
+        }
 
         return result
       }
@@ -544,7 +542,9 @@ export async function pg({config, ormLog, mockBase = basePG}: {
           return result
         }
 
-        await runJoins(result, params)
+        if (typeof params.join !== 'undefined') {
+          await runJoins(result, params)
+        }
 
         return result
       }

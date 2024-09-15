@@ -1,5 +1,5 @@
-import type {Driver} from '../orm/driverAdapters/index.js'
 import type {Foreign, Value} from './queryBuilder.js'
+import type {Driver} from '../orm/drivers/index.js'
 import type {ConnectionConfig} from '../config.js'
 import type {Tx} from '../orm/index.js'
 

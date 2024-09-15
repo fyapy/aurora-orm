@@ -4,7 +4,7 @@
 
 import path from 'node:path'
 
-import {createMigrationFile} from '../index'
+import {createMigrationFile} from '../index.js'
 
 process.on('uncaughtException', e => {
   console.error(e)

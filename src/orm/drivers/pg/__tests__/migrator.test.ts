@@ -1,13 +1,13 @@
 import {afterEach, describe, expect, test} from 'vitest'
 
 import {dropConstraint, createTable, alterTable, emptyArray, foreignKey, addColumn, column, insert, uuidV4, now} from '../../../../migrator/queryBuilder.js'
-import {clearSqlRows, getSqlRow, mockBase} from '../../../../utils/tests.js'
+import {clearSqlRows, createBase, getSqlRow} from '../../../../utils/tests.js'
 
 describe('driver/pg/migrator', () => {
   afterEach(clearSqlRows)
 
   test('should basePG call method query and log SQL', async () => {
-    const base = await mockBase()
+    const base = await createBase()
 
     await base.query('SELECT 1')
 
@@ -15,7 +15,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect alter table SQL', async () => {
-    const base = await mockBase()
+    const base = await createBase()
 
     const alterSql = base.parseAlterTable(
       alterTable('users', {
@@ -27,7 +27,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect create table SQL', async () => {
-    const base = await mockBase()
+    const base = await createBase()
 
     const createSql = base.parseCreateTable(
       createTable('users', {
@@ -43,7 +43,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect add foreign key SQL', async () => {
-    const base = await mockBase()
+    const base = await createBase()
 
     const createSql = base.parseForeignKey(
       foreignKey({table: 'panel_user_roles', key: 'user_id'}, {table: 'panel_users', key: 'id'})
@@ -54,7 +54,7 @@ describe('driver/pg/migrator', () => {
 
 
   test('should generate currect drop constraint key SQL', async () => {
-    const base = await mockBase()
+    const base = await createBase()
 
     const createSql = base.parseDropConstraint(
       dropConstraint('users', 'city_id')
@@ -64,7 +64,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect insert SQL', async () => {
-    const base = await mockBase()
+    const base = await createBase()
 
     const createSql = base.parseInsert(
       insert('users', {name: 'Lera', age: 20, active: true})
@@ -74,7 +74,7 @@ describe('driver/pg/migrator', () => {
   })
 
   test('should generate currect create table SQL with emptyArray', async () => {
-    const base = await mockBase()
+    const base = await createBase()
 
     const createSql = base.parseCreateTable(
       createTable('users', {list: column({type: 'varchar', default: emptyArray})})

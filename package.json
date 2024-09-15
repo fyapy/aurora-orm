@@ -15,18 +15,22 @@
     "test": "vitest run",
     "build": "tsx ./scripts/build.ts",
     "release": "tsx ./scripts/release.ts",
-    "bench": "node ./benchmarks/aurora_sync/index.js"
+    "benchmark": "tsx ./scripts/benchmark/index.ts"
   },
   "peerDependencies": {
     "@types/pg": "*",
     "pg": ">=8",
+    "postgres": ">=3",
     "tsx": ">=4"
   },
   "peerDependenciesMeta": {
+    "@types/pg": {
+      "optional": true
+    },
     "pg": {
       "optional": true
     },
-    "@types/pg": {
+    "postgres": {
       "optional": true
     },
     "tsx": {
@@ -34,13 +38,17 @@
     }
   },
   "devDependencies": {
+    "@faker-js/faker": "9.0.0",
     "@types/node": "22.5.0",
     "@types/pg": "8.11.9",
     "eslint": "9.10.0",
     "eslint-plugin-perfectionist": "3.6.0",
     "pg": "8.12.0",
+    "postgres": "3.4.4",
+    "reflect-metadata": "0.2.2",
     "tsup": "8.2.4",
     "tsx": "4.19.1",
+    "typeorm": "0.3.20",
     "typescript": "5.6.2",
     "typescript-eslint": "8.5.0",
     "vitest": "2.1.1"

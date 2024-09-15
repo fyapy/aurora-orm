@@ -1,4 +1,4 @@
-import type {Driver} from './driverAdapters/index.js'
+import type {Driver} from './drivers/index.js'
 
 export interface QueryConfig {
   name?: string

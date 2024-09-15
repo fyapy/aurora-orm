@@ -11,9 +11,9 @@ export interface RunMigration {
 export type MigrationDirection = 'down' | 'up'
 export interface RunMigrationsOptions {
   direction: MigrationDirection
-
   config: ConnectionConfig
-  migrationsConfig?: ConnectionConfig
+  directory?: string
+  logger?(...args: any[]): void
 }
 
 export type MigrationAction = (options: {
@@ -37,3 +37,5 @@ export interface Migration {
   getActions(): Promise<MigrationBuilderActions>
   apply(direction: MigrationDirection): Promise<void>
 }
+
+export type Logger = (...args: any[]) => void

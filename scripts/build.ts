@@ -1,6 +1,4 @@
-import fs from 'node:fs'
-
-import {exec} from './utils.js'
+import {writeJSON, readJSON, exec, cpy} from './utils.js'
 
 console.info('Package start linting!')
 
@@ -10,15 +8,15 @@ console.info('Package start building!')
 
 await exec('pnpm tsup')
 
-const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
+const packageJson = readJSON('./package.json')
 
 delete packageJson.devDependencies
 delete packageJson.scripts
 
-fs.writeFileSync('./dist/package.json', JSON.stringify(packageJson, null, 2))
+writeJSON('./dist/package.json', packageJson)
 
-fs.cpSync('./readme.md', './dist/readme.md', {recursive: true})
-fs.cpSync('./templates', './dist/templates', {recursive: true})
-fs.cpSync('./bin', './dist/bin', {recursive: true})
+cpy('./readme.md', './dist/readme.md')
+cpy('./templates', './dist/templates')
+cpy('./bin', './dist/bin')
 
 console.info('Package successfully builded!')
