@@ -3,8 +3,8 @@ import pg from 'pg'
 
 import type {NewAbstractPoolRuntime, AbstractClient, OrmLog} from './types.js'
 import type {ConnectionConfig} from '../../../config.js'
-import type {QueryConfig, Tx} from '../../types.js'
 import type {Migrator} from '../types.js'
+import type {Tx} from '../../types.js'
 
 import {
   ColumnOperator,
@@ -42,7 +42,7 @@ export async function basePG(
     await pool.end()
   }
 
-  async function queryRow<T = any>(sql: string, values: any[] | null, tx?: Tx, prepare: boolean = false): Promise<T> {
+  async function queryRow<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T> {
     ormLog(sql, values)
     const client = typeof tx === 'string' ? transactions[tx] : pool
 
@@ -54,35 +54,16 @@ export async function basePG(
         : res.rows[0]) as T
     }
 
-    if (prepare === false) {
-      const res = await client.query(sql)
-
-      return res.rows[0] as T
-    }
-
-    const res = await client.query({
-      text: SQLParams(sql),
-      name: sql,
-    } as QueryConfig)
+    const res = await client.query(sql)
 
     return res.rows[0] as T
   }
-  async function query<T = any>(sql: string, values?: any[] | null, tx?: Tx, prepare: boolean = false) {
+  async function query<T = any>(sql: string, values?: any[] | null, tx?: Tx) {
     ormLog(sql, values)
     const client = typeof tx === 'string' ? transactions[tx] : pool
 
     if (Array.isArray(values)) {
-      if (prepare === false) {
-        const res = await client.query(SQLParams(sql), values)
-
-        return res.rows as T[]
-      }
-
-      const res = await client.query({
-        text: SQLParams(sql),
-        name: sql,
-        values,
-      } as QueryConfig)
+      const res = await client.query(SQLParams(sql), values)
 
       return res.rows as T[]
     }

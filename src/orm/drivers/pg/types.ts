@@ -1,8 +1,5 @@
- 
-import type {QueryConfig} from '../../types.js'
-
 export interface AbstractClient {
-  query(sql: QueryConfig | string, values?: any[] | null): Promise<any>
+  query(sql: string, values?: any[] | null): Promise<any>
   end(): Promise<void>
   release(destroy?: boolean): void
 }

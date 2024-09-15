@@ -1,10 +1,5 @@
 import type {Driver} from './drivers/index.js'
 
-export interface QueryConfig {
-  name?: string
-  text: string
-  values?: any[]
-}
 export type Tx = string
 
 export type AnyObject = Record<string, any>
@@ -23,7 +18,6 @@ interface Writer<T extends AnyObject> {
     set: Set<T>
     returning?: Array<keyof T> | boolean
     tx?: Tx
-    prepared?: boolean
   }): Promise<T>
   delete(id: Where<T> | ID, tx?: Tx): Promise<boolean>
 }
@@ -40,7 +34,6 @@ export interface BaseFindOptions<T> {
   limit?: number
   skip?: number
   tx?: Tx
-  prepared?: boolean
 }
 
 export interface FindAllOptions<T extends AnyObject> extends BaseFindOptions<T> {
