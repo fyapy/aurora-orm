@@ -1,4 +1,4 @@
-import {createMigration} from '../../../src/migrator/v1.js'
+import {createMigration} from '../../../src/migrator/index.js'
 
 export default createMigration({
   async up({sql, defs}) {

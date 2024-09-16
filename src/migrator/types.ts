@@ -23,7 +23,6 @@ export type MigrationAction = (options: {
 }) => Promise<void> | void
 
 export interface MigrationBuilderActions {
-  version: 'v1'
   connectionNames?: string[]
   up?: MigrationAction
   down?: MigrationAction

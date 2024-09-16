@@ -67,8 +67,8 @@ const connectionString = 'postgres://test:test@localhost:5432/test'
 const direction = process.argv[2] as 'down' | 'up'
 
 await runMigrationsAndExit({
-  direction,
   config: {driver: Drivers.PG, connectionString},
+  direction,
 })
 ```
 

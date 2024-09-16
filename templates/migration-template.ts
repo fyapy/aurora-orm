@@ -1,4 +1,4 @@
-import {createMigration} from 'aurora-orm/v1'
+import {createMigration} from 'aurora-orm'
 
 export default createMigration({
   async up({}) {
