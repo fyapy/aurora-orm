@@ -1,11 +1,11 @@
 {
   "name": "aurora-orm",
   "license": "MIT",
-  "version": "0.2.46",
+  "version": "0.2.47",
   "author": "Amir Abdullin",
   "description": "Near-zero runtime ORM and migration tool for PostgreSQL with TypeScript and Node.js",
-  "types": "dist/index.d.ts",
-  "main": "dist/index.js",
+  "types": "index.d.ts",
+  "main": "index.js",
   "type": "module",
   "bin": {
     "aurora-orm": "bin/aurora-orm.js"
