@@ -107,11 +107,11 @@ export interface ModelOptions<T extends AnyObject> {
   table: string
   primaryKey?: string
   mapping: Record<keyof T, JoinStrategy | ColumnData>
-  beforeCreate?: (setData?: Partial<T>) => Promise<void>
-  afterCreate?: (data: T) => Promise<void>
-  beforeUpdate?: (set: Set<T>) => Promise<void>
-  afterUpdate?: (data: T) => Promise<void>
-  beforeDelete?: (data: Where<T> | ID) => Promise<void>
-  afterDelete?: (data: Where<T> | ID, deleted: boolean) => Promise<void>
+  beforeCreate?: (setData?: Partial<T>) => Promise<void> | void
+  afterCreate?: (data: T) => Promise<void> | void
+  beforeUpdate?: (set: Set<T>) => Promise<void> | void
+  afterUpdate?: (data: T) => Promise<void> | void
+  beforeDelete?: (data: Where<T> | ID) => Promise<void> | void
+  afterDelete?: (data: Where<T> | ID, deleted: boolean) => Promise<void> | void
   mockDriver?: Driver
 }
