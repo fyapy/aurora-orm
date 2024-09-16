@@ -13,7 +13,7 @@ import {whereOperator, setOperator} from '../../operators.js'
 import {whereOperators, setOperators} from './operators.js'
 import {buildAliasMapper, insertValues} from './utils.js'
 
-export async function pg({config, ormLog, createFakePool}: {
+export async function createDriver({config, ormLog, createFakePool}: {
   config: ConnectionConfig
   ormLog: OrmLog
   createFakePool?(): AbstractPool

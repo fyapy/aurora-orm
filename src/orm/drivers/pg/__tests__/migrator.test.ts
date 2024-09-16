@@ -9,7 +9,7 @@ describe('driver/pg/migrator', () => {
 
   afterEach(clearSqlRows)
 
-  test('should basePG call method query and log SQL', async () => {
+  test('should createFakePool call method query and log SQL', async () => {
     const base = createFakePool()
 
     await base.query('SELECT 1')

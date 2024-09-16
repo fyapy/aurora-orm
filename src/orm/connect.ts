@@ -53,7 +53,7 @@ export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   switch (config.driver) {
   case Drivers.PG:
     deleteDriverType()
-    return drivers.pg({config, ormLog})
+    return drivers.pg.createDriver({config, ormLog})
   default:
     const endOfError = `, сhoose one of these types: ${Object.values(Drivers)}`
     throw new Error(config.driver

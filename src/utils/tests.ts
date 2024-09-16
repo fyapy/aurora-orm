@@ -1,4 +1,4 @@
-import {pg} from '../orm/drivers/pg/index.js'
+import * as pg from '../orm/drivers/pg/index.js'
 
 let sqlRows = [] as [string, undefined | any[]][]
 
@@ -41,7 +41,7 @@ export function createFakePool(): AbstractPool {
   }
 }
 
-export const fakeDriver = () => pg({
+export const fakeDriver = () => pg.createDriver({
   config: {} as any,
   ormLog: () => {},
   createFakePool,
