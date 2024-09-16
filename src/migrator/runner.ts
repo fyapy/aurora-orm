@@ -112,7 +112,7 @@ export async function runMigrationsSilent(options: RunMigrationsOptions) {
   }
 }
 
-export async function runMigrations(options: RunMigrationsOptions) {
+export async function runMigrationsAndExit(options: RunMigrationsOptions) {
   try {
     await runMigrationsSilent(options)
 

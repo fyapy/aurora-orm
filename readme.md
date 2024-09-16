@@ -59,14 +59,14 @@ await connect({
 Create migrator script:
 
 ```ts
-import {runMigrations, Drivers} from 'aurora-orm'
+import {runMigrationsAndExit, Drivers} from 'aurora-orm'
 
 // Some code to load connectionString
 const connectionString = 'postgres://test:test@localhost:5432/test'
 
 const direction = process.argv[2] as 'down' | 'up'
 
-await runMigrations({
+await runMigrationsAndExit({
   direction,
   config: {driver: Drivers.PG, connectionString},
 })

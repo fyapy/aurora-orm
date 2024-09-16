@@ -7,5 +7,5 @@ export {
   column,
   now,
 } from './queryBuilder.js'
-export {runMigrationsSilent, runMigrations} from './runner.js'
+export {runMigrationsAndExit, runMigrationsSilent} from './runner.js'
 export {createMigrationFile} from './create.js'
