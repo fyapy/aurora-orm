@@ -3,7 +3,7 @@ import path from 'node:path'
 import {runMigrationsSilent, Drivers} from '../../src/index.js'
 import {connectionString} from './constants.js'
 
-const directory = path.join(process.cwd(), '/scripts/benchmark/migrations')
+const directory = path.join(process.cwd(), 'scripts', 'benchmark', 'migrations')
 
 const logger = () => {}
 

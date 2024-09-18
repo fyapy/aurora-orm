@@ -12,11 +12,10 @@ export function createMigrationFile({name, directory}: {
 
   const time = new Date().valueOf()
 
-  const templateFileName = path.resolve(import.meta.dirname, '../../templates/migration-template.ts')
-  // file name looks like migrations/1391877300255_migration-title.ts
-  const newFile = `${directory}/${time}_${name}.ts`
+  const templateFileName = path.resolve(import.meta.dirname, 'templates', 'migration-template.ts')
+  const newFile = path.join(directory, `${time}_${name}.ts`)
 
   fs.copyFileSync(templateFileName, newFile)
 
-  return newFile
+  return newFile.replace(process.cwd(), '')
 }

@@ -11,7 +11,7 @@ async function loadMigrations(
   logger: Logger,
   db: DBConnection,
   migrator: Migrator,
-  directory = path.join(process.cwd(), '/migrations'),
+  directory = path.join(process.cwd(), 'migrations'),
 ) {
   try {
     const filePaths = await loadMigrationFilePaths(directory)

@@ -66,7 +66,7 @@ export function formatResult(name: string, r: {
   insert: BenchResult
   select: BenchResult
 }) {
-  console.log(`Driver - ${name}`)
+  console.log(`Name   - ${name}`)
   console.log(`Insert - ${r.insert['ops/s']} ops/s`)
   console.log(`Select - ${r.select['ops/s']} ops/s\n`)
 }

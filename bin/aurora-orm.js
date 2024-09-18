@@ -30,7 +30,7 @@ if (action === 'create') {
 
   try {
     const migrationPath = createMigrationFile({
-      directory: path.join(process.cwd(), '/migrations'),
+      directory: path.join(process.cwd(), 'migrations'),
       name: migrationName,
     })
 

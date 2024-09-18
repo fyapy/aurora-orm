@@ -12,6 +12,7 @@ export {
   IsNull,
   ILike,
   NotIn,
+  InIds,
   In,
 } from './operators.js'
 export {
