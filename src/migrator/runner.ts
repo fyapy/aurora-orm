@@ -7,7 +7,7 @@ import {Migrator} from '../orm/drivers/types.js'
 import {DBConnection, connectDB} from './db.js'
 import {migration} from './migration.js'
 
-async function loadMigrations(
+async function loadMigrationFiles(
   logger: Logger,
   db: DBConnection,
   migrator: Migrator,
@@ -79,7 +79,7 @@ export async function runMigrationsSilent(options: RunMigrationsOptions) {
     await ensureMigrationsTable(migrator)
 
     const [migrations, runList] = await Promise.all([
-      loadMigrations(logger, db, migrator, options.directory),
+      loadMigrationFiles(logger, db, migrator, options.directory),
       migrator.selectAll<RunMigration>(),
     ])
 
@@ -97,7 +97,7 @@ export async function runMigrationsSilent(options: RunMigrationsOptions) {
     toRun.forEach(m => logger(`> File: ${m.name}`))
 
 
-    for (const migration of migrations) {
+    for (const migration of toRun) {
       logger(`> Run: ${migration.name} (${options.direction})`)
       await migration.apply(options.direction)
     }
