@@ -2,9 +2,9 @@
 
 > Near-zero runtime ORM for Node.js and TypeScript
 
-> The library is made to solve the author personal problems, and is not intended to be a truly open source
-
 Aurora ORM support PostgreSQL.
+
+> The library is made to solve the author personal problems, and is not intended to be a truly open source
 
 Aurora ORM is an [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)
 that can run in NodeJS and can be used with TypeScript and JavaScript environment.
