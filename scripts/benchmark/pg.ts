@@ -33,6 +33,8 @@ export async function benchPG() {
 }
 
 export default async function benchAndFormat() {
+  const name = 'pg'
   const result = await benchPG()
-  formatResult('pg', result)
+  formatResult(name, result)
+  return {name, ...result}
 }

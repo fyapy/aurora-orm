@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Benchmark results</title>
+  <script src="/highcharts.js"></script>
+  <script src="/exporting.js"></script>
+  <script src="/export-data.js"></script>
+  <script src="/accessibility.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    canvas {
+      width: 600px !important;
+      height: 350px !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <script>
+    const ctx = document.getElementById('chart')
+    const operations = ['insert', 'select']
+    const metric = 'ops/s'
+    const data = []
+
+    const series = data.map(d => ({
+      data: operations.map(o => Number(d[o][metric])),
+      name: d.name,
+    }))
+
+    Highcharts.chart('container', {
+      chart: {
+        type: 'bar',
+      },
+      title: {
+        text: '',
+        align: 'left',
+      },
+      xAxis: {
+        categories: operations,
+        title: {
+          text: null,
+        },
+        gridLineWidth: 1,
+        lineWidth: 0,
+      },
+      yAxis: {
+        min: 0,
+        title: {
+          text: metric,
+          align: 'high',
+        },
+        labels: {
+          overflow: 'justify',
+        },
+        gridLineWidth: 0,
+      },
+      tooltip: {
+        valueSuffix: ` ${metric}`,
+      },
+      plotOptions: {
+        bar: {
+          dataLabels: {
+            enabled: true,
+            formatter() {
+              return `${this.point.y} ops/s`
+            },
+          },
+          groupPadding: 0.1,
+        },
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'top',
+        floating: true,
+        backgroundColor: Highcharts.defaultOptions.legend.backgroundColor || '#FFFFFF',
+      },
+      credits: {
+        enabled: false,
+      },
+      series,
+    })
+  </script>
+</body>
+</html>

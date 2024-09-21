@@ -33,6 +33,8 @@ export async function benchPostgres() {
 }
 
 export default async function benchAndFormat() {
+  const name = 'postgres'
   const result = await benchPostgres()
-  formatResult('postgres', result)
+  formatResult(name, result)
+  return {name, ...result}
 }

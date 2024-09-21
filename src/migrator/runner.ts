@@ -95,7 +95,7 @@ export async function runMigrationsSilent(options: RunMigrationsOptions) {
 
     logger('> Migrating files:')
     toRun.forEach(m => logger(`> File: ${m.name}`))
-
+    logger('')
 
     for (const migration of toRun) {
       logger(`> Run: ${migration.name} (${options.direction})`)

@@ -57,6 +57,8 @@ export async function benchTypeORM() {
 }
 
 export default async function benchAndFormat() {
+  const name = 'typeorm (pg)'
   const result = await benchTypeORM()
-  formatResult('typeorm (pg)', result)
+  formatResult(name, result)
+  return {name, ...result}
 }

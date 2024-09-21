@@ -1,6 +1,7 @@
 # Aurora-ORM <a href="https://npmjs.com/package/aurora-orm"><img src="https://badgen.net/npm/v/aurora-orm" alt="npm package"></a>
 
 > Near-zero runtime ORM for Node.js and TypeScript
+> The library is made to solve the author personal problems, and is not intended to be a truly open source
 
 Aurora ORM support PostgreSQL.
 
@@ -10,6 +11,15 @@ Its goal is to always use only native JavaScript features and provide additional
 
 Aurora ORM supports only [Data Mapper](https://designpatternsphp.readthedocs.io/en/latest/Structural/DataMapper/README.html) pattern.
 And don't use unstable features like decorators and reflect-metadata that give you the ability to use modern JavaScript/TypeScript transpilers like [SWC](https://swc.rs/) or [ESbuild](https://esbuild.github.io/) to speed up development.
+
+## Benchmarks
+
+These are the results from running the benchmarks on a Macbook Pro 2,4 GHz Intel Core i9 with a default Postgres 16.3 installation and Node 22.3.0.
+
+You can run this benchmark yourself: `pnpm benchmark`
+
+![results chart](./scripts/benchmark/results.png)
+> higher is better
 
 ## Features
 

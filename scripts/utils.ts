@@ -8,6 +8,10 @@ export function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)]
 }
 
+export function readFile(path: string) {
+  return fs.readFileSync(path, 'utf8')
+}
+
 export function readJSON<T = any>(path: string) {
   return JSON.parse(fs.readFileSync(path, 'utf8')) as T
 }

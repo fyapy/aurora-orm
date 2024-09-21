@@ -47,6 +47,8 @@ async function benchAuroraORM() {
 }
 
 export default async function benchAndFormat() {
+  const name = 'aurora-orm (pg)'
   const result = await benchAuroraORM()
-  formatResult('aurora-orm (pg)', result)
+  formatResult(name, result)
+  return {name, ...result}
 }
