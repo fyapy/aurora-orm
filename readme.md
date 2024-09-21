@@ -1,6 +1,7 @@
 # Aurora-ORM <a href="https://npmjs.com/package/aurora-orm"><img src="https://badgen.net/npm/v/aurora-orm" alt="npm package"></a>
 
 > Near-zero runtime ORM for Node.js and TypeScript
+
 > The library is made to solve the author personal problems, and is not intended to be a truly open source
 
 Aurora ORM support PostgreSQL.
