@@ -15,7 +15,7 @@ And don't use unstable features like decorators and reflect-metadata that give y
 
 ## Benchmarks
 
-These are the results from running the benchmarks on a Macbook Pro 2,4 GHz Intel Core i9 with a default Postgres 16.3 installation and Node 22.3.0.
+These are the results from running the benchmarks on a Macbook Pro 2,4 GHz Intel Core i9 with Postgres 16.3 installation and Node 22.3.0.
 
 You can run this benchmark yourself: `pnpm benchmark`
 
