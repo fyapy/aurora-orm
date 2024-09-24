@@ -12,6 +12,7 @@ export default ts.config(
       'semi': ['error', 'never'],
       'object-curly-spacing': 'error',
       'array-bracket-spacing': 'error',
+      'comma-dangle': ['error', 'always-multiline'],
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       'perfectionist/sort-interfaces': 'off',
