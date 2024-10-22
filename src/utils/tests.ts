@@ -25,10 +25,17 @@ export interface AbstractPool {
   end(): Promise<void>
 }
 
-export function createFakePool(): AbstractPool {
+type ResultRows = any[][]
+
+export function createFakePool(results: ResultRows = []): AbstractPool {
+  let index = 0
+
   const query: Query = async (sql, values) => {
+    const rows = results[index] ?? []
+    index++
+
     sqlRows.push([sql, values])
-    return {rows: []}
+    return {rows}
   }
 
   return {
@@ -41,8 +48,8 @@ export function createFakePool(): AbstractPool {
   }
 }
 
-export const fakeDriver = () => pg.createDriver({
+export const fakeDriver = (results: ResultRows = []) => pg.createDriver({
   config: {} as any,
   ormLog: () => {},
-  createFakePool,
+  createFakePool: () => createFakePool(results),
 })

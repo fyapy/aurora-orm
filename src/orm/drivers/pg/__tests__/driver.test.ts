@@ -4,6 +4,7 @@ import type {Model} from '../../../types.js'
 
 import {clearSqlRows, fakeDriver, getSqlRow} from '../../../../utils/tests.js'
 import {Increment, Includes, In} from '../../../operators.js'
+import {createTestModels} from './createTestModels.js'
 import {createModel} from '../../../model.js'
 
 interface User {
@@ -19,7 +20,6 @@ describe('driver/pg/base', () => {
   beforeAll(async () => {
     userModel = createModel<User>({
       mockDriver: await fakeDriver(),
-      primaryKey: 'id',
       table: 'users',
       mapping: {
         id: 'id',
@@ -133,5 +133,29 @@ describe('driver/pg/base', () => {
 
     expect(sql).toEqual('SELECT "alt" FROM "users" WHERE $1 = ANY("alt")')
     expect(values).toEqual(['1'])
+  })
+
+  test('should be currect sql when join and select used at sametime', async () => {
+    const {GameModel} = await createTestModels()
+
+    await GameModel.findAll({
+      orderBy: {sort: 'DESC'},
+      skip: 0,
+      limit: 12,
+      where: {},
+      select: ['id', 'name', 'slug'],
+      join: [
+        ['childs', ['id', 'name', 'isPublished', 'gameId']],
+      ],
+    })
+
+    const games = getSqlRow(0)
+    const childs = getSqlRow(1)
+
+    expect(games.sql).toEqual('SELECT "id", "name", "slug" FROM "games"  ORDER BY "sort" DESC OFFSET 0 LIMIT 12')
+    expect(games.values).toEqual([])
+
+    expect(childs.sql).toEqual('SELECT "id", "name", "isPublished", "gameId", "id" FROM "childs" WHERE "gameId" = ANY($1)')
+    expect(childs.values).toEqual([['id1']])
   })
 })
