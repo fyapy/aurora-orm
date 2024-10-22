@@ -5,6 +5,9 @@ import {createModel} from '../../../model.js'
 export async function createTestModels() {
   const mockDriver = await fakeDriver([
     [{id: 'id1', name: 'first'}],
+    [],
+    [{id: 'id1', name: 'first'}],
+    [],
   ])
 
   interface ChildModelType {

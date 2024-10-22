@@ -157,5 +157,27 @@ describe('driver/pg/base', () => {
 
     expect(childs.sql).toEqual('SELECT "id", "name", "isPublished", "gameId", "id" FROM "childs" WHERE "gameId" = ANY($1)')
     expect(childs.values).toEqual([['id1']])
+
+
+
+    await GameModel.findAll({
+      orderBy: {sort: 'DESC'},
+      skip: 0,
+      limit: 12,
+      where: {},
+      select: ['name', 'slug'],
+      join: [
+        ['childs', ['id', 'name', 'isPublished', 'gameId']], // TODO: normalize when 'gameId' omited
+      ],
+    })
+
+    const games2 = getSqlRow(2)
+    const childs2 = getSqlRow(3)
+
+    expect(games2.sql).toEqual('SELECT "name", "slug", "id" FROM "games"  ORDER BY "sort" DESC OFFSET 0 LIMIT 12')
+    expect(games2.values).toEqual([])
+
+    expect(childs2.sql).toEqual('SELECT "id", "name", "isPublished", "gameId", "id" FROM "childs" WHERE "gameId" = ANY($1)')
+    expect(childs2.values).toEqual([['id1']])
   })
 })

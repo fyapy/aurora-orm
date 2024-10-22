@@ -544,9 +544,23 @@ export async function createDriver({config, ormLog, createFakePool}: {
       }
 
       function prepareSelectColumns(params: FindOneParams) {
-        return typeof params.select !== 'undefined'
-          ? cols(...params.select!)
-          : allColumns
+        if (typeof params.select === 'undefined') {
+          return allColumns
+        }
+        if (typeof params.join === 'undefined') {
+          return cols(...params.select!)
+        }
+
+        for (const join of params.join) {
+          const joinPropName = typeof join === 'string' ? join : join[0]
+          const referenceProp = joins[joinPropName].referenceProp
+
+          if (params.select.includes(referenceProp) === FALSE) {
+            params.select.push(referenceProp)
+          }
+        }
+
+        return cols(...params.select)
       }
 
       async function findAll(params: FindAllParams | Where<T>[] | Where<T> = {}): Promise<T[]> {
