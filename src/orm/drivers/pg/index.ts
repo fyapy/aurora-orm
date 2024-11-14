@@ -87,6 +87,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
       try {
         const result = await transaction(id)
         await client.query('COMMIT')
+        client.release()
 
         return result
       } catch (e) {
