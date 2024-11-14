@@ -11,7 +11,7 @@ export const uuidV4: DefaultColumn = {sql: 'uuid_generate_v4()'}
 export const emptyArray: DefaultColumn = {sql: '\'{}\''}
 
 export type Default = DefaultColumn | string | number
-export type Type = 'timestamptz' | 'smallint' | 'varchar' | 'integer' | 'jsonb' | 'uuid' | 'real' | 'text' | 'bool' | 'char'
+export type Type = 'timestamptz' | 'smallint' | 'varchar' | 'integer' | 'serial' | 'jsonb' | 'uuid' | 'real' | 'text' | 'bool' | 'char'
 
 export interface Column {
   type: Type

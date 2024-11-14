@@ -33,20 +33,6 @@ export async function createDriver({config, ormLog, createFakePool}: {
     await pool.end()
   }
 
-  async function queryRow<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T> {
-    ormLog(sql, values)
-    const client = typeof tx === 'string' ? transactions[tx] : pool
-
-    if (Array.isArray(values)) {
-      const res = await client.query(formatParams(sql), values)
-
-      return ((res as any).command === 'DELETE'
-        ? res
-        : res.rows[0]) as T
-    }
-
-    return (await client.query(sql)).rows[0] as T
-  }
   async function query<T = any>(sql: string, values?: any[] | null, tx?: Tx) {
     ormLog(sql, values)
     const client = typeof tx === 'string' ? transactions[tx] : pool
@@ -88,11 +74,29 @@ export async function createDriver({config, ormLog, createFakePool}: {
     prepareDatabase,
     ping,
     end,
-    queryRow,
     query,
     startTrx,
     commit,
     rollback,
+    async begin(transaction) {
+      const id = randomUUID()
+      const client = await pool.connect()
+      await client.query('BEGIN')
+      transactions[id] = client
+
+      try {
+        const result = await transaction(id)
+        await client.query('COMMIT')
+
+        return result
+      } catch (e) {
+        const client = transactions[id]
+        await client.query('ROLLBACK')
+        client.release()
+
+        throw e
+      }
+    },
 
     ...migratorAstParsers(),
 
@@ -360,11 +364,11 @@ export async function createDriver({config, ormLog, createFakePool}: {
           await beforeCreate!(value)
         }
 
-        const row = await queryRow<T>(
+        const row = await query<T>(
           `INSERT INTO "${table}" (${cols}) VALUES (${values}) RETURNING ${allColumns}`,
           _values,
           tx,
-        )
+        )[0]
 
         if (afterCreateExists === TRUE) {
           await afterCreate!(row)
@@ -473,7 +477,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
             await beforeUpdate!(set)
           }
 
-          const row = await queryRow<T>(sql, [...setValues, id], tx)
+          const row = await query<T>(sql, [...setValues, id], tx)[0]
 
           if (afterUpdateExists === TRUE) {
             await afterUpdate!(row)
@@ -488,7 +492,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
             await beforeUpdate!(set)
           }
 
-          const row = await queryRow<T>(sql, [...setValues, ...whereProps.values], tx)
+          const row = await query<T>(sql, [...setValues, ...whereProps.values], tx)[0]
 
           if (afterUpdateExists === TRUE) {
             await afterUpdate!(row)
@@ -498,7 +502,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
         }
       }
 
-      async function del(id: Where<T> | ID, tx?: Tx): Promise<boolean> {
+      async function del(id: Where<T> | ID, tx?: Tx): Promise<void> {
         if (typeof id !== 'object') {
           const sql = `DELETE FROM "${table}" WHERE "${primaryKey}" = ?`
 
@@ -506,31 +510,25 @@ export async function createDriver({config, ormLog, createFakePool}: {
             await beforeDelete!(id)
           }
 
-          const res = await queryRow(sql, [id], tx)
-          const deleted = (res as any).rowCount !== 0
+          await query(sql, [id], tx)[0]
 
           if (afterDeleteExists === TRUE) {
-            await afterDelete!(id, deleted)
+            await afterDelete!(id)
           }
-
-          return deleted
         }
 
-        const whereProps = where(id)
+        const whereProps = where(id as Where<T>)
         const sql = `DELETE FROM "${table}" ${whereProps.sql}`
 
         if (beforeDeleteExists === TRUE) {
           await beforeDelete!(id)
         }
 
-        const res = await queryRow(sql, whereProps.values, tx)
-        const deleted = (res as any).rowCount !== 0
+        await query(sql, whereProps.values, tx)[0]
 
         if (afterDeleteExists === TRUE) {
-          await afterDelete!(id, deleted)
+          await afterDelete!(id)
         }
-
-        return deleted
       }
 
       function isWhere(params: any): params is Where<T>[] | Where<T> {
@@ -613,7 +611,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
             sql += ` ORDER BY ${orderBy(params.orderBy)}`
           }
 
-          return await queryRow<T>(sql, [params.where], params.tx)
+          return await query<T>(sql, [params.where], params.tx)[0]
         } else {
           const whereProps = where(params.where)
           sql += ` ${whereProps.sql}`
@@ -622,7 +620,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
             sql += ` ORDER BY ${orderBy(params.orderBy)}`
           }
 
-          return await queryRow<T>(sql, whereProps.values, params.tx)
+          return await query<T>(sql, whereProps.values, params.tx)[0]
         }
       }
 
@@ -631,7 +629,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
           // isPrimitive
           const sql = `SELECT ${allColumns} FROM "${table}" WHERE "${primaryKey}" = ?`
 
-          return await queryRow<T>(sql, [params])
+          return await query<T>(sql, [params])[0]
         }
 
         if (isWhere(params)) {
@@ -639,7 +637,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
           const whereProps = where(params)
           const sql = `SELECT ${allColumns} FROM "${table}" ${whereProps.sql}`
 
-          return await queryRow<T>(sql, whereProps.values)
+          return await query<T>(sql, whereProps.values)[0]
         }
 
         // FindParams
@@ -673,13 +671,13 @@ export async function createDriver({config, ormLog, createFakePool}: {
         if (typeof id !== 'object') {
           sql += ` WHERE "${primaryKey}" = ? LIMIT 1`
 
-          const res = await queryRow<{ count: number }>(sql, [id], tx)
+          const res = await query<{count: number}>(sql, [id], tx)[0]
           return res.count !== 0
         } else {
           const whereProps = where(id)
           sql += ` ${whereProps.sql}`
 
-          const res = await queryRow<{ count: number }>(sql, whereProps.values, tx)
+          const res = await query<{count: number}>(sql, whereProps.values, tx)[0]
           return res.count !== 0
         }
       }
@@ -698,7 +696,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
         const whereProps = where(value)
         const sql = `SELECT COUNT(*)::integer as count FROM "${table}" ${whereProps.sql}`
 
-        const res = await queryRow<{ count: number }>(sql, whereProps.values, tx)
+        const res = await query<{count: number}>(sql, whereProps.values, tx)[0]
 
         return res.count
       }

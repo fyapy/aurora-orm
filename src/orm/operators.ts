@@ -26,7 +26,7 @@ export const In = <T extends string | number | null>(value: T[]): Operator => ({
   value,
 })
 
-const getId = ({id}: {id: string}) => id
+const getId = (item: {id: string}) => item.id
 
 export const InIds = <T extends {id: string}>(arr: T[]): Operator => ({
   type: whereOperator,

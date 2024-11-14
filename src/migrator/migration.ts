@@ -1,3 +1,4 @@
+import * as tsx from 'tsx/esm/api'
 import path from 'node:path'
 import url from 'node:url'
 
@@ -24,8 +25,6 @@ export function migration({db, filePath, migrator, logger}: {
     if (typeof _actions !== 'undefined') {
       return _actions
     }
-
-    const tsx = await import('tsx/esm/api')
 
     _actions = (await tsx.tsImport(url.pathToFileURL(filePath).href, import.meta.url)).default
 

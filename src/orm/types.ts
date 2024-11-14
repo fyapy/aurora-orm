@@ -19,7 +19,7 @@ interface Writer<T extends AnyObject> {
     returning?: Array<keyof T> | boolean
     tx?: Tx
   }): Promise<T>
-  delete(id: Where<T> | ID, tx?: Tx): Promise<boolean>
+  delete(id: Where<T> | ID, tx?: Tx): Promise<void>
 }
 
 type SubJoin = [string, Array<[string] | SubJoin | string>]
@@ -82,6 +82,7 @@ export interface Model<T extends AnyObject = AnyObject> extends Writer<T>, Reade
 
   setDriver(newDriver: Driver): void
   getDriver(): Driver
+  begin: Driver['begin']
   startTrx: Driver['startTrx']
   commit: Driver['commit']
   rollback: Driver['rollback']
@@ -112,6 +113,6 @@ export interface ModelOptions<T extends AnyObject> {
   beforeUpdate?: (set: Set<T>) => Promise<void> | void
   afterUpdate?: (data: T) => Promise<void> | void
   beforeDelete?: (data: Where<T> | ID) => Promise<void> | void
-  afterDelete?: (data: Where<T> | ID, deleted: boolean) => Promise<void> | void
+  afterDelete?: (data: Where<T> | ID) => Promise<void> | void
   mockDriver?: Driver
 }

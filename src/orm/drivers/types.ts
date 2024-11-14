@@ -17,10 +17,10 @@ export interface BuildModelMethodsOptions<T extends AnyObject> extends ModelOpti
 export interface Driver {
   whereOperators: Record<string, (value: string, opts: WhereOperatorOptions) => string>
 
+  begin<T = void>(transaction: (tx: Tx) => Promise<T>): Promise<T>
   startTrx(tx?: Tx): Promise<Tx>
   commit(tx: Tx): Promise<void>
   rollback(tx: Tx): Promise<void>
-  queryRow<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T>
   query<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T[]>
 
   prepareDatabase?(): Promise<void>

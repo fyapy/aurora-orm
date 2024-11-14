@@ -63,6 +63,7 @@ export function createModel<T extends AnyObject>({
       return 0
     },
 
+    begin: driver?.begin,
     startTrx: driver?.startTrx,
     commit: driver?.commit,
     rollback: driver?.rollback,
