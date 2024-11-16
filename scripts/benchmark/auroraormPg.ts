@@ -1,5 +1,5 @@
+import {createModel, disconnect, connect, Drivers} from '../../src/index.js'
 import {connectionString, idleTimeout, iter} from './constants.js'
-import {createModel, connect, Drivers} from '../../src/index.js'
 import {downMigrations, upMigrations} from './migrator.js'
 import {formatResult, readJSON, bench} from '../utils.js'
 import {User} from './data.js'
@@ -43,6 +43,7 @@ async function benchAuroraORM() {
     throw e
   } finally {
     await downMigrations()
+    await disconnect()
   }
 }
 

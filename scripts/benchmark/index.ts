@@ -2,8 +2,9 @@ import timer from 'node:timers/promises'
 import puppeteer from 'puppeteer'
 import 'reflect-metadata'
 
+import auroraormPostgres from './auroraormPostgres.js'
+import auroraormPg from './auroraormPg.js'
 import {createServer} from './server.js'
-import auroraorm from './auroraorm.js'
 import {writeJSON} from '../utils.js'
 import postgres from './postgres.js'
 import typeorm from './typeorm.js'
@@ -12,9 +13,11 @@ import pg from './pg.js'
 const results = [
   await postgres(),
   await timer.setTimeout(1000),
+  await auroraormPostgres(),
+  await timer.setTimeout(1000),
   await pg(),
   await timer.setTimeout(1000),
-  await auroraorm(),
+  await auroraormPg(),
   await timer.setTimeout(1000),
   await typeorm(),
 ].filter(v => !!v)

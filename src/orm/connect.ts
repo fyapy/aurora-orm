@@ -54,6 +54,9 @@ export function connectToDatabase(config: ConnectionConfig): Promise<Driver> {
   case Drivers.PG:
     deleteDriverType()
     return drivers.pg.createDriver({config, ormLog})
+  case Drivers.Postgres:
+    deleteDriverType()
+    return drivers.postgres.createDriver({config, ormLog})
   default:
     const endOfError = `, сhoose one of these types: ${Object.values(Drivers)}`
     throw new Error(config.driver
@@ -85,4 +88,11 @@ export async function connect({debug, config, connectNotify = true}: ConnectConf
   }
 
   return driver
+}
+
+export async function disconnect() {
+  if (ormConfig.driver !== null) {
+    await ormConfig.driver.end()
+    ormConfig.driver = null
+  }
 }

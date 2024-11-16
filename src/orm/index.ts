@@ -22,7 +22,7 @@ export {
   AuroraFail,
   mapper,
 } from './utils.js'
+export {disconnect, ormConfig, connect} from './connect.js'
 export * as JoinStrategies from './joinStrateries.js'
-export {ormConfig, connect} from './connect.js'
 export {createModel} from './model.js'
 export * from './types.js'

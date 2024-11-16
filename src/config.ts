@@ -1,4 +1,5 @@
 export enum Drivers {
+  Postgres = 'postgres',
   PG = 'pg',
 }
 

@@ -1,6 +1,8 @@
 import type {DropConstraint, CreateTable, AlterTable, ForeignKey, DropTable, Insert} from '../../migrator/queryBuilder.js'
 import type {WhereOperatorOptions, ModelOptions, AnyObject, Models, Model, Tx} from '../types.js'
 
+export type OrmLog = (sql: string, values?: any[] | null) => void
+
 export type Migrator = {
   delete(name: string, tx: Tx): Promise<void>
   insert(name: string, tx: Tx): Promise<void>
@@ -21,7 +23,7 @@ export interface Driver {
   startTrx(tx?: Tx): Promise<Tx>
   commit(tx: Tx): Promise<void>
   rollback(tx: Tx): Promise<void>
-  query<T = any>(sql: string, values: any[] | null, tx?: Tx): Promise<T[]>
+  query<T = any>(sql: string, values?: any[] | null, tx?: Tx): Promise<T[]>
 
   prepareDatabase?(): Promise<void>
 

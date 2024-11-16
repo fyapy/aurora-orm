@@ -21,7 +21,7 @@ export async function benchPG() {
       )
     })
 
-    const select = await bench(iter.select, () => pool.query('SELECT * FROM users LIMIT 10'))
+    const select = await bench(iter.select, () => pool.query('SELECT "id", "username", "email", "type", "active", "created_at" AS "createdAt" FROM users LIMIT 10'))
 
     return {insert, select}
   } catch (e) {
