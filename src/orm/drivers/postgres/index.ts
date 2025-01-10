@@ -23,7 +23,11 @@ export async function createDriver({config, ormLog}: {
   const transactions: Record<string, Sql> = {}
 
   async function prepareDatabase() {
-    await pool.unsafe('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+    const uuid = await pool.unsafe('SELECT * FROM pg_extension WHERE "extname" = \'uuid-ossp\'')
+
+    if (uuid.length === 0) {
+      await pool.unsafe('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+    }
   }
 
   async function ping() {
