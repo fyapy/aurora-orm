@@ -90,7 +90,11 @@ And add to `package.json` scripts:
   "scripts": {
     "migrator:down": "tsx ./src/migrator.ts down",
     "migrator:up": "tsx ./src/migrator.ts up",
-    "migrator:create": "aurora-orm create"
+    "migrator:create": "aurora-orm create",
+    // or with bun
+    "migrator:down": "bun ./src/migrator.ts down",
+    "migrator:up": "bun ./src/migrator.ts up",
+    "migrator:create": "aurora-orm create",
   },
 }
 ```

@@ -1,4 +1,3 @@
-import * as tsx from 'tsx/esm/api'
 import path from 'node:path'
 import url from 'node:url'
 
@@ -9,6 +8,17 @@ import {emptyArray, column, uuidV4, now} from './queryBuilder.js'
 import {Migrator} from '../orm/drivers/types.js'
 
 const defs = {now, uuidV4, emptyArray}
+
+// load tsx only in Node.js envirement
+let tsxEsmApi: typeof import('tsx/esm/api')
+
+function tsx() {
+  if (typeof tsxEsmApi !== 'undefined') {
+    return tsxEsmApi
+  }
+
+  return import('tsx/esm/api').then(module => tsxEsmApi = module)
+}
 
 export function migration({db, filePath, migrator, logger}: {
   db: DBConnection
@@ -26,7 +36,11 @@ export function migration({db, filePath, migrator, logger}: {
       return _actions
     }
 
-    _actions = (await tsx.tsImport(url.pathToFileURL(filePath).href, import.meta.url)).default
+    if (typeof process.versions.bun !== 'undefined') {
+      _actions = (await import(filePath)).default
+    } else {
+      _actions = (await (await tsx()).tsImport(url.pathToFileURL(filePath).href, import.meta.url)).default
+    }
 
     return _actions
   }

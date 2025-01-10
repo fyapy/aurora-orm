@@ -17,9 +17,11 @@ export default ts.config(
       '@typescript-eslint/no-explicit-any': 'off',
       'perfectionist/sort-interfaces': 'off',
       'perfectionist/sort-object-types': 'off',
+      'perfectionist/sort-switch-case': 'off',
       'perfectionist/sort-jsx-props': 'off',
       'perfectionist/sort-objects': 'off',
       'perfectionist/sort-classes': 'off',
+      'perfectionist/sort-modules': 'off',
     },
   },
 )
