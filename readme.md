@@ -39,8 +39,7 @@ You can run this benchmark yourself: `pnpm benchmark`
 
 ## Installation
 
-1. Install the npm package: `pnpm add aurora-orm`
-2. Install a database driver: `pnpm add [pg|postgres]`
+Install the npm package: `pnpm add aurora-orm`
 
 ## Quick Start
 
@@ -51,8 +50,7 @@ import {connect, Drivers} from 'aurora-orm'
 
 await connect({
   config: {
-    // optional, default value 'Drivers.PG'
-    driver: Drivers.PG,
+    driver: Drivers.Postgres,
 
     connectionString: 'postgres://test:test@localhost:5432/test',
     // or
@@ -78,7 +76,7 @@ const connectionString = 'postgres://test:test@localhost:5432/test'
 const direction = process.argv[2] as 'down' | 'up'
 
 await runMigrationsAndExit({
-  config: {driver: Drivers.PG, connectionString},
+  config: {driver: Drivers.Postgres, connectionString},
   direction,
 })
 ```

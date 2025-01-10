@@ -5,7 +5,7 @@ export enum Drivers {
 
 export interface PostgresqlConnectionStringConfig {
   connectionString: string
-  driver?: Drivers
+  driver: Drivers
   debug?: boolean
 }
 export interface PostgresqlConfig {
