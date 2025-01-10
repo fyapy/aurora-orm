@@ -39,8 +39,7 @@ export function migration({db, filePath, migrator, logger}: {
       throw new Error(`Unknown value for direction: ${direction}. Is the migration ${name} exporting a '${direction}' function?`)
     }
 
-    const tx = await db.driver.startTrx()
-    try {
+    await db.driver.begin(async tx => {
       await action({
         sql: {
           ...db,
@@ -65,12 +64,7 @@ export function migration({db, filePath, migrator, logger}: {
         logger(`> Completed: ${name} (up)`)
         await migrator.insert(name, tx)
       }
-
-      await db.driver.commit(tx)
-    } catch (e) {
-      await db.driver.rollback(tx)
-      throw e
-    }
+    })
   }
 
   return {

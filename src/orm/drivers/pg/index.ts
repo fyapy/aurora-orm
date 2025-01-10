@@ -49,6 +49,7 @@ export async function createDriver({config, ormLog, createFakePool}: {
     }
 
     const id = randomUUID()
+    console.log('startTrx deprecated for pg driver, please use begin API')
     const client = await pool.connect()
     await client.query('BEGIN')
     transactions[id] = client
@@ -56,11 +57,13 @@ export async function createDriver({config, ormLog, createFakePool}: {
     return id
   }
   async function commit(tx: Tx) {
+    console.log('commit deprecated for pg driver, please use begin API')
     const client = transactions[tx]
     await client.query('COMMIT')
     client.release()
   }
   async function rollback(tx: Tx) {
+    console.log('rollback deprecated for pg driver, please use begin API')
     const client = transactions[tx]
     await client.query('ROLLBACK')
     client.release()

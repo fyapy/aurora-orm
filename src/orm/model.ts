@@ -77,6 +77,7 @@ export function createModel<T extends AnyObject>({
   function setDriver(newDriver: Driver) {
     driver = newDriver
 
+    output.begin = newDriver.begin
     output.startTrx = newDriver.startTrx
     output.commit = newDriver.commit
     output.rollback = newDriver.rollback
